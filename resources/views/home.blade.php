@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h4 class="m-0">Selamat datang {{ ucwords(auth()->user()->name) }}</h4>
+                    <h4 class="m-0">Selamat datang, {{ ucwords(auth()->user()->name) }}!</h4>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -23,7 +23,7 @@
                             <h5 class="m-0">Judul Section</h5>
                         </div>
                         <div class="card-body">
-                            Silakan tambahkan konten aplikasi disini.
+                            Silakan tambahkan konten aplikasi di sini.
                         </div>
                     </div>
                 </div>

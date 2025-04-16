@@ -7,13 +7,15 @@
     <title>{{ env('APP_NAME', 'PBL IK-TI') }}</title>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <link rel="stylesheet" href="{{ asset('') }}plugins/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('') }}plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+    <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
     @stack('css')
-    <link rel="stylesheet" href="{{ asset('') }}dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
+
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition sidebar-mini layout-fixed font-primary">
     <!-- Preloader -->
     {{-- <div class="preloader flex-column justify-content-center align-items-center">
         <img class="animation__shake" src="{{ asset('') }}dist/img/logo-polines.png" alt="Polines Logo"
@@ -25,6 +27,19 @@
                 <li class="nav-item">
                     <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i
                             class="fas fa-bars"></i></a>
+                </li>
+                <li class="nav-item">
+                    <form class="form-inline ml-3">
+                        <div class="input-group">
+                            <input class="form-control form-control-navbar" type="search" placeholder="Search here"
+                                aria-label="Search">
+                            <div class="input-group-append">
+                                <button class="btn btn-navbar" type="submit">
+                                    <i class="fas fa-search color-primary"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </li>
             </ul>
 
@@ -85,11 +100,12 @@
         </div>
 
         <aside class="main-sidebar main-sidebar-custom sidebar-dark-info elevation-4">
-            <a href="{{ url('') }}" class="brand-link">
-                <img src="{{ asset('') }}dist/img/logo-polines.png" alt="Logo Polines"
-                    class="brand-image elevation-3" style="opacity: .8">
-                <span
-                    class="brand-text font-weight-light "><strong>{{ env('APP_NAME', 'PBL IK-TI Polines') }}</strong></span>
+            <a href="{{ url('/') }}" class="brand-link d-flex flex-column align-items-center text-center">
+                <img src="{{ asset('dist/img/round-logo.png') }}" alt="Logo Polines" class="brand-image mb-2"
+                    style="opacity: .9">
+                <span class="brand-text font-weight-light">
+                    <strong>{{ env('APP_NAME', 'PBL IK-TI Polines') }}</strong>
+                </span>
             </a>
             <div class="sidebar">
                 <nav class="mt-2">
@@ -120,24 +136,24 @@
         </footer>
     </div>
 
-    <script src="{{ asset('') }}plugins/jquery/jquery.min.js"></script>
-    <script src="{{ asset('') }}plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ asset('') }}plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
-    <script src="{{ asset('') }}plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="{{ asset('') }}plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-    <script src="{{ asset('') }}plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-    <script src="{{ asset('') }}plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-    <script src="{{ asset('') }}plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-    <script src="{{ asset('') }}plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-    <script src="{{ asset('') }}plugins/jszip/jszip.min.js"></script>
-    <script src="{{ asset('') }}plugins/pdfmake/pdfmake.min.js"></script>
-    <script src="{{ asset('') }}plugins/pdfmake/vfs_fonts.js"></script>
-    <script src="{{ asset('') }}plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-    <script src="{{ asset('') }}plugins/datatables-buttons/js/buttons.print.min.js"></script>
-    <script src="{{ asset('') }}plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <script src="{{ asset('plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('plugins/jszip/jszip.min.js') }}"></script>
+    <script src="{{ asset('plugins/pdfmake/pdfmake.min.js') }}"></script>
+    <script src="{{ asset('plugins/pdfmake/vfs_fonts.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-buttons/js/buttons.html5.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-buttons/js/buttons.print.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.0/sweetalert.min.js"></script>
     @stack('js')
-    <script src="{{ asset('') }}dist/js/adminlte.min.js"></script>
+    <script src="{{ asset('dist/js/adminlte.min.js') }}"></script>
     <script>
         $(function() {
             $("#datatable-main").DataTable({
@@ -149,7 +165,7 @@
                 pageLength: 50,
                 //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
             }).buttons().container().appendTo('#datatable-main_wrapper .col-md-6:eq(0)');
-            
+
             $('#datatable-sub').DataTable({
                 "paging": true,
                 "lengthChange": false,
