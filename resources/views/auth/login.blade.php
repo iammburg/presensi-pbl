@@ -17,7 +17,7 @@
 <body>
     <div class="row login-container m-0">
         <!-- Order changes on mobile: login-form will be on top for small screens -->
-        <div class="col-md-6 bg-primary d-flex align-items-center justify-content-center order-md-1 order-2">
+        <div class="col-md-6 bg-primary-dark d-flex align-items-center justify-content-center order-md-1 order-2">
             <div class="login-form">
                 <h4 class="text-center mb-4 fw-bold">SIGN IN</h4>
 
