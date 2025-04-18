@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AcademicYear;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 
-class AcademicYearController extends Controller
+class SubjectController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $academicYears = AcademicYear::all();
-        return view('academic_years.index', compact('academicYears'));
+        //
     }
 
     /**
@@ -35,7 +34,7 @@ class AcademicYearController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(AcademicYear $academicYear)
+    public function show(Subject $subject)
     {
         //
     }
@@ -43,7 +42,7 @@ class AcademicYearController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(AcademicYear $academicYear)
+    public function edit(Subject $subject)
     {
         //
     }
@@ -51,7 +50,7 @@ class AcademicYearController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, AcademicYear $academicYear)
+    public function update(Request $request, Subject $subject)
     {
         //
     }
@@ -59,7 +58,7 @@ class AcademicYearController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(AcademicYear $academicYear)
+    public function destroy(Subject $subject)
     {
         //
     }
