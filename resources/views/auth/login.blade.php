@@ -70,7 +70,7 @@
         </div>
 
         <div class="col-md-6 p-0 position-relative building-image order-md-2 order-1"
-            style="background-image: url('{{ asset('assets/images/1440px-SMA_Negeri_10_Padang.jpg') }}');">
+            style="background-image: url('{{ asset('assets/images/Sma_N_16_Jakarta.jpg') }}');">
             <div class="overlay">
                 <div class="logo-container mb-3">
                     <img src="{{ asset('assets/images/login-logo.png') }}" alt="Logo Polines" class="img-fluid">
