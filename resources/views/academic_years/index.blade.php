@@ -1,12 +1,14 @@
 @extends('layouts.app')
+
 @section('title')
-    Alalalal
+    Manajemen Tahun Akademik
 @endsection
+
 @push('css')
     <!-- DataTables -->
     <link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css`') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
 @endpush
 
 @section('content')
@@ -18,6 +20,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
+                        {{-- Tambahkan breadcrumb jika diperlukan --}}
                     </ol>
                 </div>
             </div>
@@ -38,53 +41,54 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <table id="datatable-main" class="table table-bordered table-striped border-table">
-                                <thead class="bg-tertiary text-white">
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Tahun Mulai</th>
-                                        <th>Tahun Selesai</th>
-                                        <th>Semester</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($academicYears as $academicYear)
+                            <div class="table-responsive">
+                                <table id="datatable-main" class="table table-bordered table-striped">
+                                    <thead class="bg-tertiary text-white">
                                         <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $academicYear->start_year }}</td>
-                                            <td>{{ $academicYear->end_year }}</td>
-                                            <td>{{ $academicYear->semester == 0 ? 'Ganjil' : 'Genap' }}</td>
-                                            <td>{{ $academicYear->is_active ? 'Aktif' : 'Tidak Aktif' }}</td>
-                                            <td>
-                                                <div class="btn-group">
-                                                    <button type="button"
-                                                        class="btn btn-sm btn-outline-info dropdown-toggle"
-                                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                        <i class="fas fa-cog"></i>
-                                                    </button>
-                                                    <div class="dropdown-menu">
-                                                        <a class="dropdown-item"
-                                                            href="{{ route('manage-academic-years.edit', $academicYear->id) }}">Edit</a>
-                                                        <form
-                                                            action="{{ route('manage-academic-years.destroy', $academicYear->id) }}"
-                                                            method="POST"
-                                                            onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit"
-                                                                class="dropdown-item text-danger">Hapus</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </td>
+                                            <th>No</th>
+                                            <th>Tahun Mulai</th>
+                                            <th>Tahun Selesai</th>
+                                            <th>Semester</th>
+                                            <th>Status</th>
+                                            <th>Aksi</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($academicYears as $academicYear)
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $academicYear->start_year }}</td>
+                                                <td>{{ $academicYear->end_year }}</td>
+                                                <td>{{ $academicYear->semester == 0 ? 'Ganjil' : 'Genap' }}</td>
+                                                <td>{{ $academicYear->is_active ? 'Aktif' : 'Tidak Aktif' }}</td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <button type="button"
+                                                            class="btn btn-sm btn-outline-info dropdown-toggle"
+                                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-cog"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu">
+                                                            <a class="dropdown-item"
+                                                                href="{{ route('manage-academic-years.edit', $academicYear->id) }}">Edit</a>
+                                                            <form action="{{ route('manage-academic-years.destroy', $academicYear->id) }}"
+                                                                method="POST"
+                                                                onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                    class="dropdown-item text-danger">Hapus</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div> {{-- table-responsive --}}
+                        </div> {{-- card-body --}}
+                    </div> {{-- card --}}
                 </div>
             </div>
         </div>
@@ -99,15 +103,16 @@
     <script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
-    <script>
-        $(function() {
-            $("#datatable-main").DataTable({
-                "responsive": true,
-                "autoWidth": false,
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+
+    {{-- <script>
+        $(function () {
+            $('#datatable-main').DataTable({
+                responsive: true,
+                autoWidth: false,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
                 }
             });
         });
-    </script>
+    </script> --}}
 @endpush

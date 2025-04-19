@@ -81,9 +81,9 @@
                             </div>
 
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-info btn-block btn-flat">
+                                <button type="submit" class="btn btn-block btn-flat text-white" style="background-color: #1777E5">
                                     <i class="fa fa-save"></i> Simpan
-                                </button>
+                                </button>       
                             </div>
                         </form>
 
