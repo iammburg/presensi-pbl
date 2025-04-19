@@ -113,24 +113,28 @@ class TeacherController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Teacher $teacher)
+    public function show(string $nip)
     {
-        //
+        $teacher = Teacher::with('user')->where('nip', $nip)->firstOrFail();
+        return view('teachers.show', compact('teacher'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Teacher $teacher)
+    public function edit(string $nip)
     {
+        $teacher = Teacher::with('user')->where('nip', $nip)->firstOrFail();
         return view('teachers.edit', compact('teacher'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Teacher $teacher)
+    public function update(Request $request, string $nip)
     {
+        $teacher = Teacher::with('user')->where('nip', $nip)->firstOrFail();
+
         $request->validate([
             'name' => 'required',
             'phone' => 'required',
@@ -168,8 +172,10 @@ class TeacherController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Teacher $teacher)
+    public function destroy(string $nip)
     {
+        $teacher = Teacher::with('user')->where('nip', $nip)->firstOrFail();
+
         // Delete photo if exists
         if ($teacher->photo) {
             Storage::disk('public')->delete($teacher->photo);
@@ -200,13 +206,13 @@ class TeacherController extends Controller
             $errors = [];
 
             foreach ($failures as $failure) {
-                $errors[] = 'Baris ke-' . $failure->row() . ': ' . implode(', ', $failure->errors());
+                $errors[] = "Baris ke-{$failure->row()}: {$failure->errors()[0]}";
             }
 
-            return redirect()->route('manage-teachers.index')
-                ->with('error', 'Terjadi kesalahan saat import data:<br>' . implode('<br>', $errors));
+            return redirect()->back()
+                ->with('error', implode('<br>', $errors));
         } catch (\Exception $e) {
-            return redirect()->route('manage-teachers.index')
+            return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat import data: ' . $e->getMessage());
         }
     }
