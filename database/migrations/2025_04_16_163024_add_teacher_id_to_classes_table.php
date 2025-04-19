@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('classes', function (Blueprint $table) {
-            $table->unsignedInteger('teacher_id');
+            $table->char('teacher_id');
             $table->foreign('teacher_id')
                 ->references('nip')
                 ->on('teachers')
