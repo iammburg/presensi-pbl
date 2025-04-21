@@ -3,51 +3,68 @@
 @section('title', 'Manajemen Data Guru')
 
 @section('content')
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Kelola Data Guru</h3>
-                        <div class="card-tools">
-                            @can('create_teacher')
-                                <div class="dropdown">
-                                    <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="tambahDataDropdown"
-                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fas fa-plus"></i> Tambah Data
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="tambahDataDropdown">
-                                        <a class="dropdown-item" href="{{ route('manage-teachers.create') }}">
-                                            <i class="fas fa-keyboard mr-2"></i> Isi Manual
-                                        </a>
-                                        <a class="dropdown-item" href="#" id="importExcel">
-                                            <i class="fas fa-file-excel mr-2"></i> Import Excel
-                                        </a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="{{ route('manage-teachers.template') }}">
-                                            <i class="fas fa-download mr-2"></i> Download Template Excel
-                                        </a>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6 text-uppercase">
+                    <h4 class="m-0">Manajemen Data Guru</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Kelola Data Guru</h3>
+                            <div class="card-tools">
+                                @can('create_teacher')
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary btn-sm dropdown-toggle" type="button"
+                                            id="tambahDataDropdown" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">
+                                            <i class="fas fa-plus"></i> Tambah Data
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="tambahDataDropdown">
+                                            <a class="dropdown-item" href="{{ route('manage-teachers.create') }}">
+                                                <i class="fas fa-keyboard mr-2"></i> Isi Manual
+                                            </a>
+                                            <a class="dropdown-item" href="#" id="importExcel">
+                                                <i class="fas fa-file-excel mr-2"></i> Import Excel
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="{{ route('manage-teachers.template') }}">
+                                                <i class="fas fa-download mr-2"></i> Download Template Excel
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
-                            @endcan
+                                @endcan
+                            </div>
                         </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table id="teachersTable" class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>No.</th>
-                                        <th>NIP</th>
-                                        <th>Nama Guru</th>
-                                        <th>Email</th>
-                                        <th>Phone</th>
-                                        <th>Alamat</th>
-                                        <th>Role</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                            </table>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="teachersTable" class="table table-bordered table-striped"
+                                    style="border-radius: 10px; overflow: hidden;">
+                                    <thead style="background-color: #009cf3; color: white;">
+                                        <tr>
+                                            <th>No.</th>
+                                            <th>NIP</th>
+                                            <th>Nama Guru</th>
+                                            <th>Email</th>
+                                            <th>No. Telp</th>
+                                            <th>Alamat</th>
+                                            <th>Role</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

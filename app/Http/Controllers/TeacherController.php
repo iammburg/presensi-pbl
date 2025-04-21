@@ -84,7 +84,7 @@ class TeacherController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make('password123'), // Default password
+            'password' => Hash::make($request->nip . date('dmY', strtotime($request->birth_date))), // Default password
         ]);
         $user->assignRole('Guru');
 
