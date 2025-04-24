@@ -45,6 +45,8 @@ Route::resource('manage-permission', PermissionController::class)->only('store',
 // Route buat Admin Sekolah
 Route::resource('manage-academic-years', AcademicYearController::class);
 Route::resource('manage-classes', SchoolClassController::class);
+Route::get('manage-classes/create', [SchoolClassController::class, 'create'])->name('manage-classes.create');
+Route::post('manage-classes', [SchoolClassController::class, 'store'])->name('manage-classes.store');
 Route::resource('manage-subjects', SubjectController::class);
 Route::resource('manage-teachers', TeacherController::class);
 Route::resource('manage-students', StudentController::class);

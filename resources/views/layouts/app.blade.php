@@ -13,6 +13,11 @@
     <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
 
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Memuat Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed font-primary">
