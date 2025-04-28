@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Teacher extends Model
 {
@@ -12,7 +13,7 @@ class Teacher extends Model
     protected $table = 'teachers';
     protected $primaryKey = 'nip';
     public $incrementing = false;
-    protected $keyType = 'unsignedInteger';
+    protected $keyType = 'string';
     protected $fillable = [
         'nip',
         'name',
@@ -23,4 +24,16 @@ class Teacher extends Model
         'photo',
         'user_id',
     ];
+
+    protected $casts = [
+        'birth_date' => 'date',
+    ];
+
+    /**
+     * Get the user that owns the teacher.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }
