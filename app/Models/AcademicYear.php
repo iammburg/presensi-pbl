@@ -16,4 +16,10 @@ class AcademicYear extends Model
         'semester',
         'is_active',
     ];
+
+    public function getYearLabelAttribute()
+    {
+        return $this->start_year . '/' . $this->end_year . ' - Semester ' . $this->semester;
+    }
+
 }

@@ -213,7 +213,7 @@ class TeacherController extends Controller
                 ->with('error', implode('<br>', $errors));
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Terjadi kesalahan saat import data: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan saat import data');
         }
     }
 
