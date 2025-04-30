@@ -220,7 +220,7 @@ class StudentController extends Controller
         } catch (\Exception $e) {
             Log::error('Error saat import data siswa:', ['error' => $e->getMessage()]);
             return redirect()->back()
-                ->with('error', 'Terjadi kesalahan saat import data siswa.');
+                ->with('error', 'Terjadi kesalahan saat import data siswa.', $e->getMessage());
         }
     }
 
