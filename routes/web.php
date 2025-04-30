@@ -11,6 +11,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\HomeroomAssignmentController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -52,5 +53,11 @@ Route::resource('manage-teachers', TeacherController::class);
 Route::post('manage-teachers/import', [TeacherController::class, 'import'])->name('manage-teachers.import');
 Route::get('manage-teachers/template/download', [TeacherController::class, 'downloadTemplate'])->name('manage-teachers.template');
 Route::resource('manage-students', StudentController::class);
+
+Route::resource('manage-homeroom-assignments', HomeroomAssignmentController::class);
+Route::post('manage-homeroom-assignments', [HomeroomAssignmentController::class, 'store'])->name('manage-homeroom-assignments.store');
+Route::put('manage-homeroom-assignments/{id}', [HomeroomAssignmentController::class, 'update'])->name('manage-homeroom-assignments.update');
+Route::get('manage-homeroom-assignments', [HomeroomAssignmentController::class, 'index'])->name('manage-homeroom-assignments.index');
+
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
