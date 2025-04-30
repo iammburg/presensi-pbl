@@ -15,7 +15,7 @@
         "maatwebsite/excel": "*",
         "nwidart/laravel-modules": "^10.0",
         "spatie/laravel-permission": "^6.3",
-        "yajra/laravel-datatables-oracle": "11.0",
+        "yajra/laravel-datatables-oracle": "^11.1",
         "yoeunes/toastr": "^2.3"
     },
     "require-dev": {
