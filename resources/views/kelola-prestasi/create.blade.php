@@ -54,11 +54,30 @@
         border-radius: 10px;
         border: 1px solid #ced4da;
         width: 100%;
+        background-color: #fff;
     }
 
     .prestasi-card .form-control:focus {
         border-color: #007bff;
         box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .select-wrapper {
+        position: relative;
+    }
+
+    .select-wrapper select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg fill='%23003366' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 20px;
+        padding-right: 48px;
+        z-index: 1; /* Pastikan dropdown berada di atas */
+        position: relative; /* Pastikan elemen berada di atas */
+        cursor: pointer; /* Tambahkan pointer untuk memastikan klik */
     }
 
     .btn-save {
@@ -116,21 +135,47 @@
                 <form action="{{ route('prestasi.simpan') }}" method="POST">
                     @csrf
 
-                    <div class="form-group">
+                    <!-- Dropdown Jenis Prestasi -->
+                    <div class="form-group select-wrapper">
                         <label for="jenis_prestasi">Jenis Prestasi</label>
-                        <input type="text" id="jenis_prestasi" name="jenis_prestasi" class="form-control" placeholder="Masukkan jenis prestasi" required>
+                        <select id="jenis_prestasi" name="jenis_prestasi" class="form-control" required>
+                            <option value="" disabled {{ old('jenis_prestasi') ? '' : 'selected' }}>Pilih jenis prestasi</option>
+                            @php
+                                $jenisOptions = [
+                                    'Juara 1 Internasional',
+                                    'Juara 2 Internasional',
+                                    'Juara 3 Internasional',
+                                    'Juara 1 Nasional',
+                                    'Juara 2 Nasional',
+                                    'Juara 3 Nasional',
+                                    'Juara 1 Kota/Kabupaten',
+                                    'Juara 2 Kota/Kabupaten',
+                                    'Juara 3 Kota/Kabupaten',
+                                ];
+                            @endphp
+                            @foreach ($jenisOptions as $option)
+                                <option value="{{ $option }}" {{ old('jenis_prestasi') == $option ? 'selected' : '' }}>{{ $option }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
-                    <div class="form-group">
+                    <!-- Dropdown Kategori Prestasi -->
+                    <div class="form-group select-wrapper">
                         <label for="kategori_prestasi">Kategori Prestasi</label>
-                        <input type="text" id="kategori_prestasi" name="kategori_prestasi" class="form-control" placeholder="Masukkan kategori prestasi" required>
+                        <select id="kategori_prestasi" name="kategori_prestasi" class="form-control" required>
+                            <option value="" disabled {{ old('kategori_prestasi') ? '' : 'selected' }}>Pilih kategori prestasi</option>
+                            <option value="Akademik" {{ old('kategori_prestasi') == 'Akademik' ? 'selected' : '' }}>Akademik</option>
+                            <option value="Non Akademik" {{ old('kategori_prestasi') == 'Non Akademik' ? 'selected' : '' }}>Non Akademik</option>
+                        </select>
                     </div>
 
+                    <!-- Input Poin -->
                     <div class="form-group">
                         <label for="poin">Poin</label>
-                        <input type="number" id="poin" name="poin" class="form-control" placeholder="0" required>
+                        <input type="number" id="poin" name="poin" class="form-control" placeholder="0" value="{{ old('poin') }}" required>
                     </div>
 
+                    <!-- Tombol Simpan -->
                     <button type="submit" class="btn-save">
                         <i class="fa fa-save"></i> SIMPAN
                     </button>

@@ -3,11 +3,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePrestasisTable extends Migration
+class CreateAchievementsTable extends Migration
 {
     public function up()
     {
-        Schema::create('prestasis', function (Blueprint $table) {
+        Schema::create('achievements', function (Blueprint $table) {
             $table->id();
             $table->string('jenis_prestasi');
             $table->string('kategori_prestasi');
@@ -19,6 +19,6 @@ class CreatePrestasisTable extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('prestasis');
+        Schema::dropIfExists('achievements');
     }
 }

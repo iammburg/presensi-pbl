@@ -14,7 +14,7 @@ class Prestasi extends Model
      *
      * @var string
      */
-    protected $table = 'prestasis';
+    protected $table = 'Achievements';
 
     /**
      * Kolom-kolom yang dapat diisi secara massal.

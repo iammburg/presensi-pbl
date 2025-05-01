@@ -15,7 +15,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('prestasis')->group(function () {
+Route::prefix('achievements')->group(function () {
     Route::get('/kelola-prestasi', [PrestasiController::class, 'index'])->name('prestasi.kelola');
     Route::get('/riwayat', [PrestasiController::class, 'riwayat'])->name('prestasi.riwayat');
     Route::get('/create', [PrestasiController::class, 'create'])->name('prestasi.create');

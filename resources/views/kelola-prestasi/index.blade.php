@@ -229,9 +229,9 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($prestasis as $key => $item)
+                @foreach($achievements as $key => $item)
                 <tr>
-                    <td>{{ $prestasis->firstItem() + $key }}</td>
+                    <td>{{ $achievements->firstItem() + $key }}</td>
                     <td>{{ $item->jenis_prestasi }}</td>
                     <td>{{ $item->kategori_prestasi }}</td>
                     <td>{{ $item->poin }}</td>
@@ -264,25 +264,25 @@
     <div class="pagination-container">
         <div>
             <p class="mb-0" style="color:#003366;">
-                Showing {{ $prestasis->firstItem() }} to {{ $prestasis->lastItem() }} of {{ $prestasis->total() }} entries
+                Showing {{ $achievements->firstItem() }} to {{ $achievements->lastItem() }} of {{ $achievements->total() }} entries
             </p>
         </div>
         <nav>
             <ul class="pagination">
-                @if($prestasis->onFirstPage())
+                @if($achievements->onFirstPage())
                     <li class="page-item disabled"><span class="page-link">Previous</span></li>
                 @else
-                    <li class="page-item"><a class="page-link" href="{{ $prestasis->previousPageUrl() }}">Previous</a></li>
+                    <li class="page-item"><a class="page-link" href="{{ $achievements->previousPageUrl() }}">Previous</a></li>
                 @endif
 
-                @foreach($prestasis->getUrlRange(1, $prestasis->lastPage()) as $page => $url)
-                    <li class="page-item {{ $prestasis->currentPage()==$page?'active':'' }}">
+                @foreach($achievements->getUrlRange(1, $achievements->lastPage()) as $page => $url)
+                    <li class="page-item {{ $achievements->currentPage()==$page?'active':'' }}">
                         <a class="page-link" href="{{ $url }}">{{ $page }}</a>
                     </li>
                 @endforeach
 
-                @if($prestasis->hasMorePages())
-                    <li class="page-item"><a class="page-link" href="{{ $prestasis->nextPageUrl() }}">Next</a></li>
+                @if($achievements->hasMorePages())
+                    <li class="page-item"><a class="page-link" href="{{ $achievements->nextPageUrl() }}">Next</a></li>
                 @else
                     <li class="page-item disabled"><span class="page-link">Next</span></li>
                 @endif
