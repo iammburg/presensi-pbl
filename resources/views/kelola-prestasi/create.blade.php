@@ -50,16 +50,27 @@
 
     .prestasi-card .form-control {
         font-size: 18px;
-        padding: 16px 20px;
+        padding: 5px 20px;
         border-radius: 10px;
         border: 1px solid #ced4da;
         width: 100%;
         background-color: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .prestasi-card .form-control:focus {
         border-color: #007bff;
         box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .prestasi-card .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .prestasi-card .invalid-feedback {
+        font-size: 14px;
+        margin-top: 8px;
+        color: #dc3545;
     }
 
     .select-wrapper {
@@ -75,9 +86,9 @@
         background-position: right 16px center;
         background-size: 20px;
         padding-right: 48px;
-        z-index: 1; /* Pastikan dropdown berada di atas */
-        position: relative; /* Pastikan elemen berada di atas */
-        cursor: pointer; /* Tambahkan pointer untuk memastikan klik */
+        z-index: 1;
+        position: relative;
+        cursor: pointer;
     }
 
     .btn-save {
@@ -94,6 +105,7 @@
         justify-content: center;
         gap: 10px;
         transition: background-color 0.2s ease;
+        margin-top: 32px;
     }
 
     .btn-save:hover {
@@ -138,7 +150,7 @@
                     <!-- Dropdown Jenis Prestasi -->
                     <div class="form-group select-wrapper">
                         <label for="jenis_prestasi">Jenis Prestasi</label>
-                        <select id="jenis_prestasi" name="jenis_prestasi" class="form-control" required>
+                        <select id="jenis_prestasi" name="jenis_prestasi" class="form-control @error('jenis_prestasi') is-invalid @enderror" required>
                             <option value="" disabled {{ old('jenis_prestasi') ? '' : 'selected' }}>Pilih jenis prestasi</option>
                             @php
                                 $jenisOptions = [
@@ -157,22 +169,37 @@
                                 <option value="{{ $option }}" {{ old('jenis_prestasi') == $option ? 'selected' : '' }}>{{ $option }}</option>
                             @endforeach
                         </select>
+                        @error('jenis_prestasi')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
                     </div>
 
                     <!-- Dropdown Kategori Prestasi -->
                     <div class="form-group select-wrapper">
                         <label for="kategori_prestasi">Kategori Prestasi</label>
-                        <select id="kategori_prestasi" name="kategori_prestasi" class="form-control" required>
+                        <select id="kategori_prestasi" name="kategori_prestasi" class="form-control @error('kategori_prestasi') is-invalid @enderror" required>
                             <option value="" disabled {{ old('kategori_prestasi') ? '' : 'selected' }}>Pilih kategori prestasi</option>
                             <option value="Akademik" {{ old('kategori_prestasi') == 'Akademik' ? 'selected' : '' }}>Akademik</option>
                             <option value="Non Akademik" {{ old('kategori_prestasi') == 'Non Akademik' ? 'selected' : '' }}>Non Akademik</option>
                         </select>
+                        @error('kategori_prestasi')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
                     </div>
 
                     <!-- Input Poin -->
                     <div class="form-group">
                         <label for="poin">Poin</label>
-                        <input type="number" id="poin" name="poin" class="form-control" placeholder="0" value="{{ old('poin') }}" required>
+                        <input type="number" id="poin" name="poin" class="form-control @error('poin') is-invalid @enderror" placeholder="0" value="{{ old('poin') }}" required>
+                        @error('poin')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
                     </div>
 
                     <!-- Tombol Simpan -->

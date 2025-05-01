@@ -54,6 +54,7 @@
     }
     .table-responsive {
         margin-bottom: 20px;
+        overflow: visible !important;
     }
     .table thead th {
         background-color: #007bff;
@@ -67,7 +68,7 @@
         border-spacing: 0;
         border: 1px solid #dee2e6;
         border-radius: 10px;
-        overflow: hidden;
+        /* overflow: hidden; */
     }
     .table td {
         text-align: left;
@@ -112,6 +113,7 @@
     .dropdown-item.text-danger:hover {
         background-color: #f8d7da;
         color: #a71d2a !important;
+        z-index: 9999 !important;
     }
     label.form-label { font-weight: normal !important; }
     .btn-action {
@@ -134,6 +136,11 @@
     input#entriesInput::-webkit-inner-spin-button,
     input#entriesInput::-webkit-outer-spin-button {
         opacity: 1;
+    }
+
+    .dropdown-menu {
+        z-index: 1050 !important;
+        position: absolute !important;
     }
 </style>
 
@@ -308,9 +315,7 @@
     });
 </script>
 
-<script>
-    function applyFilters() {
-        const url<script>
-    function applyFilters() {
-        const url
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
 @endsection

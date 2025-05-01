@@ -52,7 +52,7 @@
 
     .prestasi-card .form-control {
         font-size: 18px;
-        padding: 16px 20px;
+        padding: 5px 20px;
         border-radius: 10px;
         border: 1px solid #ced4da;
         width: 100%;
