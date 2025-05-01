@@ -47,8 +47,10 @@ Route::resource('manage-academic-years', AcademicYearController::class);
 Route::resource('manage-classes', SchoolClassController::class);
 Route::resource('manage-subjects', SubjectController::class);
 Route::resource('manage-teachers', TeacherController::class);
-Route::post('manage-teachers/import', [TeacherController::class, 'import'])->name('manage-teachers.import');
+Route::post('manage-teachers/import', [TeacherController::class, 'import'] )->name('manage-teachers.import');
 Route::get('manage-teachers/template/download', [TeacherController::class, 'downloadTemplate'])->name('manage-teachers.template');
 Route::resource('manage-students', StudentController::class);
+Route::post('manage-students/import', [StudentController::class, 'import'])->name('manage-students.import');
+Route::get('manage-students/template/download', [StudentController::class, 'downloadTemplate'])->name('manage-students.template');
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
