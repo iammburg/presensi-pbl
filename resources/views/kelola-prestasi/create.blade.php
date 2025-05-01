@@ -148,7 +148,7 @@
                     @csrf
 
                     <!-- Dropdown Jenis Prestasi -->
-                    <div class="form-group select-wrapper">
+                    <div class="form-group">
                         <label for="jenis_prestasi">Jenis Prestasi</label>
                         <select id="jenis_prestasi" name="jenis_prestasi" class="form-control @error('jenis_prestasi') is-invalid @enderror" required>
                             <option value="" disabled {{ old('jenis_prestasi') ? '' : 'selected' }}>Pilih jenis prestasi</option>
@@ -177,7 +177,7 @@
                     </div>
 
                     <!-- Dropdown Kategori Prestasi -->
-                    <div class="form-group select-wrapper">
+                    <div class="form-group">
                         <label for="kategori_prestasi">Kategori Prestasi</label>
                         <select id="kategori_prestasi" name="kategori_prestasi" class="form-control @error('kategori_prestasi') is-invalid @enderror" required>
                             <option value="" disabled {{ old('kategori_prestasi') ? '' : 'selected' }}>Pilih kategori prestasi</option>

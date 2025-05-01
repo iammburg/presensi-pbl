@@ -86,19 +86,4 @@ class PrestasiController extends Controller
         $prestasi->delete();
         return redirect()->route('prestasi.kelola')->with('success', 'Data prestasi berhasil dihapus.');
     }
-
-    public function updateStatus($id, $status)
-    {
-        // Validasi status yang diperbolehkan
-        $allowedStatuses = ['menunggu', 'proses', 'selesai', 'tidak-valid'];
-        if (!in_array($status, $allowedStatuses)) {
-            return redirect()->route('prestasi.laporan')->with('error', 'Status tidak valid.');
-        }
-
-        $prestasi = Prestasi::findOrFail($id);
-        $prestasi->status = $status;
-        $prestasi->save();
-
-        return redirect()->route('prestasi.laporan')->with('success', 'Status prestasi berhasil diperbarui.');
-    }
 }

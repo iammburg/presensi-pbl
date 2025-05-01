@@ -174,7 +174,7 @@
     value="{{ request('entries', 10) }}"
     oninput="filterValue(this)"
 >
-<script>
+<!-- <script>
     function filterValue(input) {
         const validValues = [25, 50, 100];
         let value = parseInt(input.value);
@@ -206,7 +206,7 @@
             }
         }
     });
-</script>
+</script> -->
                 <label class="form-label mb-0">entries</label>
             </div>
             <div class="d-flex align-items-center gap-2">
