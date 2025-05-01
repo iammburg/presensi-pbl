@@ -3,17 +3,23 @@
 @section('title', 'Edit Data Siswa')
 
 @section('content')
-    <div class="container-fluid mt-4" style="font-family: 'Roboto', sans-serif; max-width: 1200px;"> <!-- Container diperlebar -->
+    <div class="container-fluid mt-4" style="font-family: 'Roboto', sans-serif; max-width: 1240px;">
         <h1 class="mt-4" style="font-weight: bold; font-size: 2rem; color: #183C70;">Edit Data Siswa</h1>
         <div class="row justify-content-center">
-            <div class="col-12"> <!-- Container diperlebar dengan col-12 -->
+            <div class="col-12">
                 <div class="card shadow-sm">
                     <form action="{{ route('manage-students.update', $student->nisn) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <label for="nisn" class="font-weight-bold mb-0">NISN</label>
+                            <a href="{{ route('manage-students.index') }}"
+                            style="width: 25px; height: 25px; background-color: #1777e5; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; text-decoration: none; margin-top: -10px;">
+                                <i class="fas fa-arrow-left" style="font-size: 14px;"></i>
+                            </a>
+                        </div>
                             <div class="form-group">
-                                <label for="nisn" class="font-weight-bold">NISN</label>
                                 <input type="text" class="form-control @error('nisn') is-invalid @enderror" id="nisn" name="nisn" value="{{ $student->nisn }}" readonly>
                                 @error('nisn')
                                 <div class="invalid-feedback">
@@ -143,9 +149,6 @@
                             <button type="submit" class="btn btn-primary btn-block">
                                 <i class="fas fa-save"></i> SIMPAN
                             </button>
-                            <a href="{{ route('manage-students.index') }}" class="btn btn-secondary btn-block">
-                                <i class="fas fa-arrow-left"></i> BATAL
-                            </a>
                         </div>
                     </form>
                 </div>
@@ -155,9 +158,8 @@
 @endsection
 
 @push('css')
-    <!-- Font Roboto -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
             font-family: 'Roboto', sans-serif;

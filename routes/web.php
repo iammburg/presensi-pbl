@@ -52,5 +52,6 @@ Route::get('manage-teachers/template/download', [TeacherController::class, 'down
 Route::resource('manage-students', StudentController::class);
 Route::post('manage-students/import', [StudentController::class, 'import'])->name('manage-students.import');
 Route::get('manage-students/template/download', [StudentController::class, 'downloadTemplate'])->name('manage-students.template');
+Route::get('/manage-students/{nisn}/detail', [StudentController::class, 'detail']);
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);

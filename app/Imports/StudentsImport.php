@@ -26,7 +26,6 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
 
     public function __construct()
     {
-        // Mapping berbagai kemungkinan nama kolom
         $this->headerMap = [
             'nisn' => ['nisn'],
             'nama' => ['nama', 'name', 'nama_lengkap'],
@@ -38,7 +37,6 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             'jenis_kelamin' => ['jenis_kelamin', 'jenis_kelamin_lp', 'gender'],
             'tanggal_lahir' => ['tanggal_lahir', 'tanggal_lahir_yyyy_mm_dd', 'birth_date'],
             'tahun_masuk' => ['tahun_masuk', 'enter_year'],
-            'id_kelas' => ['id_kelas', 'id_kelas_referensi_id_kelas_di_tabel_school_classes'],
         ];
     }
 
@@ -47,7 +45,6 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
         $possibleHeaders = $this->headerMap[$field];
         $headers = array_keys($row);
 
-        // Cari header yang cocok (case insensitive)
         foreach ($headers as $header) {
             $normalizedHeader = strtolower(str_replace([' ', '_', '-'], '', $header));
             foreach ($possibleHeaders as $possibleHeader) {
@@ -63,10 +60,8 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
     public function model(array $row)
     {
         try {
-            // Debug log
             Log::info('Processing row:', $row);
 
-            // Temukan key yang sesuai untuk setiap field
             $nisnKey = $this->findHeaderKey($row, 'nisn');
             $namaKey = $this->findHeaderKey($row, 'nama');
             $alamatKey = $this->findHeaderKey($row, 'alamat');
@@ -77,42 +72,33 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             $jenisKelaminKey = $this->findHeaderKey($row, 'jenis_kelamin');
             $tanggalLahirKey = $this->findHeaderKey($row, 'tanggal_lahir');
             $tahunMasukKey = $this->findHeaderKey($row, 'tahun_masuk');
-            $idKelasKey = $this->findHeaderKey($row, 'id_kelas');
 
-            // Validasi semua field required ada
             if (!$nisnKey || !$namaKey || !$alamatKey || !$teleponKey || !$namaOrangTuaKey ||
                 !$teleponOrangTuaKey || !$emailOrangTuaKey || !$jenisKelaminKey || !$tanggalLahirKey ||
-                !$tahunMasukKey || !$idKelasKey) {
+                !$tahunMasukKey) {
                 throw new \Exception('Ada kolom wajib yang tidak ditemukan di file Excel');
             }
 
-            // Validasi jenis kelamin
             $gender = strtoupper(trim($row[$jenisKelaminKey]));
             if (!in_array($gender, ['L', 'P'])) {
                 throw new \Exception('Jenis kelamin harus L atau P.');
             }
 
-            // Format tanggal lahir
             $birthDate = $this->parseDate($row[$tanggalLahirKey]);
             if (!$birthDate) {
                 throw new \Exception('Format tanggal lahir tidak valid.');
             }
 
-            // Validasi ID Kelas
-            $class = SchoolClass::find($row[$idKelasKey]);
-            if (!$class) {
-                throw new \Exception("Kelas dengan ID '{$row[$idKelasKey]}' tidak ditemukan.");
-            }
+            // Ambil kelas pertama atau kosongkan jika tidak ada
+            $class = SchoolClass::first();
+            $classId = $class ? $class->id : null;
 
-            // Check jika NISN sudah ada
             if (Student::where('nisn', $row[$nisnKey])->exists()) {
                 Log::warning('NISN sudah ada, dilewati: ' . $row[$nisnKey]);
                 return null;
             }
 
-            // Mulai transaksi database
-            return DB::transaction(function () use ($row, $nisnKey, $namaKey, $alamatKey, $teleponKey, $namaOrangTuaKey, $teleponOrangTuaKey, $emailOrangTuaKey, $jenisKelaminKey, $birthDate, $tahunMasukKey, $class) {
-                // Buat user account
+            return DB::transaction(function () use ($row, $nisnKey, $namaKey, $alamatKey, $teleponKey, $namaOrangTuaKey, $teleponOrangTuaKey, $emailOrangTuaKey, $jenisKelaminKey, $birthDate, $tahunMasukKey, $classId) {
                 $user = User::firstOrCreate(
                     ['email' => strtolower($row[$emailOrangTuaKey])],
                     [
@@ -123,7 +109,6 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
 
                 $user->assignRole('Siswa');
 
-                // Buat data siswa
                 return Student::create([
                     'nisn' => $row[$nisnKey],
                     'name' => $row[$namaKey],
@@ -135,7 +120,7 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
                     'parent_phone' => $row[$teleponOrangTuaKey],
                     'parent_email' => $row[$emailOrangTuaKey],
                     'enter_year' => $row[$tahunMasukKey],
-                    'class_id' => $class->id,
+                    'class_id' => $classId,
                     'user_id' => $user->id,
                 ]);
             });
@@ -154,17 +139,14 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
         if (empty($value)) return null;
 
         try {
-            // Jika input adalah numeric (Excel date)
             if (is_numeric($value)) {
                 return Date::excelToDateTimeObject($value)->format('Y-m-d');
             }
 
-            // Jika format sudah YYYY-MM-DD
             if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
                 return $value;
             }
 
-            // Coba parse dengan Carbon (mendukung berbagai format)
             return Carbon::parse($value)->format('Y-m-d');
         } catch (\Exception $e) {
             Log::error('Date parsing error:', [
@@ -177,7 +159,7 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
 
     public function rules(): array
     {
-        return [];  // Validasi dilakukan secara manual di model()
+        return [];
     }
 
     public function customValidationMessages()

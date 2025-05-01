@@ -3,14 +3,21 @@
 @section('title', 'Tambah Data Siswa')
 
 @section('content')
-<div class="container-fluid mt-4" style="font-family: 'Roboto', sans-serif; max-width: 1200px;"> <!-- Container diperlebar -->
+<div class="container-fluid mt-4" style="font-family: 'Roboto', sans-serif; max-width: 1240px;">
     <h1 class="mt-4" style="font-weight: bold; font-size: 2rem; color: #183C70;">Tambah Data Siswa</h1>
     <div class="row justify-content-center">
-        <div class="col-12"> <!-- Container diperlebar dengan col-12 -->
-            <div class="card shadow-sm">
+        <div class="col-12">
+            <div class="card shadow-sm position-relative">
+                <a href="{{ route('manage-students.index') }}" class="position-absolute d-flex align-items-center justify-content-center"
+                   style="top: 15px; right: 20px; width: 25px; height: 25px; background-color: #1777e5; border-radius: 50%; color: white; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
                 <form action="{{ route('manage-students.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="card-body">
+
+                        <!-- Semua inputan form tidak berubah -->
+                        <!-- ... (form inputs seperti sebelumnya tetap sama) ... -->
 
                         <div class="form-group">
                             <label for="nisn">NISN</label>
@@ -151,9 +158,6 @@
                         <button type="submit" class="btn btn-primary btn-block">
                             <i class="fas fa-save"></i> SIMPAN
                         </button>
-                        <a href="{{ route('manage-students.index') }}" class="btn btn-secondary btn-block">
-                            <i class="fas fa-arrow-left"></i> BATAL
-                        </a>
                     </div>
                 </form>
             </div>
@@ -164,7 +168,7 @@
 
 @push('css')
     <link rel="stylesheet" href="{{ asset('plugins/bs-custom-file-input/bs-custom-file-input.min.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
