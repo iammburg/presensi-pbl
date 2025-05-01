@@ -10,7 +10,7 @@ class Subject extends Model
     use HasFactory;
 
     // Kolom yang dapat diisi (mass assignable)
-    protected $fillable = ['code', 'name', 'teacher_id', 'description'];
+    protected $fillable = ['code', 'name', 'description', 'is_active'];
 
     /**
      * Relasi ke model Teacher

@@ -12,11 +12,11 @@ class SubjectSeeder extends Seeder
      */
     public function run(): void
     {
-        // Tambahkan data mata pelajaran ke tabel subjects
-        Subject::create(['code' => 'MAT12', 'name' => 'Matematika Lanjutan', 'teacher_id' => 1, 'description' => 'Opsional']);
-        Subject::create(['code' => 'FIS11', 'name' => 'Fisika Dasar', 'teacher_id' => 2, 'description' => 'Opsional']);
-        Subject::create(['code' => 'KIM10', 'name' => 'Kimia Dasar', 'teacher_id' => 3, 'description' => 'Opsional']);
-        Subject::create(['code' => 'BIO10', 'name' => 'Biologi Dasar', 'teacher_id' => 4, 'description' => 'Opsional']);
-        Subject::create(['code' => 'ENG10', 'name' => 'Bahasa Inggris', 'teacher_id' => 5, 'description' => 'Opsional']);
+        // Tambahkan data mata pelajaran ke tabel subjects 
+        Subject::create(['code' => 'MAT12', 'name' => 'Matematika Lanjutan', 'description' => 'Opsional']);
+        Subject::create(['code' => 'FIS11', 'name' => 'Fisika Dasar','description' => 'Opsional']);
+        Subject::create(['code' => 'KIM10', 'name' => 'Kimia Dasar', 'description' => 'Opsional']);
+        Subject::create(['code' => 'BIO10', 'name' => 'Biologi Dasar', 'description' => 'Opsional']);
+        Subject::create(['code' => 'ENG10', 'name' => 'Bahasa Inggris', 'description' => 'Opsional']);
     }
 }

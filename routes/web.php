@@ -38,6 +38,7 @@ Auth::routes();
 
 // Route untuk dashboard setelah login
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::resource('subject', SubjectController::class);
 
 // Route untuk profil pengguna
 Route::resource('profil', ProfilController::class)->except('destroy');

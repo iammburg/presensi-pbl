@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class SubjectController extends Controller
 {
@@ -14,39 +13,33 @@ class SubjectController extends Controller
      */
     public function index()
     {
-        $subjects = Subject::with('teacher')->paginate(10); // Ambil data mata pelajaran beserta guru
-        return view('subjects.index', compact('subjects'));
+        $subjects = Subject::with('teacher')->paginate(10); // menampilkan data dengan pagination
+        return view('manage-subjects.index', compact('subjects'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        $teachers = Teacher::all(); // Ambil semua data guru
-        return view('subjects.create', compact('teachers'));
-    }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'code' => 'required|unique:subjects,code|max:10',
+        // Validasi data
+        $validatedData = $request->validate([
+            'code' => 'required|string|max:10|unique:subjects,code',
             'name' => 'required|string|max:255',
-            'teacher_id' => 'required|exists:teachers,id',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:500',
         ]);
 
-        Subject::create([
-            'code' => $request->code,
-            'name' => $request->name,
-            'teacher_id' => $request->teacher_id,
-            'description' => $request->description,
-        ]);
+        // Tambahkan default untuk is_active jika belum diset di database
+        $validatedData['is_active'] = 1;
 
-        return redirect()->route('subjects.index')->with('success', 'Mata pelajaran berhasil ditambahkan.');
+        // Simpan ke database
+        Subject::create($validatedData);
+
+        return redirect()->route('subject.index')->with('success', 'Mata pelajaran berhasil ditambahkan.');
     }
 
     /**
@@ -54,7 +47,12 @@ class SubjectController extends Controller
      */
     public function show(Subject $subject)
     {
-        return view('subjects.show', compact('subject'));
+        //
+    }
+
+    public function create()
+    {
+        return view('manage-subjects.create');
     }
 
     /**
@@ -62,8 +60,7 @@ class SubjectController extends Controller
      */
     public function edit(Subject $subject)
     {
-        $teachers = Teacher::all(); // Ambil semua data guru
-        return view('subjects.edit', compact('subject', 'teachers'));
+        return view('manage-subjects.edit', compact('subject'));
     }
 
     /**
@@ -71,38 +68,23 @@ class SubjectController extends Controller
      */
     public function update(Request $request, Subject $subject)
     {
-        $request->validate([
-            'code' => 'required|unique:subjects,code,' . $subject->id . '|max:10',
-            'name' => 'required|string|max:255',
-            'teacher_id' => 'required|exists:teachers,id',
-            'description' => 'nullable|string',
-        ]);
+        $subject->update($request->all());
 
-        $subject->update([
-            'code' => $request->code,
-            'name' => $request->name,
-            'teacher_id' => $request->teacher_id,
-            'description' => $request->description,
-        ]);
-
-        return redirect()->route('subjects.index')->with('success', 'Mata pelajaran berhasil diperbarui.');
+        return redirect()->route('subject.index')->with('success', 'Mata pelajaran berhasil diubah.'); // Atau ke halaman lain setelah update
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Subject $subject)
     {
+        // Menghapus subject
         $subject->delete();
-        return redirect()->route('subjects.index')->with('success', 'Mata pelajaran berhasil dihapus.');
+
+        // Redirect ke halaman index atau halaman lain setelah penghapusan
+        return redirect()->route('subject.index')->with('success', 'Mata pelajaran berhasil dihapus.');
     }
 
-    /**
-     * Get schedule names as JSON.
-     */
-    public function getScheduleNames()
-    {
-        $scheduleNames = DB::table('subjects')->pluck('name'); // Mengambil nama mata pelajaran dari tabel subjects
-        return response()->json($scheduleNames);
-    }
 }
+
