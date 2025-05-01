@@ -50,23 +50,12 @@
 
     .prestasi-card .form-control {
         font-size: 18px;
-        padding: 16px 20px;
+        padding: 16px 48px 16px 20px;
         border-radius: 10px;
         border: 1px solid #ced4da;
         width: 100%;
         background-color: #fff;
-    }
-
-    .prestasi-card .form-control:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
-
-    .select-wrapper {
-        position: relative;
-    }
-
-    .select-wrapper select {
+        color: #000; /* Pastikan teks terlihat */
         appearance: none;
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -74,10 +63,13 @@
         background-repeat: no-repeat;
         background-position: right 16px center;
         background-size: 20px;
-        padding-right: 48px;
-        z-index: 1; /* Pastikan dropdown berada di atas */
-        position: relative; /* Pastikan elemen berada di atas */
-        cursor: pointer; /* Tambahkan pointer untuk memastikan klik */
+        cursor: pointer;
+    }
+
+    .prestasi-card .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        outline: none;
     }
 
     .btn-save {
@@ -136,7 +128,7 @@
                     @csrf
 
                     <!-- Dropdown Jenis Prestasi -->
-                    <div class="form-group select-wrapper">
+                    <div class="form-group">
                         <label for="jenis_prestasi">Jenis Prestasi</label>
                         <select id="jenis_prestasi" name="jenis_prestasi" class="form-control" required>
                             <option value="" disabled {{ old('jenis_prestasi') ? '' : 'selected' }}>Pilih jenis prestasi</option>
@@ -160,7 +152,7 @@
                     </div>
 
                     <!-- Dropdown Kategori Prestasi -->
-                    <div class="form-group select-wrapper">
+                    <div class="form-group">
                         <label for="kategori_prestasi">Kategori Prestasi</label>
                         <select id="kategori_prestasi" name="kategori_prestasi" class="form-control" required>
                             <option value="" disabled {{ old('kategori_prestasi') ? '' : 'selected' }}>Pilih kategori prestasi</option>

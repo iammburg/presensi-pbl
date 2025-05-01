@@ -12,7 +12,6 @@ class CreateAchievementsTable extends Migration
             $table->string('jenis_prestasi');
             $table->string('kategori_prestasi');
             $table->integer('poin');
-            $table->enum('status', ['pending', 'proses', 'selesai'])->default('pending');
             $table->timestamps();
         });
     }
