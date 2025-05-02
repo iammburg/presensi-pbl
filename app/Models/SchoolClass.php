@@ -24,4 +24,9 @@ class SchoolClass extends Model
         return $this->belongsTo(AcademicYear::class);
     }
 
+    public function homeroomAssignments()
+    {
+        return $this->hasMany(HomeroomAssignment::class, 'class_id');
+    }
+
 }

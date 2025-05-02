@@ -102,6 +102,18 @@ class SchoolAdminSeeder extends Seeder
         Permission::create(['name' => 'update_student', 'menu_id' => $subMenuId->id]);
         Permission::create(['name' => 'delete_student', 'menu_id' => $subMenuId->id]);
 
+        $subMenuId = Menu::create([
+            'nama_menu' => 'Manajemen Plotting Wali Kelas',
+            'url' => 'manage-homeroom-assignments',
+            'parent_id' => $schoolAdminSubMenu->id,
+            'urutan' => 6
+        ]);
+
+        Permission::create(['name' => 'create_homeroom_assignment', 'menu_id' => $subMenuId->id]);
+        Permission::create(['name' => 'read_homeroom_assignment', 'menu_id' => $subMenuId->id]);
+        Permission::create(['name' => 'update_homeroom_assignment', 'menu_id' => $subMenuId->id]);
+        Permission::create(['name' => 'delete_homeroom_assignment', 'menu_id' => $subMenuId->id]);
+
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [9, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [10, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [11, 2]);
@@ -110,6 +122,7 @@ class SchoolAdminSeeder extends Seeder
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [14, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [15, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [16, 2]);
+        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [17, 2]);
 
         User::factory()->create([
             'name' => 'Admin Sekolah 1',
@@ -138,7 +151,11 @@ class SchoolAdminSeeder extends Seeder
             'create_student',
             'read_student',
             'update_student',
-            'delete_student'
+            'delete_student',
+            'create_homeroom_assignment',
+            'read_homeroom_assignment',
+            'update_homeroom_assignment',
+            'delete_homeroom_assignment'
         ]);
         User::firstWhere('email', 'adminsekolah1@gmail.com')->assignRole('Admin Sekolah');
     }
