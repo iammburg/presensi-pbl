@@ -13,6 +13,7 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViolationPointController;
+use App\Http\Controllers\HomeroomAssignmentController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -54,17 +55,9 @@ Route::post('manage-teachers/import', [TeacherController::class, 'import'] )->na
 Route::get('manage-teachers/template/download', [TeacherController::class, 'downloadTemplate'])->name('manage-teachers.template');
 Route::resource('manage-students', StudentController::class);
 Route::resource('kelola-prestasi', PrestasiController::class);
-
 Route::post('manage-students/import', [StudentController::class, 'import'])->name('manage-students.import');
 Route::get('manage-students/template/download', [StudentController::class, 'downloadTemplate'])->name('manage-students.template');
+Route::resource('manage-homeroom-assignments', HomeroomAssignmentController::class);
+Route::resource('kelola-pelanggaran', ViolationPointController::class);
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
-
-Route::prefix('pelanggaran')->group(function () {
-    Route::get('/kelola-pelanggaran', [ViolationPointController::class, 'index'])->name('pelanggaran.kelola');
-    Route::get('/create', [ViolationPointController::class, 'create'])->name('pelanggaran.create');
-    Route::post('/simpan', [ViolationPointController::class, 'store'])->name('pelanggaran.simpan');
-    Route::get('/edit/{id}', [ViolationPointController::class, 'edit'])->name('pelanggaran.edit');
-    Route::put('/update/{id}', [ViolationPointController::class, 'update'])->name('pelanggaran.update');
-    Route::delete('/hapus/{id}', [ViolationPointController::class, 'destroy'])->name('pelanggaran.hapus');
-});
