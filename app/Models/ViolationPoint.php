@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Prestasi extends Model
+class ViolationPoint extends Model
 {
     use HasFactory;
 
@@ -14,7 +14,7 @@ class Prestasi extends Model
      *
      * @var string
      */
-    protected $table = 'achievement_points';
+    protected $table = 'violation_points';
 
     /**
      * Kolom-kolom yang dapat diisi secara massal.
@@ -22,8 +22,7 @@ class Prestasi extends Model
      * @var array
      */
     protected $fillable = [
-        'jenis_prestasi',
-        'kategori_prestasi',
-        'poin',
+        'violation_type',
+        'points',
     ];
 }

@@ -22,10 +22,10 @@ class PrestasiController extends Controller
 
         // Pagination berdasarkan jumlah "entries" yang dipilih
         $entries = $request->input('entries', 10); // Default 10
-        $achievements = $query->paginate($entries)->appends($request->query());
+        $achievementPoints = $query->paginate($entries)->appends($request->query());
 
         // Mengarahkan ke view kelola-prestasi/index.blade.php
-        return view('kelola-prestasi.index', compact('achievements'));
+        return view('kelola-prestasi.index', compact('achievementPoints'));
     }
 
     public function laporan(Request $request)

@@ -236,9 +236,9 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($achievements as $key => $item)
+                @foreach($achievementPoints as $key => $item)
                 <tr>
-                    <td>{{ $achievements->firstItem() + $key }}</td>
+                    <td>{{ $achievementPoints->firstItem() + $key }}</td>
                     <td>{{ $item->jenis_prestasi }}</td>
                     <td>{{ $item->kategori_prestasi }}</td>
                     <td>{{ $item->poin }}</td>
@@ -271,25 +271,25 @@
     <div class="pagination-container">
         <div>
             <p class="mb-0" style="color:#003366;">
-                Showing {{ $achievements->firstItem() }} to {{ $achievements->lastItem() }} of {{ $achievements->total() }} entries
+                Showing {{ $achievementPoints->firstItem() }} to {{ $achievementPoints->lastItem() }} of {{ $achievementPoints->total() }} entries
             </p>
         </div>
         <nav>
             <ul class="pagination">
-                @if($achievements->onFirstPage())
+                @if($achievementPoints->onFirstPage())
                     <li class="page-item disabled"><span class="page-link">Previous</span></li>
                 @else
-                    <li class="page-item"><a class="page-link" href="{{ $achievements->previousPageUrl() }}">Previous</a></li>
+                    <li class="page-item"><a class="page-link" href="{{ $achievementPoints->previousPageUrl() }}">Previous</a></li>
                 @endif
 
-                @foreach($achievements->getUrlRange(1, $achievements->lastPage()) as $page => $url)
-                    <li class="page-item {{ $achievements->currentPage()==$page?'active':'' }}">
+                @foreach($achievementPoints->getUrlRange(1, $achievementPoints->lastPage()) as $page => $url)
+                    <li class="page-item {{ $achievementPoints->currentPage()==$page?'active':'' }}">
                         <a class="page-link" href="{{ $url }}">{{ $page }}</a>
                     </li>
                 @endforeach
 
-                @if($achievements->hasMorePages())
-                    <li class="page-item"><a class="page-link" href="{{ $achievements->nextPageUrl() }}">Next</a></li>
+                @if($achievementPoints->hasMorePages())
+                    <li class="page-item"><a class="page-link" href="{{ $achievementPoints->nextPageUrl() }}">Next</a></li>
                 @else
                     <li class="page-item disabled"><span class="page-link">Next</span></li>
                 @endif

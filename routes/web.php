@@ -12,10 +12,11 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ViolationPointController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('achievements')->group(function () {
+Route::prefix('achievement-points')->group(function () {
     Route::get('/kelola-prestasi', [PrestasiController::class, 'index'])->name('prestasi.kelola');
     Route::get('/riwayat', [PrestasiController::class, 'riwayat'])->name('prestasi.riwayat');
     Route::get('/create', [PrestasiController::class, 'create'])->name('prestasi.create');
@@ -58,3 +59,12 @@ Route::post('manage-students/import', [StudentController::class, 'import'])->nam
 Route::get('manage-students/template/download', [StudentController::class, 'downloadTemplate'])->name('manage-students.template');
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
+
+Route::prefix('pelanggaran')->group(function () {
+    Route::get('/kelola-pelanggaran', [ViolationPointController::class, 'index'])->name('pelanggaran.kelola');
+    Route::get('/create', [ViolationPointController::class, 'create'])->name('pelanggaran.create');
+    Route::post('/simpan', [ViolationPointController::class, 'store'])->name('pelanggaran.simpan');
+    Route::get('/edit/{id}', [ViolationPointController::class, 'edit'])->name('pelanggaran.edit');
+    Route::put('/update/{id}', [ViolationPointController::class, 'update'])->name('pelanggaran.update');
+    Route::delete('/hapus/{id}', [ViolationPointController::class, 'destroy'])->name('pelanggaran.hapus');
+});
