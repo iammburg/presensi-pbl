@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AcademicYear;
 use App\Models\SchoolClass;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class SchoolClassController extends Controller
 {
@@ -13,13 +14,32 @@ class SchoolClassController extends Controller
      */
     public function index()
     {
-        // Mengambil semua data school_classes
-        // $classes = SchoolClass::all();
-        $classes = SchoolClass::with('academicYear')->get();
+        if (request()->ajax()) {
+            $classes = SchoolClass::with('academicYear')
+                ->select('classes.*', 'academic_year_id as academic_year_id'); // Select kolom yang dibutuhkan
 
-        // Mengirim data ke view manage_classes/index.blade.php
-        return view('manage-classes.index', compact('classes'));
+            return DataTables::of($classes)
+                ->addIndexColumn()
+                ->addColumn('academic_year', function ($class) {
+                    return $class->academic_year_id;
+                })
+                ->addColumn('status', function ($class) {
+                    return $class->is_active ? '<span class="badge badge-success">Aktif</span>' : '<span class="badge badge-danger">Tidak Aktif</span>';
+                })
+                ->addColumn('action', function ($class) {
+                    $actions = '';
+                    // Tambahkan tombol edit
+                    $actions .= "<a href='" . route('manage-classes.edit', $class->id) . "' class='btn btn-sm btn-info mr-1'><i class='fas fa-edit'></i></a>";
+                    // Tambahkan tombol delete
+                    $actions .= "<button class='btn btn-sm btn-danger' onclick='deleteClass(" . $class->id . ")'><i class='fas fa-trash'></i></button>";
+                    return $actions;
+                })
+                ->rawColumns(['status', 'action']) // Render HTML pada kolom status dan action
+                ->make(true);
         }
+
+        return view('manage-classes.index');
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -50,7 +70,7 @@ class SchoolClassController extends Controller
             'name' => $request->name,
             'parallel_name' => $request->parallel_name,
             'academic_year_id' => $request->academic_year_id,
-            'is_active' => $request->is_active,  // Sesuaikan dengan kebutuhan
+            'is_active' => $request->is_active,   // Sesuaikan dengan kebutuhan
         ]);
 
         return redirect()->route('manage-classes.index')->with('success', 'Data kelas berhasil ditambahkan.');
@@ -72,7 +92,7 @@ class SchoolClassController extends Controller
         $class = SchoolClass::findOrFail($id);
         $academicYears = AcademicYear::all();
         return view('manage-classes.edit', compact('class', 'academicYears'));
-        }
+    }
 
     /**
      * Update the specified resource in storage.
@@ -85,18 +105,18 @@ class SchoolClassController extends Controller
             'academic_year_id' => 'required|exists:academic_years,id',
             'is_active' => 'required|boolean',
         ]);
-    
+
         $class = SchoolClass::findOrFail($id);
-    
+
         $class->update([
             'name' => $request->name,
             'parallel_name' => $request->parallel_name,
             'academic_year_id' => $request->academic_year_id,
             'is_active' => $request->is_active,
         ]);
-    
+
         return redirect()->route('manage-classes.index')
-                         ->with('success', 'Data kelas berhasil diperbarui.');
+            ->with('success', 'Data kelas berhasil diperbarui.');
     }
 
     /**

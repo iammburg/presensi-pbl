@@ -22,4 +22,8 @@ class AcademicYear extends Model
         return $this->start_year . '/' . $this->end_year . ' - Semester ' . $this->semester;
     }
 
+    public function classes() {
+        return $this->hasMany(ClassModel::class, 'academic_year_id');
+    }
+
 }
