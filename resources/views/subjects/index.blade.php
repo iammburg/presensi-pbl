@@ -18,7 +18,6 @@
                 <th>No.</th>
                 <th>Kode</th>
                 <th>Nama</th>
-                <th>Guru Pengampu</th>
                 <th>Deskripsi</th>
                 <th>Aksi</th>
             </tr>
@@ -29,7 +28,6 @@
                 <td>{{ $key + 1 }}</td>
                 <td>{{ $subject->code }}</td>
                 <td>{{ $subject->name }}</td>
-                <td>{{ $subject->teacher->name ?? 'Tidak Ada' }}</td>
                 <td>{{ $subject->description ?? 'Opsional' }}</td>
                 <td>
                     <a href="{{ route('subjects.edit', $subject->id) }}" class="btn btn-warning btn-sm">Edit</a>
@@ -64,15 +62,6 @@
                     <div class="form-group">
                         <label for="name">Nama Mata Pelajaran</label>
                         <input type="text" name="name" id="name" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="teacher_id">Pilih Guru Pengampu</label>
-                        <select name="teacher_id" id="teacher_id" class="form-control" required>
-                            <option value="">Pilih Guru Pengampu</option>
-                            @foreach($teachers as $teacher)
-                                <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
-                            @endforeach
-                        </select>
                     </div>
                     <div class="form-group">
                         <label for="description">Deskripsi</label>

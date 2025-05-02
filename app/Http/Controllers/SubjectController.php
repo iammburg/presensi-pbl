@@ -13,7 +13,7 @@ class SubjectController extends Controller
      */
     public function index()
     {
-        $subjects = Subject::with('teacher')->paginate(10); // menampilkan data dengan pagination
+        $subjects = Subject::paginate(10);
         return view('manage-subjects.index', compact('subjects'));
     }
 

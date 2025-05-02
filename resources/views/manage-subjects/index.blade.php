@@ -35,7 +35,7 @@
                                             <th>No.</th>
                                             <th>Kode Mata Pelajaran</th>
                                             <th>Nama Mata Pelajaran</th>
-                                            <th>Nama Guru Pengampu</th>
+                                            <!-- <th>Nama Guru Pengampu</th> -->
                                             <th>Deskripsi</th>
                                             <th>Aksi</th>
                                         </tr>
@@ -46,7 +46,6 @@
                                         <td>{{ $loop->iteration + ($subjects->currentPage() - 1) * $subjects->perPage() }}</td>
                                         <td>{{ $subject->code }}</td>
                                         <td>{{ $subject->name }}</td>
-                                        <td>{{ $subject->teacher->name ?? '-' }}</td>
                                         <td>{{ $subject->description ?? 'Opsional' }}</td>
                                         <td>
                                             <div class="dropdown">

@@ -19,15 +19,7 @@
                             <label for="name">Nama Mata Pelajaran</label>
                             <input type="text" name="name" class="form-control" placeholder="Contoh: Matematika Lanjutan" required>
                         </div>
-                        <div class="form-group">
-                            <label for="teacher_id">Nama Guru Pengampu</label>
-                            <select name="teacher_id" class="form-control">
-                                <option value="">-- Pilih Guru --</option>
-                                @foreach ($teachers as $teacher)
-                                    <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <!-- Elemen Guru Pengampu telah dihapus sepenuhnya -->
                         <div class="form-group">
                             <label for="description">Deskripsi (Opsional)</label>
                             <textarea name="description" class="form-control" rows="3" placeholder="Contoh: Mata pelajaran wajib untuk jurusan IPA."></textarea>
