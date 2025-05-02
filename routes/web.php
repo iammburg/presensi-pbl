@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PrestasiController;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\DBBackupController;
 use App\Http\Controllers\MenuController;
@@ -11,20 +12,22 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ViolationPointController;
 use App\Http\Controllers\HomeroomAssignmentController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+Route::prefix('achievement-points')->group(function () {
+    Route::get('/kelola-prestasi', [PrestasiController::class, 'index'])->name('prestasi.kelola');
+    Route::get('/riwayat', [PrestasiController::class, 'riwayat'])->name('prestasi.riwayat');
+    Route::get('/create', [PrestasiController::class, 'create'])->name('prestasi.create');
+    Route::post('/simpan', [PrestasiController::class, 'store'])->name('prestasi.simpan');
+    Route::get('/edit/{id}', [PrestasiController::class, 'edit'])->name('prestasi.edit');
+    Route::put('/update/{id}', [PrestasiController::class, 'update'])->name('prestasi.update');
+    Route::delete('/hapus/{id}', [PrestasiController::class, 'destroy'])->name('prestasi.hapus');
+    Route::get('/prestasi/laporan', [PrestasiController::class, 'laporan'])->name('prestasi.laporan');
+    Route::get('/prestasi/update-status/{id}/{status}', [PrestasiController::class, 'updateStatus'])->name('prestasi.updateStatus');
+});
 
 Route::get('/', function () {
     return view('welcome');
@@ -51,8 +54,10 @@ Route::resource('manage-teachers', TeacherController::class);
 Route::post('manage-teachers/import', [TeacherController::class, 'import'] )->name('manage-teachers.import');
 Route::get('manage-teachers/template/download', [TeacherController::class, 'downloadTemplate'])->name('manage-teachers.template');
 Route::resource('manage-students', StudentController::class);
+Route::resource('kelola-prestasi', PrestasiController::class);
 Route::post('manage-students/import', [StudentController::class, 'import'])->name('manage-students.import');
 Route::get('manage-students/template/download', [StudentController::class, 'downloadTemplate'])->name('manage-students.template');
 Route::resource('manage-homeroom-assignments', HomeroomAssignmentController::class);
+Route::resource('kelola-pelanggaran', ViolationPointController::class);
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
