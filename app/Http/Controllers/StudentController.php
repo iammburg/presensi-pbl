@@ -67,7 +67,6 @@ class StudentController extends Controller
             'parent_phone' => 'nullable|string|max:20',
             'parent_email' => 'required|email|unique:users,email',
             'enter_year' => 'required|digits:4',
-            'class_id' => 'nullable|exists:classes,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -99,7 +98,6 @@ class StudentController extends Controller
                 'enter_year' => $validated['enter_year'],
                 'photo' => $photoPath,
                 'user_id' => $user->id,
-                'class_id' => $validated['class_id'] ?? null,
                 'is_active' => true,
             ]);
 
@@ -131,7 +129,6 @@ class StudentController extends Controller
             'parent_phone' => 'nullable|string|max:20',
             'parent_email' => 'required|email|unique:users,email,' . $student->user_id,
             'enter_year' => 'required|digits:4',
-            'class_id' => 'nullable|exists:classes,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -153,7 +150,6 @@ class StudentController extends Controller
                 'parent_phone' => $validated['parent_phone'],
                 'parent_email' => $validated['parent_email'],
                 'enter_year' => $validated['enter_year'],
-                'class_id' => $validated['class_id'] ?? $student->class_id,
                 'photo' => $student->photo,
             ]);
 
@@ -216,22 +212,21 @@ class StudentController extends Controller
 
 
     public function detail($nisn)
-{
-    $student = Student::with('class')->where('nisn', $nisn)->firstOrFail();
-    return response()->json([
-        'nisn' => $student->nisn,
-        'name' => $student->name,
-        'address' => $student->address,
-        'phone' => $student->phone,
-        'gender' => $student->gender,
-        'enter_year' => $student->enter_year,
-        'parent_name' => $student->parent_name,
-        'parent_phone' => $student->parent_phone,
-        'parent_email' => $student->parent_email,
-        'birth_date' => $student->birth_date,
-        'photo_url' => $student->photo ? asset('storage/' . $student->photo) : null,
-        'class_name' => $student->class->name, // Tambahkan nama kelas
-    ]);
-} 
-
+    {
+        $student = Student::with('class')->where('nisn', $nisn)->firstOrFail();
+        return response()->json([
+            'nisn' => $student->nisn,
+            'name' => $student->name,
+            'address' => $student->address,
+            'phone' => $student->phone,
+            'gender' => $student->gender,
+            'enter_year' => $student->enter_year,
+            'parent_name' => $student->parent_name,
+            'parent_phone' => $student->parent_phone,
+            'parent_email' => $student->parent_email,
+            'birth_date' => $student->birth_date,
+            'photo_url' => $student->photo ? asset('storage/' . $student->photo) : null,
+            'class_name' => $student->class->name, // Tambahkan nama kelas
+        ]);
+    }
 }

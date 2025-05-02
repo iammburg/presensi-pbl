@@ -124,23 +124,6 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="class_id">Kelas</label>
-                            <select name="class_id" id="class_id" class="form-control @error('class_id') is-invalid @enderror" required>
-                                <option value="">Pilih Kelas</option>
-                                @foreach ($classes as $class)
-                                    <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>
-                                        {{ $class->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('class_id')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
                             <label for="photo">Foto</label>
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input @error('photo') is-invalid @enderror" id="photo" name="photo" accept="image/*">

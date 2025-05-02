@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('classes', function (Blueprint $table) {
-            $table->dropForeign(['teacher_id']);
-            $table->dropColumn('teacher_id');
+        Schema::table('students', function (Blueprint $table) {
+            $table->dropForeign(['class_id']);
+            $table->dropColumn('class_id');
         });
     }
 
@@ -22,12 +22,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('classes', function (Blueprint $table) {
-            $table->char('teacher_id');
-            $table->foreign('teacher_id')
-                ->references('nip')
-                ->on('teachers')
+        Schema::table('students', function (Blueprint $table) {
+            $table->foreign('class_id')
+                ->references('id')
+                ->on('classes')
                 ->onDelete('cascade');
+            $table->unsignedBigInteger('class_id')->after('nisn');
         });
     }
 };
