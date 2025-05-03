@@ -120,7 +120,6 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
                     'parent_phone' => $row[$teleponOrangTuaKey],
                     'parent_email' => $row[$emailOrangTuaKey],
                     'enter_year' => $row[$tahunMasukKey],
-                    'class_id' => $classId,
                     'user_id' => $user->id,
                 ]);
             });
