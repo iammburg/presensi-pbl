@@ -5,19 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Prestasi extends Model
+class AchievementPoint extends Model
 {
     use HasFactory;
 
     /**
-     * Nama tabel yang terkait dengan model ini.
+     * The table associated with the model.
      *
      * @var string
      */
     protected $table = 'achievement_points';
 
     /**
-     * Kolom-kolom yang dapat diisi secara massal.
+     * The attributes that are mass assignable.
      *
      * @var array
      */
