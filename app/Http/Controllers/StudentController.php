@@ -28,11 +28,10 @@ class StudentController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $students = Student::with(['user', 'class'])->select('students.*');
+            $students = Student::with(['user'])->select('students.*');
 
             return DataTables::of($students)
                 ->addIndexColumn()
-                ->addColumn('class', fn($student) => $student->class->name ?? '-')
                 ->addColumn('action', function ($student) {
                     $actions = '';
                     if (Auth::check()) {
@@ -213,7 +212,7 @@ class StudentController extends Controller
 
     public function detail($nisn)
     {
-        $student = Student::with('class')->where('nisn', $nisn)->firstOrFail();
+        $student = Student::where('nisn', $nisn)->firstOrFail();
         return response()->json([
             'nisn' => $student->nisn,
             'name' => $student->name,
@@ -226,7 +225,6 @@ class StudentController extends Controller
             'parent_email' => $student->parent_email,
             'birth_date' => $student->birth_date,
             'photo_url' => $student->photo ? asset('storage/' . $student->photo) : null,
-            'class_name' => $student->class->name, // Tambahkan nama kelas
         ]);
     }
 }
