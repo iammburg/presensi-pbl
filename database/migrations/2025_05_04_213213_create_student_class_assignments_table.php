@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('teaching_assignments', function (Blueprint $table) {
+        Schema::create('student_class_assignments', function (Blueprint $table) {
             $table->id();
+            $table->char('student_id', 10);
+            $table->foreign('student_id')->references('nisn')->on('students')->onDelete('cascade');
             $table->foreignId('academic_year_id')->constrained('academic_years')->onDelete('cascade');
-            $table->foreignId('subject_id')->constrained('subjects')->onDelete('cascade');
-            $table->char('teacher_id', 18);
-            $table->foreign('teacher_id')->references('nip')->on('teachers')->onDelete('cascade');
             $table->foreignId('class_id')->constrained('classes')->onDelete('cascade');
             $table->timestamps();
         });
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('teaching_assignments');
+        Schema::dropIfExists('student_class_assignments');
     }
 };
