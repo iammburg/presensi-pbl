@@ -50,6 +50,10 @@ Route::resource('manage-students', StudentController::class);
 Route::post('manage-students/import', [StudentController::class, 'import'])->name('manage-students.import');
 Route::get('manage-students/template/download', [StudentController::class, 'downloadTemplate'])->name('manage-students.template');
 Route::resource('manage-homeroom-assignments', HomeroomAssignmentController::class);
+Route::resource('manage-teacher-subject-assignments', TeachingAssignmentController::class)
+    ->parameters(['manage-teacher-subject-assignments' => 'teacherAssignment']);
+Route::resource('manage-student-class-assignments', StudentClassAssignmentController::class)
+    ->parameters(['manage-student-class-assignments' => 'studentAssignment']);
 
 // Route buat Guru BK
 Route::resource('violation-management', ViolationPointController::class);
@@ -57,9 +61,5 @@ Route::resource('achievement-management', AchievementPointController::class);
 Route::resource('achievements', AchievementController::class);
 Route::resource('violations', ViolationController::class);
 Route::resource('kelola-pelanggaran', ViolationPointController::class);
-Route::resource('manage-teacher-subject-assignments', TeachingAssignmentController::class)
-    ->parameters(['manage-teacher-subject-assignments' => 'teacherAssignment']);
-Route::resource('manage-student-class-assignments', StudentClassAssignmentController::class)
-    ->parameters(['manage-student-class-assignments' => 'studentAssignment']);
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
