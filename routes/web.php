@@ -14,6 +14,7 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViolationPointController;
 use App\Http\Controllers\HomeroomAssignmentController;
+use App\Http\Controllers\StudentClassAssignmentController;
 use App\Http\Controllers\TeachingAssignmentController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -60,6 +61,9 @@ Route::post('manage-students/import', [StudentController::class, 'import'])->nam
 Route::get('manage-students/template/download', [StudentController::class, 'downloadTemplate'])->name('manage-students.template');
 Route::resource('manage-homeroom-assignments', HomeroomAssignmentController::class);
 Route::resource('kelola-pelanggaran', ViolationPointController::class);
-Route::resource('manage-teacher-subject-assignments', TeachingAssignmentController::class);
+Route::resource('manage-teacher-subject-assignments', TeachingAssignmentController::class)
+    ->parameters(['manage-teacher-subject-assignments' => 'teacherAssignment']);
+Route::resource('manage-student-class-assignments', StudentClassAssignmentController::class)
+    ->parameters(['manage-student-class-assignments' => 'studentAssignment']);
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
