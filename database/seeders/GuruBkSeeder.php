@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Menu;
 use App\Models\User;
+use App\Models\AchievementPoint;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
@@ -57,14 +58,14 @@ class GuruBkSeeder extends Seeder
         ]);
         $kelolaPelanggaran = Menu::create([
             'nama_menu' => 'Kelola Pelanggaran',
-            'url' => 'kelola-pelanggaran',
+            'url' => 'violation-management',
             'icon' => '',
             'parent_id' => $pelanggaranMenu->id,
             'urutan' => 1
         ]);
         $laporanPelanggaran = Menu::create([
             'nama_menu' => 'Laporan Pelanggaran',
-            'url' => 'laporan-pelanggaran',
+            'url' => 'violation-report',
             'icon' => '',
             'parent_id' => $pelanggaranMenu->id,
             'urutan' => 2
@@ -80,14 +81,14 @@ class GuruBkSeeder extends Seeder
         ]);
         $kelolaPrestasi = Menu::create([
             'nama_menu' => 'Kelola Prestasi',
-            'url' => 'kelola-prestasi',
+            'url' => 'achievement-management',
             'icon' => '',
             'parent_id' => $prestasiMenu->id,
             'urutan' => 1
         ]);
         $laporanPrestasi = Menu::create([
             'nama_menu' => 'Laporan Prestasi',
-            'url' => 'laporan-prestasi',
+            'url' => 'achievement-report',
             'icon' => '',
             'parent_id' => $prestasiMenu->id,
             'urutan' => 2

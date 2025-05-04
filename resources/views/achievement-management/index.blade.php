@@ -157,7 +157,7 @@
     <!-- Tambah, Show Entries, Search -->
     <div class="control-bar mt-3">
         <div class="d-flex justify-content-end">
-            <a href="{{ route('prestasi.create') }}" class="btn btn-primary btn-lg px-4 py-2" style="font-size:18px;">
+            <a href="{{ route('achievement-management.create') }}" class="btn btn-primary btn-lg px-4 py-2" style="font-size:18px;">
                 <i class="fa fa-plus me-1"></i> Tambah Data Prestasi
             </a>
         </div>
@@ -236,9 +236,9 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($achievementPoints as $key => $item)
+                @foreach($achievements as $key => $item)
                 <tr>
-                    <td>{{ $achievementPoints->firstItem() + $key }}</td>
+                    <td>{{ $achievements->firstItem() + $key }}</td>
                     <td>{{ $item->jenis_prestasi }}</td>
                     <td>{{ $item->kategori_prestasi }}</td>
                     <td>{{ $item->poin }}</td>
@@ -248,9 +248,9 @@
                                 <i class="fa fa-cog"></i>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('prestasi.edit',$item->id) }}">Edit</a></li>
+                                <li><a class="dropdown-item" href="{{ route('achievement-management.edit',$item->id) }}">Edit</a></li>
                                 <li>
-                                    <form action="{{ route('prestasi.hapus',$item->id) }}" method="POST">
+                                    <form action="{{ route('achievement-management.destroy',$item->id) }}" method="POST">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="dropdown-item text-danger"
                                             onclick="return confirm('Yakin ingin menghapus data ini?')">
@@ -271,25 +271,25 @@
     <div class="pagination-container">
         <div>
             <p class="mb-0" style="color:#003366;">
-                Showing {{ $achievementPoints->firstItem() }} to {{ $achievementPoints->lastItem() }} of {{ $achievementPoints->total() }} entries
+                Showing {{ $achievements->firstItem() }} to {{ $achievements->lastItem() }} of {{ $achievements->total() }} entries
             </p>
         </div>
         <nav>
             <ul class="pagination">
-                @if($achievementPoints->onFirstPage())
+                @if($achievements->onFirstPage())
                     <li class="page-item disabled"><span class="page-link">Previous</span></li>
                 @else
-                    <li class="page-item"><a class="page-link" href="{{ $achievementPoints->previousPageUrl() }}">Previous</a></li>
+                    <li class="page-item"><a class="page-link" href="{{ $achievements->previousPageUrl() }}">Previous</a></li>
                 @endif
 
-                @foreach($achievementPoints->getUrlRange(1, $achievementPoints->lastPage()) as $page => $url)
-                    <li class="page-item {{ $achievementPoints->currentPage()==$page?'active':'' }}">
+                @foreach($achievements->getUrlRange(1, $achievements->lastPage()) as $page => $url)
+                    <li class="page-item {{ $achievements->currentPage()==$page?'active':'' }}">
                         <a class="page-link" href="{{ $url }}">{{ $page }}</a>
                     </li>
                 @endforeach
 
-                @if($achievementPoints->hasMorePages())
-                    <li class="page-item"><a class="page-link" href="{{ $achievementPoints->nextPageUrl() }}">Next</a></li>
+                @if($achievements->hasMorePages())
+                    <li class="page-item"><a class="page-link" href="{{ $achievements->nextPageUrl() }}">Next</a></li>
                 @else
                     <li class="page-item disabled"><span class="page-link">Next</span></li>
                 @endif
