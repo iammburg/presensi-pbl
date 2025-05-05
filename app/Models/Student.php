@@ -9,10 +9,10 @@ class Student extends Model
 {
     use HasFactory;
 
-    protected $table = 'students';
     protected $primaryKey = 'nisn';
     public $incrementing = false;
-    protected $keyType = 'unsignedInteger';
+    protected $keyType = 'string';
+
     protected $fillable = [
         'nisn',
         'enter_year',
@@ -28,7 +28,11 @@ class Student extends Model
         'photo',
         'is_active',
     ];
-}
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     // public function class()
     // {
