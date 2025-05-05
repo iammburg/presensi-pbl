@@ -28,18 +28,15 @@ class StudentController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $students = Student::with(['user', 'class'])->select('students.*');
+            $students = Student::with(['user'])->select('students.*');
 
             return DataTables::of($students)
                 ->addIndexColumn()
-                ->addColumn('class', function ($student) {
-                    return $student->class->name ?? '-';
-                })
                 ->addColumn('action', function ($student) {
                     $actions = '';
                     if (Auth::check()) {
                         $actions .= "<a href='" . route('manage-students.edit', $student->nisn) . "' class='btn btn-sm btn-info mr-1'><i class='fas fa-edit'></i></a>";
-                        $actions .= "<button class='btn btn-sm btn-danger' onclick='deleteStudent(\"" . $student->nisn . "\")'><i class='fas fa-trash'></i></button>";
+                        $actions .= "<button class='btn btn-sm btn-danger' onclick='deleteStudent(\"{$student->nisn}\")'><i class='fas fa-trash'></i></button>";
                     }
                     return $actions;
                 })
@@ -58,7 +55,7 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nisn' => 'required|unique:students,nisn',
             'name' => 'required|string|max:255',
             'address' => 'required|string',
@@ -69,49 +66,44 @@ class StudentController extends Controller
             'parent_phone' => 'nullable|string|max:20',
             'parent_email' => 'required|email|unique:users,email',
             'enter_year' => 'required|digits:4',
-            'class_id' => 'nullable|exists:classes,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         try {
             $user = User::create([
-                'name' => $request->name,
-                'email' => $request->parent_email,
-                'password' => Hash::make($request->nisn . date('dmY', strtotime($request->birth_date))),
+                'name' => $validated['name'],
+                'email' => $validated['parent_email'],
+                'password' => Hash::make($validated['nisn'] . date('dmY', strtotime($validated['birth_date']))),
             ]);
 
             if (method_exists($user, 'assignRole')) {
                 $user->assignRole('Siswa');
             }
 
-            // Handle photo upload
-            $photoPath = null;
-            if ($request->hasFile('photo')) {
-                $photoPath = $request->file('photo')->store('student-photos', 'public');
-            }
+            $photoPath = $request->hasFile('photo')
+                ? $request->file('photo')->store('student-photos', 'public')
+                : null;
 
             Student::create([
-                'nisn' => $request->nisn,
-                'name' => $request->name,
-                'address' => $request->address,
-                'gender' => $request->gender,
-                'birth_date' => $request->birth_date,
-                'phone' => $request->phone,
-                'parent_name' => $request->parent_name,
-                'parent_phone' => $request->parent_phone,
-                'parent_email' => $request->parent_email,
-                'enter_year' => $request->enter_year,
+                'nisn' => $validated['nisn'],
+                'name' => $validated['name'],
+                'address' => $validated['address'],
+                'gender' => $validated['gender'],
+                'birth_date' => $validated['birth_date'],
+                'phone' => $validated['phone'],
+                'parent_name' => $validated['parent_name'],
+                'parent_phone' => $validated['parent_phone'],
+                'parent_email' => $validated['parent_email'],
+                'enter_year' => $validated['enter_year'],
                 'photo' => $photoPath,
                 'user_id' => $user->id,
-                'class_id' => $request->class_id,
                 'is_active' => true,
             ]);
 
-            return redirect()->route('manage-students.index')
-                ->with('success', 'Data siswa berhasil ditambahkan.');
+            return redirect()->route('manage-students.index')->with('success', 'Data siswa berhasil ditambahkan.');
         } catch (\Exception $e) {
-            Log::error('Error saat menyimpan data siswa:', ['error' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data siswa.');
+            Log::error('Gagal menambahkan siswa', ['error' => $e->getMessage()]);
+            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat menyimpan data siswa.');
         }
     }
 
@@ -126,7 +118,7 @@ class StudentController extends Controller
     {
         $student = Student::where('nisn', $nisn)->firstOrFail();
 
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'address' => 'required|string',
             'gender' => 'required|in:L,P',
@@ -136,46 +128,39 @@ class StudentController extends Controller
             'parent_phone' => 'nullable|string|max:20',
             'parent_email' => 'required|email|unique:users,email,' . $student->user_id,
             'enter_year' => 'required|digits:4',
-            'class_id' => 'nullable|exists:classes,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         try {
-            // Handle photo upload
             if ($request->hasFile('photo')) {
-                // Delete old photo if exists
-                if ($student->photo) {
+                if ($student->photo && Storage::disk('public')->exists($student->photo)) {
                     Storage::disk('public')->delete($student->photo);
                 }
-
-                // Store new photo
-                $photoPath = $request->file('photo')->store('student-photos', 'public');
-                $student->photo = $photoPath;
+                $student->photo = $request->file('photo')->store('student-photos', 'public');
             }
 
             $student->update([
-                'name' => $request->name,
-                'address' => $request->address,
-                'gender' => $request->gender,
-                'birth_date' => $request->birth_date,
-                'phone' => $request->phone,
-                'parent_name' => $request->parent_name,
-                'parent_phone' => $request->parent_phone,
-                'parent_email' => $request->parent_email,
-                'enter_year' => $request->enter_year,
-                'class_id' => $request->class_id ?? $student->class_id,
+                'name' => $validated['name'],
+                'address' => $validated['address'],
+                'gender' => $validated['gender'],
+                'birth_date' => $validated['birth_date'],
+                'phone' => $validated['phone'],
+                'parent_name' => $validated['parent_name'],
+                'parent_phone' => $validated['parent_phone'],
+                'parent_email' => $validated['parent_email'],
+                'enter_year' => $validated['enter_year'],
+                'photo' => $student->photo,
             ]);
 
             $student->user->update([
-                'name' => $request->name,
-                'email' => $request->parent_email,
+                'name' => $validated['name'],
+                'email' => $validated['parent_email'],
             ]);
 
-            return redirect()->route('manage-students.index')
-                ->with('success', 'Data siswa berhasil diperbarui.');
+            return redirect()->route('manage-students.index')->with('success', 'Data siswa berhasil diperbarui.');
         } catch (\Exception $e) {
-            Log::error('Error saat memperbarui data siswa:', ['error' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui data siswa.');
+            Log::error('Gagal memperbarui siswa', ['error' => $e->getMessage()]);
+            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat memperbarui data siswa.');
         }
     }
 
@@ -184,7 +169,7 @@ class StudentController extends Controller
         $student = Student::where('nisn', $nisn)->firstOrFail();
 
         try {
-            if ($student->photo) {
+            if ($student->photo && Storage::disk('public')->exists($student->photo)) {
                 Storage::disk('public')->delete($student->photo);
             }
 
@@ -196,7 +181,7 @@ class StudentController extends Controller
 
             return response()->json(['message' => 'Data siswa berhasil dihapus.']);
         } catch (\Exception $e) {
-            Log::error('Error saat menghapus data siswa:', ['error' => $e->getMessage()]);
+            Log::error('Gagal menghapus siswa', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'Terjadi kesalahan saat menghapus data siswa.'], 500);
         }
     }
@@ -209,23 +194,36 @@ class StudentController extends Controller
 
         try {
             Excel::import(new StudentsImport, $request->file('file'));
-            return redirect()->route('manage-students.index')
-                ->with('success', 'Data siswa berhasil diimport.');
+            return redirect()->route('manage-students.index')->with('success', 'Data siswa berhasil diimport.');
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-            $errors = collect($e->failures())->map(function ($failure) {
-                return "Baris {$failure->row()}: {$failure->errors()[0]}";
-            })->implode('<br>');
-
+            $errors = collect($e->failures())->map(fn($failure) => "Baris {$failure->row()}: {$failure->errors()[0]}")->implode('<br>');
             return redirect()->back()->with('error', $errors);
         } catch (\Exception $e) {
-            Log::error('Error saat import data siswa:', ['error' => $e->getMessage()]);
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan saat import data siswa.');
+            Log::error('Gagal import data siswa', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat import data siswa.', $e->getMessage());
         }
     }
 
     public function downloadTemplate()
     {
         return Excel::download(new StudentTemplateExport, 'template_import_siswa.xlsx');
+    }
+  
+    public function detail($nisn)
+    {
+        $student = Student::where('nisn', $nisn)->firstOrFail();
+        return response()->json([
+            'nisn' => $student->nisn,
+            'name' => $student->name,
+            'address' => $student->address,
+            'phone' => $student->phone,
+            'gender' => $student->gender,
+            'enter_year' => $student->enter_year,
+            'parent_name' => $student->parent_name,
+            'parent_phone' => $student->parent_phone,
+            'parent_email' => $student->parent_email,
+            'birth_date' => $student->birth_date,
+            'photo_url' => $student->photo ? asset('storage/' . $student->photo) : null,
+        ]);
     }
 }

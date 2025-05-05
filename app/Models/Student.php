@@ -17,7 +17,6 @@ class Student extends Model
         'nisn',
         'enter_year',
         'user_id',
-        'class_id',
         'name',
         'gender',
         'birth_date',
@@ -35,8 +34,8 @@ class Student extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function class()
-    {
-        return $this->belongsTo(SchoolClass::class, 'class_id');
-    }
+    // public function class()
+    // {
+    //     return $this->belongsTo(SchoolClass::class, 'class_id');
+    // }
 }

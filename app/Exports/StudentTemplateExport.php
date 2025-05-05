@@ -25,7 +25,6 @@ class StudentTemplateExport implements FromArray, WithHeadings, WithStyles, With
                 'jenis_kelamin' => 'L', // L atau P
                 'tanggal_lahir' => '2005-01-01', // Format YYYY-MM-DD
                 'tahun_masuk' => '2025', // 4 digit
-                'id_kelas' => '1', // ID Kelas
             ]
         ];
     }
@@ -43,7 +42,6 @@ class StudentTemplateExport implements FromArray, WithHeadings, WithStyles, With
             'Jenis Kelamin (L/P)',
             'Tanggal Lahir (YYYY-MM-DD)',
             'Tahun Masuk',
-            'ID Kelas (Referensi ID Kelas di tabel school_classes)',
         ];
     }
 
@@ -53,7 +51,6 @@ class StudentTemplateExport implements FromArray, WithHeadings, WithStyles, With
             'A' => NumberFormat::FORMAT_TEXT,          // NISN
             'I' => NumberFormat::FORMAT_DATE_YYYYMMDD, // Tanggal Lahir
             'J' => NumberFormat::FORMAT_TEXT,         // Tahun Masuk
-            'K' => NumberFormat::FORMAT_TEXT,         // ID Kelas
         ];
     }
 
@@ -90,7 +87,6 @@ class StudentTemplateExport implements FromArray, WithHeadings, WithStyles, With
         $sheet->getColumnDimension('H')->setWidth(20); // Jenis Kelamin
         $sheet->getColumnDimension('I')->setWidth(25); // Tanggal Lahir
         $sheet->getColumnDimension('J')->setWidth(15); // Tahun Masuk
-        $sheet->getColumnDimension('K')->setWidth(20); // ID Kelas
 
         // Tambahkan validasi untuk jenis kelamin
         $validation = $sheet->getCell('H2')->getDataValidation();
