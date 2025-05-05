@@ -1,50 +1,20 @@
 @extends('layouts.app')
 @push('css')
-    <style>
-        h4.m-0 {
-            color: #183C70 !important;
-            font-size: 2rem !important;
-            font-weight: bold !important;  
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif !important;
-        }
-
-        .btn-info {
-            background-color: #1777e5 !important;
-            border-color: #1777e5 !important;
-        }
-
-        .btn-info:hover {
-            background-color: #183C70 !important;
-            border-color: #183C70 !important;
-        }
-
-        .card-tools .btn-tool i {
-            color: #1777e5 !important;
-        }
-
-        .card-tools .btn-tool:hover i {
-            color: #183C70 !important;
-        }
-    </style>
 @endpush
-
 @section('content')
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h4 class="m-0">Edit Pengguna</h4>
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                </ol>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6 text-uppercase">
+                    <h4 class="m-0">Tambah Pengguna</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                    </ol>
+                </div>
             </div>
         </div>
     </div>
-</div>
     <div class="content">
         <div class="container-fluid">
             <div class="row">
@@ -89,6 +59,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Role Pengguna</label>
+                                    {{-- {{ $role_user }} --}}
                                     @if (count($user->roles->pluck('name')->toarray()) > 0)
                                         @foreach ($roles as $item)
                                             <div class="custom-control custom-checkbox">
@@ -131,7 +102,6 @@
         </div>
     </div>
 @endsection
-
 @push('js')
     <script src="{{ asset('') }}plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
     <script>

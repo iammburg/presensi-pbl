@@ -3,8 +3,6 @@
 :root {
     --font-primary: 'DM Sans', sans-serif;
     --primary-color: #0e3b7c;
-    --secondary-color: #1777e5;
-    --tertiary-color: #009cf3;
 }
 
 .font-primary {
@@ -19,27 +17,6 @@
     color: var(--primary-color) !important;
 }
 
-.bg-secondary {
-    background-color: var(--secondary-color) !important;
-}
-
-.color-secondary {
-    color: var(--secondary-color) !important;
-}
-
-.bg-tertiary {
-    background-color: var(--tertiary-color) !important;
-}
-
-.color-tertiary {
-    color: var(--tertiary-color) !important;
-}
-
 .main-sidebar {
     background-color: #183b70 !important;
-}
-
-.border-table {
-    border-radius: 6px;
-    overflow: hidden;
 }

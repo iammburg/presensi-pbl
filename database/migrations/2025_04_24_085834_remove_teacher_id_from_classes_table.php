@@ -23,13 +23,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('classes', function (Blueprint $table) {
-            Schema::table('classes', function (Blueprint $table) {
-                $table->char('teacher_id');
-                $table->foreign('teacher_id')
-                    ->references('nip')
-                    ->on('teachers')
-                    ->onDelete('cascade');
-            });
+            $table->char('teacher_id');
+            $table->foreign('teacher_id')
+                ->references('nip')
+                ->on('teachers')
+                ->onDelete('cascade');
         });
     }
 };
