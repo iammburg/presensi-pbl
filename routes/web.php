@@ -60,6 +60,5 @@ Route::resource('violation-management', ViolationPointController::class);
 Route::resource('achievement-management', AchievementPointController::class);
 Route::resource('achievements', AchievementController::class);
 Route::resource('violations', ViolationController::class);
-Route::resource('kelola-pelanggaran', ViolationPointController::class);
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
