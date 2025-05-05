@@ -15,7 +15,8 @@ class Student extends Model
     protected $keyType = 'unsignedInteger';
     protected $fillable = [
         'nisn',
-        'class_id',
+        'enter_year',
+        'user_id',
         'name',
         'gender',
         'birth_date',
@@ -27,4 +28,10 @@ class Student extends Model
         'photo',
         'is_active',
     ];
+}
+
+    // public function class()
+    // {
+    //     return $this->belongsTo(SchoolClass::class, 'class_id');
+    // }
 }
