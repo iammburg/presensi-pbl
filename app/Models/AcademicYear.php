@@ -10,6 +10,7 @@ class AcademicYear extends Model
     use HasFactory;
 
     protected $table = 'academic_years';
+    
     protected $fillable = [
         'start_year',
         'end_year',
@@ -17,9 +18,20 @@ class AcademicYear extends Model
         'is_active',
     ];
 
+    /**
+     * Accessor untuk label tahun ajaran
+     */
     public function getYearLabelAttribute()
     {
         return $this->start_year . '/' . $this->end_year . ' - Semester ' . $this->semester;
     }
+
+    /**
+     * Relasi ke homeroom_assignments
+     */
+    public function homeroomAssignments()
+{
+    return $this->hasMany(HomeroomAssignment::class);
+}
 
 }

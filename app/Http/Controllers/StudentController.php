@@ -208,8 +208,7 @@ class StudentController extends Controller
     {
         return Excel::download(new StudentTemplateExport, 'template_import_siswa.xlsx');
     }
-
-
+  
     public function detail($nisn)
     {
         $student = Student::where('nisn', $nisn)->firstOrFail();
