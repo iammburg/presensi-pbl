@@ -180,11 +180,11 @@
     }
 
     #studentsTable tbody tr:nth-child(odd) {
-        background-color: #f4f4f4; 
+        background-color: #f4f4f4;
     }
 
     #studentsTable tbody tr:nth-child(even) {
-        background-color: #ffffff; 
+        background-color: #ffffff;
     }
     #studentDetailModal {
     font-family: 'Roboto', sans-serif;
@@ -292,7 +292,7 @@ $(function () {
                 $('#studentDetailBody').html(`
                     <div class="row">
                         <div class="col-md-4 text-center">
-                            ${data.photo_url 
+                            ${data.photo_url
                                 ? `<img src="${data.photo_url}" alt="Foto" class="img-thumbnail" style="max-width: 150px;">`
                                 : `<div class="text-muted mt-4">Mohon Edit Data Untuk Menambahkan Foto</div>`
                             }

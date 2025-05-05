@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Teacher extends Model
 {
@@ -13,7 +12,7 @@ class Teacher extends Model
     protected $table = 'teachers';
     protected $primaryKey = 'nip';
     public $incrementing = false;
-    protected $keyType = 'string';
+    protected $keyType = 'unsignedInteger';
     protected $fillable = [
         'nip',
         'name',
@@ -36,7 +35,7 @@ class Teacher extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     public function homeroomAssignments()
 {
     return $this->hasMany(HomeroomAssignment::class, 'teacher_id', 'nip');

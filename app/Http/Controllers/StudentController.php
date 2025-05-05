@@ -3,28 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Student;
-use App\Models\User;
-use App\Models\SchoolClass;
-use App\Imports\StudentsImport;
-use App\Exports\StudentTemplateExport;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
-use Yajra\DataTables\Facades\DataTables;
 
 class StudentController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('permission:read_student')->only('index');
-        $this->middleware('permission:create_student')->only('create', 'store', 'import');
-        $this->middleware('permission:update_student')->only('edit', 'update');
-        $this->middleware('permission:delete_student')->only('destroy');
-    }
-
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
         if (request()->ajax()) {
@@ -49,10 +34,12 @@ class StudentController extends Controller
 
     public function create()
     {
-        $classes = SchoolClass::all();
-        return view('students.create', compact('classes'));
+        //
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -208,7 +195,7 @@ class StudentController extends Controller
     {
         return Excel::download(new StudentTemplateExport, 'template_import_siswa.xlsx');
     }
-  
+
     public function detail($nisn)
     {
         $student = Student::where('nisn', $nisn)->firstOrFail();

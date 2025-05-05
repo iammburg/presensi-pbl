@@ -9,11 +9,7 @@ class Subject extends Model
 {
     use HasFactory;
 
-    protected $table = 'subjects';
-    protected $fillable = [
-        'code',
-        'name',
-        'description',
-        'is_active',
-    ];
+    // Kolom yang dapat diisi (mass assignable)
+    protected $fillable = ['code', 'name', 'description', 'is_active'];
+   
 }
