@@ -15,31 +15,38 @@ class SchoolClassController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $classes = SchoolClass::with('academicYear')
-                ->select('classes.*', 'academic_year_id as academic_year_id'); // Select kolom yang dibutuhkan
+            // Ambil data beserta relasi academicYear
+            $classes = SchoolClass::with('academicYear')->select('classes.*');
 
             return DataTables::of($classes)
                 ->addIndexColumn()
                 ->addColumn('academic_year', function ($class) {
-                    return $class->academic_year_id;
+                    if ($class->academicYear) {
+                        $semesterText = $class->academicYear->semester == 0 ? 'Ganjil' : 'Genap';
+                        return $class->academicYear->start_year . ' - ' . $class->academicYear->end_year . ' ' . $semesterText . '';
+                    }
+                    return '-';
                 })
+                
                 ->addColumn('status', function ($class) {
-                    return $class->is_active ? '<span class="badge badge-success">Aktif</span>' : '<span class="badge badge-danger">Tidak Aktif</span>';
+                    return $class->is_active
+                        ? '<span class="badge badge-success">Aktif</span>'
+                        : '<span class="badge badge-danger">Tidak Aktif</span>';
                 })
                 ->addColumn('action', function ($class) {
-                    $actions = '';
-                    // Tambahkan tombol edit
-                    $actions .= "<a href='" . route('manage-classes.edit', $class->id) . "' class='btn btn-sm btn-info mr-1'><i class='fas fa-edit'></i></a>";
-                    // Tambahkan tombol delete
-                    $actions .= "<button class='btn btn-sm btn-danger' onclick='deleteClass(" . $class->id . ")'><i class='fas fa-trash'></i></button>";
-                    return $actions;
+                    $editUrl = route('manage-classes.edit', $class->id);
+                    return <<<HTML
+                        <a href="{$editUrl}" class="btn btn-sm btn-info mr-1"><i class="fas fa-edit"></i></a>
+                        <button class="btn btn-sm btn-danger" onclick="deleteClass({$class->id})"><i class="fas fa-trash"></i></button>
+                    HTML;
                 })
-                ->rawColumns(['status', 'action']) // Render HTML pada kolom status dan action
+                ->rawColumns(['status', 'action']) // Render HTML pada kolom status & action
                 ->make(true);
         }
 
         return view('manage-classes.index');
     }
+
 
     /**
      * Show the form for creating a new resource.
