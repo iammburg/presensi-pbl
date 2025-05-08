@@ -12,4 +12,4 @@ class Subject extends Model
     // Kolom yang dapat diisi (mass assignable)
     protected $fillable = ['code', 'name', 'description', 'is_active'];
    
-} 
+}
