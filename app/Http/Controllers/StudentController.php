@@ -25,16 +25,17 @@ class StudentController extends Controller
         $this->middleware('permission:delete_student')->only('destroy');
     }
 
+    // tolong revisi ya, ada yg error. Kayak modal import nggak muncul
     public function index()
     {
         if (request()->ajax()) {
-            $students = Student::with(['user', 'class'])->select('students.*');
+            $students = Student::with(['user'])->select('students.*');
 
             return DataTables::of($students)
                 ->addIndexColumn()
-                ->addColumn('class', function ($student) {
-                    return $student->class->name ?? '-';
-                })
+                // ->addColumn('class', function ($student) {
+                //     return $student->class->name ?? '-';
+                // })
                 ->addColumn('action', function ($student) {
                     $actions = '';
                     if (Auth::check()) {
@@ -227,5 +228,23 @@ class StudentController extends Controller
     public function downloadTemplate()
     {
         return Excel::download(new StudentTemplateExport, 'template_import_siswa.xlsx');
+    }
+
+    public function detail($nisn)
+    {
+        $student = Student::where('nisn', $nisn)->firstOrFail();
+        return response()->json([
+            'nisn' => $student->nisn,
+            'name' => $student->name,
+            'address' => $student->address,
+            'phone' => $student->phone,
+            'gender' => $student->gender,
+            'enter_year' => $student->enter_year,
+            'parent_name' => $student->parent_name,
+            'parent_phone' => $student->parent_phone,
+            'parent_email' => $student->parent_email,
+            'birth_date' => $student->birth_date,
+            'photo_url' => $student->photo ? asset('storage/' . $student->photo) : null,
+        ]);
     }
 }

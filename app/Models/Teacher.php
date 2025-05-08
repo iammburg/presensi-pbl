@@ -36,4 +36,9 @@ class Teacher extends Model
     {
         return $this->belongsTo(User::class);
     }
+    
+    public function homeroomAssignments()
+{
+    return $this->hasMany(HomeroomAssignment::class, 'teacher_id', 'nip');
+}
 }
