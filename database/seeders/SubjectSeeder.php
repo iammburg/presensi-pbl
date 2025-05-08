@@ -19,4 +19,4 @@ class SubjectSeeder extends Seeder
         Subject::create(['code' => 'BIO10', 'name' => 'Biologi Dasar', 'description' => 'Opsional']);
         Subject::create(['code' => 'ENG10', 'name' => 'Bahasa Inggris', 'description' => 'Opsional']);
     }
-}
+} 
