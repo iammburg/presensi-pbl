@@ -22,7 +22,8 @@ class DatabaseSeeder extends Seeder
         // ]);
         $this->call(MasterSeeder::class);
         $this->call(SchoolAdminSeeder::class);
-        $this->call(SubjectSeeder::class);
+        $this->call(GuruBkSeeder::class);
+        $this->call(TeacherSeeder::class);
     }
 }
  

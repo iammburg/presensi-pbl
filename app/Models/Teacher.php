@@ -23,4 +23,21 @@ class Teacher extends Model
         'photo',
         'user_id',
     ];
+
+    protected $casts = [
+        'birth_date' => 'date',
+    ];
+
+    /**
+     * Get the user that owns the teacher.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function homeroomAssignments()
+{
+    return $this->hasMany(HomeroomAssignment::class, 'teacher_id', 'nip');
+}
 }
