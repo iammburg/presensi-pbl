@@ -25,6 +25,7 @@ class StudentController extends Controller
         $this->middleware('permission:delete_student')->only('destroy');
     }
 
+    // tolong revisi ya, ada yg error. Kayak modal import nggak muncul
     public function index()
     {
         if (request()->ajax()) {
