@@ -13,22 +13,40 @@
                         @csrf
                         @method('PUT')
                         <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-1">
-                                <label for="nisn" class="font-weight-bold mb-0">NISN</label>
+
+                            <!-- Tombol Kembali -->
+                            <div class="d-flex justify-content-end mb-3">
                                 <a href="{{ route('manage-students.index') }}"
-                                    style="width: 25px; height: 25px; background-color: #1777e5; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; text-decoration: none; margin-top: -10px;">
+                                    style="width: 25px; height: 25px; background-color: #1777e5; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; text-decoration: none;">
                                     <i class="fas fa-arrow-left" style="font-size: 14px;"></i>
                                 </a>
                             </div>
+
+                            <!-- NIS -->
                             <div class="form-group">
+                                <label for="nis" class="font-weight-bold">NIS (5 digits)</label>
+                                <input type="text" class="form-control @error('nis') is-invalid @enderror"
+                                    id="nis" name="nis" value="{{ old('nis', $student->nis) }}" maxlength="5" required>
+                                @error('nis')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <!-- NISN -->
+                            <div class="form-group">
+                                <label for="nisn" class="font-weight-bold">NISN (18 digits)</label>
                                 <input type="text" class="form-control @error('nisn') is-invalid @enderror"
-                                    id="nisn" name="nisn" value="{{ $student->nisn }}" readonly>
+                                    id="nisn" name="nisn" value="{{ old('nisn', $student->nisn) }}" maxlength="18" required readonly>
                                 @error('nisn')
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
                                 @enderror
                             </div>
+
+                            <!-- Nama Lengkap -->
                             <div class="form-group">
                                 <label for="name" class="font-weight-bold">Nama Lengkap</label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror"
@@ -39,6 +57,8 @@
                                     </div>
                                 @enderror
                             </div>
+
+                            <!-- Jenis Kelamin -->
                             <div class="form-group">
                                 <label for="gender" class="font-weight-bold">Jenis Kelamin</label>
                                 <select class="form-control @error('gender') is-invalid @enderror" id="gender"
@@ -54,6 +74,8 @@
                                     </div>
                                 @enderror
                             </div>
+
+                            <!-- Tanggal Lahir -->
                             <div class="form-group">
                                 <label for="birth_date" class="font-weight-bold">Tanggal Lahir</label>
                                 <input type="date" class="form-control @error('birth_date') is-invalid @enderror"
@@ -64,6 +86,8 @@
                                     </div>
                                 @enderror
                             </div>
+
+                            <!-- Alamat -->
                             <div class="form-group">
                                 <label for="address" class="font-weight-bold">Alamat</label>
                                 <textarea class="form-control @error('address') is-invalid @enderror" id="address" name="address" rows="3">{{ old('address', $student->address) }}</textarea>
@@ -73,6 +97,8 @@
                                     </div>
                                 @enderror
                             </div>
+
+                            <!-- No. Telepon -->
                             <div class="form-group">
                                 <label for="phone" class="font-weight-bold">No. Telepon</label>
                                 <input type="text" class="form-control @error('phone') is-invalid @enderror"
@@ -83,6 +109,8 @@
                                     </div>
                                 @enderror
                             </div>
+
+                            <!-- Nama Orang Tua -->
                             <div class="form-group">
                                 <label for="parent_name" class="font-weight-bold">Nama Orang Tua</label>
                                 <input type="text" class="form-control @error('parent_name') is-invalid @enderror"
@@ -94,6 +122,8 @@
                                     </div>
                                 @enderror
                             </div>
+
+                            <!-- No. Telepon Orang Tua -->
                             <div class="form-group">
                                 <label for="parent_phone" class="font-weight-bold">No. Telepon Orang Tua</label>
                                 <input type="text" class="form-control @error('parent_phone') is-invalid @enderror"
@@ -105,6 +135,8 @@
                                     </div>
                                 @enderror
                             </div>
+
+                            <!-- Email Orang Tua -->
                             <div class="form-group">
                                 <label for="parent_email" class="font-weight-bold">Email Orang Tua</label>
                                 <input type="email" class="form-control @error('parent_email') is-invalid @enderror"
@@ -116,6 +148,8 @@
                                     </div>
                                 @enderror
                             </div>
+
+                            <!-- Tahun Masuk -->
                             <div class="form-group">
                                 <label for="enter_year" class="font-weight-bold">Tahun Masuk</label>
                                 <input type="number" class="form-control @error('enter_year') is-invalid @enderror"
@@ -128,6 +162,7 @@
                                 @enderror
                             </div>
 
+                            <!-- Foto -->
                             <div class="form-group">
                                 <label for="photo" class="font-weight-bold">Foto</label>
                                 <div class="custom-file">
