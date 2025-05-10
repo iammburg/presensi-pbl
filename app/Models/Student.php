@@ -14,10 +14,10 @@ class Student extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
+        'nis',
         'nisn',
         'enter_year',
         'user_id',
-        'class_id',
         'name',
         'gender',
         'birth_date',
@@ -35,8 +35,11 @@ class Student extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function class()
+    /**
+     * Override agar route model binding pakai 'nisn' sebagai key.
+     */
+    public function getRouteKeyName()
     {
-        return $this->belongsTo(SchoolClass::class, 'class_id');
+        return 'nisn';
     }
 }
