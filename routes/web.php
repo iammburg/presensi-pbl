@@ -17,6 +17,7 @@ use App\Http\Controllers\HomeroomAssignmentController;
 use App\Http\Controllers\HourController;
 use App\Http\Controllers\AchievementPointController;
 use App\Http\Controllers\AchievementController;
+use App\Http\Controllers\ClassScheduleController;
 use App\Http\Controllers\ViolationController;
 use App\Http\Controllers\StudentClassAssignmentController;
 use App\Http\Controllers\TeachingAssignmentController;
@@ -56,6 +57,7 @@ Route::resource('manage-teacher-subject-assignments', TeachingAssignmentControll
 Route::resource('manage-student-class-assignments', StudentClassAssignmentController::class)
     ->parameters(['manage-student-class-assignments' => 'studentAssignment']);
 Route::resource('manage-hours', HourController::class);
+Route::resource('manage-schedules', ClassScheduleController::class);
 
 // Route buat Guru BK
 Route::resource('violation-management', ViolationPointController::class);
