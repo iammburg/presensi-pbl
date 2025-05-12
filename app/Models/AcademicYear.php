@@ -26,12 +26,12 @@ class AcademicYear extends Model
         return $this->start_year . '/' . $this->end_year . ' - Semester ' . $this->semester;
     }
 
-    /**
-     * Relasi ke homeroom_assignments
-     */
+    public function classes() {
+        return $this->hasMany(ClassModel::class, 'academic_year_id');
+    }
+   
     public function homeroomAssignments()
-{
-    return $this->hasMany(HomeroomAssignment::class);
-}
-
+    {
+        return $this->hasMany(HomeroomAssignment::class);
+    }
 }

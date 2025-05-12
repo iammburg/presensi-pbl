@@ -17,11 +17,9 @@ class SchoolClass extends Model
         'is_active',
     ];
 
-    // app/Models/SchoolClass.php
-
     public function academicYear()
     {
-        return $this->belongsTo(AcademicYear::class);
+        return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
 
     public function homeroomAssignments()

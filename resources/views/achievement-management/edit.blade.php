@@ -1,4 +1,5 @@
 @extends('layouts.app')
+
 @section('content')
 
 <style>
@@ -19,12 +20,13 @@
         color: #003366;
         margin-bottom: 32px;
         text-align: left;
-        margin-left: 60px;
+        margin-left: 60px; /* selaraskan dengan tambah */
     }
 
     .prestasi-card-wrapper {
         margin: 0 auto;
-        padding: 0 60px;
+        padding-left: 60px;
+        padding-right: 60px;
     }
 
     .prestasi-card {
@@ -54,23 +56,11 @@
         border-radius: 10px;
         border: 1px solid #ced4da;
         width: 100%;
-        background-color: #fff;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .prestasi-card .form-control:focus {
         border-color: #007bff;
         box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
-
-    .prestasi-card .form-control.is-invalid {
-        border-color: #dc3545;
-    }
-
-    .prestasi-card .invalid-feedback {
-        font-size: 14px;
-        margin-top: 8px;
-        color: #dc3545;
     }
 
     .select-wrapper {
@@ -86,9 +76,9 @@
         background-position: right 16px center;
         background-size: 20px;
         padding-right: 48px;
-        z-index: 1;
-        position: relative;
-        cursor: pointer;
+        z-index: 1; /* Pastikan dropdown berada di atas */
+        position: relative; /* Pastikan elemen berada di atas */
+        cursor: pointer; /* Tambahkan pointer untuk memastikan klik */
     }
 
     .btn-save {
@@ -105,7 +95,6 @@
         justify-content: center;
         gap: 10px;
         transition: background-color 0.2s ease;
-        margin-top: 32px;
     }
 
     .btn-save:hover {
@@ -137,21 +126,21 @@
 
 <div class="content-section">
     <div class="container-fluid">
-        <div class="title-prestasi">Tambah Data Prestasi</div>
+        <div class="title-prestasi">Edit Data Prestasi</div>
         <div class="prestasi-card-wrapper">
             <div class="prestasi-card">
                 <button type="button" onclick="window.history.back()" class="back-btn">
                     <i class="fa fa-arrow-left"></i>
                 </button>
-
-                <form action="{{ route('prestasi.simpan') }}" method="POST">
+                <form method="POST" action="{{ route('achievement-management.update', ['achievement_management' => $achievement->id]) }}">
                     @csrf
+                    @method('PUT')
 
                     <!-- Dropdown Jenis Prestasi -->
-                    <div class="form-group">
+                    <div class="form-group select-wrapper">
                         <label for="jenis_prestasi">Jenis Prestasi</label>
-                        <select id="jenis_prestasi" name="jenis_prestasi" class="form-control @error('jenis_prestasi') is-invalid @enderror" required>
-                            <option value="" disabled {{ old('jenis_prestasi') ? '' : 'selected' }}>Pilih jenis prestasi</option>
+                        <select id="jenis_prestasi" name="jenis_prestasi" class="form-control" required>
+                            <option value="" disabled {{ old('jenis_prestasi', $achievement->jenis_prestasi) ? '' : 'selected' }}>Pilih jenis prestasi</option>
                             @php
                                 $jenisOptions = [
                                     'Juara 1 Internasional',
@@ -166,45 +155,29 @@
                                 ];
                             @endphp
                             @foreach ($jenisOptions as $option)
-                                <option value="{{ $option }}" {{ old('jenis_prestasi') == $option ? 'selected' : '' }}>{{ $option }}</option>
+                                <option value="{{ $option }}" {{ old('jenis_prestasi', $achievement->jenis_prestasi) == $option ? 'selected' : '' }}>{{ $option }}</option>
                             @endforeach
                         </select>
-                        @error('jenis_prestasi')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
                     </div>
 
                     <!-- Dropdown Kategori Prestasi -->
-                    <div class="form-group">
+                    <div class="form-group select-wrapper">
                         <label for="kategori_prestasi">Kategori Prestasi</label>
-                        <select id="kategori_prestasi" name="kategori_prestasi" class="form-control @error('kategori_prestasi') is-invalid @enderror" required>
-                            <option value="" disabled {{ old('kategori_prestasi') ? '' : 'selected' }}>Pilih kategori prestasi</option>
-                            <option value="Akademik" {{ old('kategori_prestasi') == 'Akademik' ? 'selected' : '' }}>Akademik</option>
-                            <option value="Non Akademik" {{ old('kategori_prestasi') == 'Non Akademik' ? 'selected' : '' }}>Non Akademik</option>
+                        <select id="kategori_prestasi" name="kategori_prestasi" class="form-control" required>
+                            <option value="" disabled {{ old('kategori_prestasi', $achievement->kategori_prestasi) ? '' : 'selected' }}>Pilih kategori prestasi</option>
+                            <option value="Akademik" {{ old('kategori_prestasi', $achievement->kategori_prestasi) == 'Akademik' ? 'selected' : '' }}>Akademik</option>
+                            <option value="Non Akademik" {{ old('kategori_prestasi', $achievement->kategori_prestasi) == 'Non Akademik' ? 'selected' : '' }}>Non Akademik</option>
                         </select>
-                        @error('kategori_prestasi')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
                     </div>
 
                     <!-- Input Poin -->
                     <div class="form-group">
                         <label for="poin">Poin</label>
-                        <input type="number" id="poin" name="poin" class="form-control @error('poin') is-invalid @enderror" placeholder="0" value="{{ old('poin') }}" required>
-                        @error('poin')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
+                        <input type="number" id="poin" name="poin" class="form-control" value="{{ old('poin', $achievement->poin) }}" required>
                     </div>
 
-                    <!-- Tombol Simpan -->
                     <button type="submit" class="btn-save">
-                        <i class="fa fa-save"></i> SIMPAN
+                        <i class="fa fa-save"></i> SIMPAN PERUBAHAN
                     </button>
                 </form>
             </div>

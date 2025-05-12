@@ -49,14 +49,26 @@
 
                 <div class="mb-3">
                     <label for="is_active" class="form-label">Status</label>
-                    <select class="form-control" id="is_active" name="is_active" required>
-                        <option value="1" {{ $class->is_active ? 'selected' : '' }}>Aktif</option>
-                        <option value="0" {{ !$class->is_active ? 'selected' : '' }}>Tidak Aktif</option>
-                    </select>
+                    <!-- Hidden input to ensure '0' is sent when checkbox is unchecked -->
+                    <input type="hidden" name="is_active" value="0">
+                    <div class="form-check">
+                        <input 
+                            class="form-check-input" 
+                            type="checkbox" 
+                            id="is_active" 
+                            name="is_active" 
+                            value="1" 
+                            {{ old('is_active', $class->is_active) == '1' ? 'checked' : '' }}
+                        >
+                        <label class="form-check-label" for="is_active">
+                            Aktif
+                        </label>
+                    </div>
                     @error('is_active')
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
+                
 
                 <button type="submit" class="btn btn-primary">Update</button>
                 <a href="{{ route('manage-classes.index') }}" class="btn btn-secondary">Kembali</a>
