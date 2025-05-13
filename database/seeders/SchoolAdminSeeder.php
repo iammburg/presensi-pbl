@@ -103,10 +103,22 @@ class SchoolAdminSeeder extends Seeder
         Permission::create(['name' => 'delete_student', 'menu_id' => $subMenuId->id]);
 
         $subMenuId = Menu::create([
+            'nama_menu' => 'Manajemen Jam Pelajaran',
+            'url' => 'manage-hours',
+            'parent_id' => $schoolAdminSubMenu->id,
+            'urutan' => 6
+        ]);
+
+        Permission::create(['name' => 'create_hours', 'menu_id' => $subMenuId->id]);
+        Permission::create(['name' => 'read_hours', 'menu_id' => $subMenuId->id]);
+        Permission::create(['name' => 'update_hours', 'menu_id' => $subMenuId->id]);
+        Permission::create(['name' => 'delete_hours', 'menu_id' => $subMenuId->id]);
+
+        $subMenuId = Menu::create([
             'nama_menu' => 'Manajemen Jadwal',
             'url' => 'manage-schedules',
             'parent_id' => $schoolAdminSubMenu->id,
-            'urutan' => 6
+            'urutan' => 7
         ]);
 
         Permission::create(['name' => 'create_schedules', 'menu_id' => $subMenuId->id]);
@@ -171,6 +183,7 @@ class SchoolAdminSeeder extends Seeder
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [19, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [20, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [21, 2]);
+        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [22, 2]);
 
         User::factory()->create([
             'name' => 'Admin Sekolah 1',
@@ -200,6 +213,10 @@ class SchoolAdminSeeder extends Seeder
             'read_student',
             'update_student',
             'delete_student',
+            'create_hours',
+            'read_hours',
+            'update_hours',
+            'delete_hours',
             'create_schedules',
             'read_schedules',
             'update_schedules',
