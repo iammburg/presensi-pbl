@@ -15,7 +15,8 @@ class StudentTemplateExport implements FromArray, WithHeadings, WithStyles, With
     {
         return [
             [
-                'nisn' => '1234567890123456',
+                'nis' => '12345', // NIS (5 karakter)
+                'nisn' => '123456789012345678', // NISN (18 karakter)
                 'nama' => 'Contoh: Rudi Hartono',
                 'alamat' => 'Jl. Contoh No. 123',
                 'telepon' => '081234567890',
@@ -25,7 +26,6 @@ class StudentTemplateExport implements FromArray, WithHeadings, WithStyles, With
                 'jenis_kelamin' => 'L', // L atau P
                 'tanggal_lahir' => '2005-01-01', // Format YYYY-MM-DD
                 'tahun_masuk' => '2025', // 4 digit
-                'id_kelas' => '1', // ID Kelas
             ]
         ];
     }
@@ -33,6 +33,7 @@ class StudentTemplateExport implements FromArray, WithHeadings, WithStyles, With
     public function headings(): array
     {
         return [
+            'NIS',
             'NISN',
             'Nama',
             'Alamat',
@@ -43,17 +44,16 @@ class StudentTemplateExport implements FromArray, WithHeadings, WithStyles, With
             'Jenis Kelamin (L/P)',
             'Tanggal Lahir (YYYY-MM-DD)',
             'Tahun Masuk',
-            'ID Kelas (Referensi ID Kelas di tabel school_classes)',
         ];
     }
 
     public function columnFormats(): array
     {
         return [
-            'A' => NumberFormat::FORMAT_TEXT,          // NISN
-            'I' => NumberFormat::FORMAT_DATE_YYYYMMDD, // Tanggal Lahir
-            'J' => NumberFormat::FORMAT_TEXT,         // Tahun Masuk
-            'K' => NumberFormat::FORMAT_TEXT,         // ID Kelas
+            'A' => NumberFormat::FORMAT_TEXT,          // NIS
+            'B' => NumberFormat::FORMAT_TEXT,          // NISN
+            'J' => NumberFormat::FORMAT_DATE_YYYYMMDD, // Tanggal Lahir
+            'K' => NumberFormat::FORMAT_TEXT,          // Tahun Masuk
         ];
     }
 
@@ -80,20 +80,20 @@ class StudentTemplateExport implements FromArray, WithHeadings, WithStyles, With
         ]);
 
         // Set lebar kolom
-        $sheet->getColumnDimension('A')->setWidth(20); // NISN
-        $sheet->getColumnDimension('B')->setWidth(30); // Nama
-        $sheet->getColumnDimension('C')->setWidth(35); // Alamat
-        $sheet->getColumnDimension('D')->setWidth(20); // Telepon
-        $sheet->getColumnDimension('E')->setWidth(30); // Nama Orang Tua
-        $sheet->getColumnDimension('F')->setWidth(20); // Telepon Orang Tua
-        $sheet->getColumnDimension('G')->setWidth(30); // Email Orang Tua
-        $sheet->getColumnDimension('H')->setWidth(20); // Jenis Kelamin
-        $sheet->getColumnDimension('I')->setWidth(25); // Tanggal Lahir
-        $sheet->getColumnDimension('J')->setWidth(15); // Tahun Masuk
-        $sheet->getColumnDimension('K')->setWidth(20); // ID Kelas
+        $sheet->getColumnDimension('A')->setWidth(10); // NIS
+        $sheet->getColumnDimension('B')->setWidth(20); // NISN
+        $sheet->getColumnDimension('C')->setWidth(30); // Nama
+        $sheet->getColumnDimension('D')->setWidth(35); // Alamat
+        $sheet->getColumnDimension('E')->setWidth(20); // Telepon
+        $sheet->getColumnDimension('F')->setWidth(30); // Nama Orang Tua
+        $sheet->getColumnDimension('G')->setWidth(20); // Telepon Orang Tua
+        $sheet->getColumnDimension('H')->setWidth(30); // Email Orang Tua
+        $sheet->getColumnDimension('I')->setWidth(20); // Jenis Kelamin
+        $sheet->getColumnDimension('J')->setWidth(25); // Tanggal Lahir
+        $sheet->getColumnDimension('K')->setWidth(15); // Tahun Masuk
 
-        // Tambahkan validasi untuk jenis kelamin
-        $validation = $sheet->getCell('H2')->getDataValidation();
+        // Validasi untuk jenis kelamin
+        $validation = $sheet->getCell('I2')->getDataValidation();
         $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
         $validation->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_INFORMATION);
         $validation->setAllowBlank(false);
