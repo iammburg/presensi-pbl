@@ -37,7 +37,7 @@
                     <select class="form-control" id="academic_year_id" name="academic_year_id" required>
                         <option value="">-- Pilih Tahun Akademik --</option>
                         @foreach ($academicYears as $year)
-                            <option value="{{ $year->id }}">
+                            <option value="{{ $year->id }}" {{ old('academic_year_id', $class->academic_year_id) == $year->id ? 'selected' : '' }}>
                                 {{ str_replace(['Semester 0', 'Semester 1'], ['Semester Ganjil', 'Semester Genap'], $year->year_label) }}
                             </option>
                         @endforeach

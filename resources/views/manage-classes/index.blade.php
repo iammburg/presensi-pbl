@@ -146,7 +146,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: `/manage-classes/${id}`, // Sesuaikan dengan route kelas
+                            url: `/manage-classes/${id}`,
                             type: 'DELETE',
                             data: {
                                 "_token": "{{ csrf_token() }}"
@@ -157,10 +157,11 @@
                                     response.message,
                                     'success'
                                 );
-                                $('#classesTable').DataTable().ajax
-                                    .reload(); // Pastikan ID datatable sesuai
+                                $('#ClassesTable').DataTable().ajax.reload(); // ✅ Perbaiki ID
                             },
                             error: function(xhr) {
+                                console.log(xhr.status); // status code (contoh: 403, 500)
+                                console.log(xhr.responseText); // isi pesan kesalahan dari backend
                                 Swal.fire(
                                     'Error!',
                                     'Terjadi kesalahan saat menghapus data kelas.',
@@ -171,6 +172,7 @@
                     }
                 });
             }
+
 
 
             // Handle success message

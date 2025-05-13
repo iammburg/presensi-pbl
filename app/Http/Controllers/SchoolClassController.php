@@ -144,7 +144,8 @@ class SchoolClassController extends Controller
 
         $class->delete();
 
-        return redirect()->route('manage-classes.index')
-            ->with('success', 'Data kelas berhasil dihapus.');
+        return response()->json([
+            'message' => 'Data kelas berhasil dihapus.'
+        ], 200);
     }
 }
