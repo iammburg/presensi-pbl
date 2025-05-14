@@ -35,7 +35,7 @@
                         <div class="card-header">
                             <h3 class="card-title">Data Pelanggaran</h3>
                             <div class="card-tools">
-                                <a href="#" class="btn btn-primary">
+                                <a href="{{ route('violation-management.create') }}" class="btn btn-primary">
                                     <i class="fas fa-plus-circle"></i> Tambah Data
                                 </a>
                             </div>
@@ -44,44 +44,47 @@
                             <div class="table-responsive">
                                 <table id="datatable-main" class="table table-bordered table-striped">
                                     <thead class="bg-tertiary text-white">
-                                        <tr>
-                                            <th>No</th>
-                                            <th>Nama Pelanggaran</th>
-                                            <th>Jenis Pelanggaran</th>
-                                            <th>Poin</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                            <tr>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td>
-                                                    <div class="btn-group">
-                                                        <button type="button"
-                                                            class="btn btn-sm btn-outline-info dropdown-toggle"
-                                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            <i class="fas fa-cog"></i>
-                                                        </button>
-                                                        <div class="dropdown-menu">
-                                                            {{-- <a class="dropdown-item"
-                                                                href="{{ route('manage-academic-years.edit', $academicYear->id) }}">Edit</a>
-                                                            <form action="{{ route('manage-academic-years.destroy', $academicYear->id) }}" --}}
-                                                                {{-- method="POST"
-                                                                onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                                                                @csrf --}}
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="dropdown-item text-danger">Hapus</button>
-                                                            </form>
+                                        <th>No</th>
+                                        <th>Nama Pelanggaran</th>
+                                        <th>Jenis Pelanggaran</th>
+                                        <th>Poin</th>
+                                        <th>Aksi</th>
+                                        <thead>
+                                        <tbody>
+                                            @foreach ($violationPoints as $index => $violation)
+                                                <tr>
+                                                    <td>{{ $index + $violationPoints->firstItem() }}</td>
+                                                    <td>{{ $violation->violation_type }}</td>
+                                                    <td>{{ $violation->violation_level }}</td> {{-- atau kolom lain jika ada
+                                                    --}}
+                                                    <td>{{ $violation->points }}</td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-info dropdown-toggle"
+                                                                data-toggle="dropdown" aria-haspopup="true"
+                                                                aria-expanded="false">
+                                                                <i class="fas fa-cog"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu">
+                                                                <a class="dropdown-item"
+                                                                    href="{{ route('violation-management.edit', $violation->id) }}">Edit</a>
+                                                                <form
+                                                                    action="{{ route('violation-management.destroy', $violation->id) }}"
+                                                                    method="POST"
+                                                                    onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit"
+                                                                        class="dropdown-item text-danger">Hapus</button>
+                                                                </form>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        {{-- @endforeach --}}
-                                    </tbody>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+
                                 </table>
                             </div> {{-- table-responsive --}}
                         </div> {{-- card-body --}}
@@ -101,7 +104,8 @@
     <script src="{{ asset('plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
 
-    {{-- <script>
+    {{--
+    <script>
         $(function () {
             $('#datatable-main').DataTable({
                 responsive: true,

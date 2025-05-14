@@ -23,6 +23,7 @@ class ViolationPoint extends Model
      */
     protected $fillable = [
         'violation_type',
+        'violation_level',
         'points',
     ];
 }
