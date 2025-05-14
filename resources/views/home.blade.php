@@ -32,6 +32,7 @@
         </div>
     </div>
 @endsection
+{{-- edit di sini --}}
 @push('js')
     <script>
         $('.toast').toast('show')
