@@ -7,59 +7,56 @@ use Illuminate\Http\Request;
 
 class CurriculumController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $curriculums = Curriculum::latest()->get();
+        return view('curriculums.index', compact('curriculums'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('curriculums.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'curriculum_name' => 'required|string|max:255',
+        ]);
+
+        Curriculum::create([
+            'curriculum_name' => $validated['curriculum_name'],
+        ]);
+
+        return redirect()->route('manage-curriculums.index')->with('success', 'Kurikulum berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Curriculum $curriculum)
+    public function edit($id)
     {
-        //
+        $curriculum = Curriculum::findOrFail($id);
+        return view('curriculums.edit', compact('curriculum'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Curriculum $curriculum)
+    public function update(Request $request, $id)
     {
-        //
+        $validated = $request->validate([
+            'curriculum_name' => 'required|string|max:255',
+        ]);
+
+        $curriculum = Curriculum::findOrFail($id);
+
+        $curriculum->update([
+            'curriculum_name' => $validated['curriculum_name'],
+        ]);
+
+        return redirect()->route('manage-curriculums.index')->with('success', 'Kurikulum berhasil diperbarui.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Curriculum $curriculum)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Curriculum $curriculum)
-    {
-        //
+        $curriculum = Curriculum::findOrFail($id);
+        
+        $curriculum->delete();
+        return redirect()->route('manage-curriculums.index')->with('success', 'Kurikulum berhasil dihapus.');
     }
 }
