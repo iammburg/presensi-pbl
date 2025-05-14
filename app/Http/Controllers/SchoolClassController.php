@@ -30,14 +30,21 @@ class SchoolClassController extends Controller
                 
                 ->addColumn('status', function ($class) {
                     return $class->is_active
-                        ? '<span class="badge badge-success">Aktif</span>'
-                        : '<span class="badge badge-danger">Tidak Aktif</span>';
+                        ? 'Aktif'
+                        : 'Tidak Aktif';
                 })
                 ->addColumn('action', function ($class) {
                     $editUrl = route('manage-classes.edit', $class->id);
                     return <<<HTML
-                        <a href="{$editUrl}" class="btn btn-sm btn-info mr-1"><i class="fas fa-edit"></i></a>
-                        <button class="btn btn-sm btn-danger" onclick="deleteClass({$class->id})"><i class="fas fa-trash"></i></button>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-info btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{$editUrl}"><i class="fas fa-edit me-1"></i>Edit</a>
+                                <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="deleteClass({$class->id})"><i class="fas fa-trash-alt me-1"></i>Delete</a>
+                            </div>
+                        </div>
                     HTML;
                 })
                 ->rawColumns(['status', 'action']) // Render HTML pada kolom status & action
@@ -137,7 +144,8 @@ class SchoolClassController extends Controller
 
         $class->delete();
 
-        return redirect()->route('manage-classes.index')
-            ->with('success', 'Data kelas berhasil dihapus.');
+        return response()->json([
+            'message' => 'Data kelas berhasil dihapus.'
+        ], 200);
     }
 }

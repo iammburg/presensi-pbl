@@ -36,7 +36,7 @@
                         <option value="">-- Pilih Tahun Akademik --</option>
                         @foreach ($academicYears as $year)
                             <option value="{{ $year->id }}">
-                                {{ $year->year_label }}
+                                {{ str_replace(['Semester 0', 'Semester 1'], ['Semester Ganjil', 'Semester Genap'], $year->year_label) }}
                             </option>
                         @endforeach
                     </select>
@@ -44,6 +44,7 @@
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
+                
 
                 <div class="mb-3">
                     <label for="is_active" class="form-label">Status</label>

@@ -37,8 +37,8 @@
                     <select class="form-control" id="academic_year_id" name="academic_year_id" required>
                         <option value="">-- Pilih Tahun Akademik --</option>
                         @foreach ($academicYears as $year)
-                            <option value="{{ $year->id }}" {{ $class->academic_year_id == $year->id ? 'selected' : '' }}>
-                                {{ $year->year_label }}
+                            <option value="{{ $year->id }}" {{ old('academic_year_id', $class->academic_year_id) == $year->id ? 'selected' : '' }}>
+                                {{ str_replace(['Semester 0', 'Semester 1'], ['Semester Ganjil', 'Semester Genap'], $year->year_label) }}
                             </option>
                         @endforeach
                     </select>
@@ -46,6 +46,7 @@
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
+                
 
                 <div class="mb-3">
                     <label for="is_active" class="form-label">Status</label>
