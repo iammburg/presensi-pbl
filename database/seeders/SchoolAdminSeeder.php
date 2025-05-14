@@ -43,10 +43,22 @@ class SchoolAdminSeeder extends Seeder
         ]);
 
         $subMenuId = Menu::create([
+            'nama_menu' => 'Manajemen Kurikulum',
+            'url' => 'manage-curriculums',
+            'parent_id' => $schoolAdminSubMenu->id,
+            'urutan' => 1
+        ]);
+
+        Permission::create(['name' => 'create_curriculums', 'menu_id' => $subMenuId->id]);
+        Permission::create(['name' => 'read_curriculums', 'menu_id' => $subMenuId->id]);
+        Permission::create(['name' => 'update_curriculums', 'menu_id' => $subMenuId->id]);
+        Permission::create(['name' => 'delete_curriculums', 'menu_id' => $subMenuId->id]);
+
+        $subMenuId = Menu::create([
             'nama_menu' => 'Manajemen Tahun Akademik',
             'url' => 'manage-academic-years',
             'parent_id' => $schoolAdminSubMenu->id,
-            'urutan' => 1
+            'urutan' => 2
         ]);
 
         Permission::create(['name' => 'create_academic_year', 'menu_id' => $subMenuId->id]);
@@ -58,7 +70,7 @@ class SchoolAdminSeeder extends Seeder
             'nama_menu' => 'Manajemen Data Kelas',
             'url' => 'manage-classes',
             'parent_id' => $schoolAdminSubMenu->id,
-            'urutan' => 2
+            'urutan' => 3
         ]);
 
         Permission::create(['name' => 'create_class', 'menu_id' => $subMenuId->id]);
@@ -70,7 +82,7 @@ class SchoolAdminSeeder extends Seeder
             'nama_menu' => 'Manajemen Data Mapel',
             'url' => 'manage-subjects',
             'parent_id' => $schoolAdminSubMenu->id,
-            'urutan' => 3
+            'urutan' => 4
         ]);
 
         Permission::create(['name' => 'create_subject', 'menu_id' => $subMenuId->id]);
@@ -82,7 +94,7 @@ class SchoolAdminSeeder extends Seeder
             'nama_menu' => 'Manajemen Data Guru',
             'url' => 'manage-teachers',
             'parent_id' => $schoolAdminSubMenu->id,
-            'urutan' => 4
+            'urutan' => 5
         ]);
 
         Permission::create(['name' => 'create_teacher', 'menu_id' => $subMenuId->id]);
@@ -94,7 +106,7 @@ class SchoolAdminSeeder extends Seeder
             'nama_menu' => 'Manajemen Data Siswa',
             'url' => 'manage-students',
             'parent_id' => $schoolAdminSubMenu->id,
-            'urutan' => 5
+            'urutan' => 6
         ]);
 
         Permission::create(['name' => 'create_student', 'menu_id' => $subMenuId->id]);
@@ -106,7 +118,7 @@ class SchoolAdminSeeder extends Seeder
             'nama_menu' => 'Manajemen Jam Pelajaran',
             'url' => 'manage-hours',
             'parent_id' => $schoolAdminSubMenu->id,
-            'urutan' => 6
+            'urutan' => 7
         ]);
 
         Permission::create(['name' => 'create_hours', 'menu_id' => $subMenuId->id]);
@@ -118,7 +130,7 @@ class SchoolAdminSeeder extends Seeder
             'nama_menu' => 'Manajemen Jadwal',
             'url' => 'manage-schedules',
             'parent_id' => $schoolAdminSubMenu->id,
-            'urutan' => 7
+            'urutan' => 8
         ]);
 
         Permission::create(['name' => 'create_schedules', 'menu_id' => $subMenuId->id]);
@@ -184,6 +196,7 @@ class SchoolAdminSeeder extends Seeder
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [20, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [21, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [22, 2]);
+        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [23, 2]);
 
         User::factory()->create([
             'name' => 'Admin Sekolah 1',
@@ -193,6 +206,10 @@ class SchoolAdminSeeder extends Seeder
 
         $schoolAdmin = Role::create(['name' => 'Admin Sekolah']);
         $schoolAdmin->givePermissionTo([
+            'create_curriculums',
+            'read_curriculums',
+            'update_curriculums',
+            'delete_curriculums',
             'create_academic_year',
             'read_academic_year',
             'update_academic_year',
