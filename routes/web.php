@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PrestasiController;
+use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\DBBackupController;
 use App\Http\Controllers\MenuController;
@@ -42,6 +43,7 @@ Route::resource('manage-menu', MenuController::class);
 Route::resource('manage-permission', PermissionController::class)->only('store', 'destroy');
 
 // Route buat Admin Sekolah
+Route::resource('manage-curriculums', CurriculumController::class);
 Route::resource('manage-academic-years', AcademicYearController::class);
 Route::resource('manage-classes', SchoolClassController::class);
 Route::resource('manage-subjects', SubjectController::class);
