@@ -42,12 +42,21 @@ class TeacherController extends Controller
                     return 'Guru'; // Karena semua teacher pasti rolenya Guru
                 })
                 ->addColumn('action', function ($teacher) {
-                    $actions = '';
-                    if (Auth::check()) {
-                        $actions .= "<a href='" . route('manage-teachers.edit', $teacher->nip) . "' class='btn btn-sm btn-info mr-1'><i class='fas fa-edit'></i></a>";
-                        $actions .= "<button class='btn btn-sm btn-danger' onclick='deleteTeacher(" . $teacher->nip . ")'><i class='fas fa-trash'></i></button>";
-                    }
-                    return $actions;
+                    $id = $teacher->nip;
+                    $editUrl = route('manage-teachers.edit', $id);
+                    $deleteForm = '<form id="delete-form-' . $id . '" action="' . route('manage-teachers.destroy', $id) . '" method="POST" style="display: none;">'
+                        . csrf_field() . method_field('DELETE') . '</form>';
+                    return '
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="' . $editUrl . '">Edit</a>
+                                <button type="button" class="dropdown-item text-primary" onclick="jadikanGuruBk(\'' . $id . '\')">Jadikan Guru BK</button>
+                                <button type="button" class="dropdown-item text-danger" onclick="confirmDelete(\'' . $id . '\')">Hapus</button>
+                            </div>
+                        </div>' . $deleteForm;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
@@ -220,5 +229,19 @@ class TeacherController extends Controller
     public function downloadTemplate()
     {
         return Excel::download(new TeacherTemplateExport, 'template_import_guru.xlsx');
+    }
+
+    /**
+     * Jadikan Guru BK
+     */
+    public function jadikanGuruBk(Request $request, $nip)
+    {
+        $teacher = Teacher::with('user')->where('nip', $nip)->firstOrFail();
+        $user = $teacher->user;
+        if ($user->hasRole('Guru BK')) {
+            return response()->json(['status' => false, 'message' => 'Guru sudah menjadi Guru BK']);
+        }
+        $user->assignRole('Guru BK');
+        return response()->json(['status' => true, 'message' => 'Guru berhasil dijadikan Guru BK']);
     }
 }

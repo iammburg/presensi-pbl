@@ -50,6 +50,7 @@ Route::resource('manage-subjects', SubjectController::class);
 Route::resource('manage-teachers', TeacherController::class);
 Route::post('manage-teachers/import', [TeacherController::class, 'import'])->name('manage-teachers.import');
 Route::get('manage-teachers/template/download', [TeacherController::class, 'downloadTemplate'])->name('manage-teachers.template');
+Route::post('manage-teachers/{nip}/jadikan-guru-bk', [TeacherController::class, 'jadikanGuruBk'])->name('manage-teachers.jadikan-guru-bk');
 Route::resource('manage-students', StudentController::class);
 Route::post('manage-students/import', [StudentController::class, 'import'])->name('manage-students.import');
 Route::get('manage-students/template/download', [StudentController::class, 'downloadTemplate'])->name('manage-students.template');
