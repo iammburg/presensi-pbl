@@ -40,7 +40,7 @@ class ViolationPointController extends Controller
         ]);
 
         ViolationPoint::create($request->all());
-        return redirect()->route('pelanggaran.kelola')->with('success', 'Data pelanggaran berhasil ditambahkan.');
+        return redirect()->route('violation-management.index')->with('success', 'Data pelanggaran berhasil ditambahkan.');
     }
 
     public function edit($id)
@@ -53,19 +53,20 @@ class ViolationPointController extends Controller
     {
         $request->validate([
             'violation_type' => 'required|string',
+            'violation_level' => 'required|string',
             'points' => 'required|integer|min:1',
         ]);
 
         $violationPoint = ViolationPoint::findOrFail($id);
         $violationPoint->update($request->all());
 
-        return redirect()->route('pelanggaran.kelola')->with('success', 'Data pelanggaran berhasil diperbarui.');
+        return redirect()->route('violation-management.index')->with('success', 'Data pelanggaran berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
         $violationPoint = ViolationPoint::findOrFail($id);
         $violationPoint->delete();
-        return redirect()->route('pelanggaran.kelola')->with('success', 'Data pelanggaran berhasil dihapus.');
+        return redirect()->route('violation-management.index')->with('success', 'Data pelanggaran berhasil dihapus.');
     }
 }

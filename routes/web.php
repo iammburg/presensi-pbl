@@ -25,6 +25,11 @@ use App\Http\Controllers\TeachingAssignmentController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+// Route::get('/violation-management', [ViolationPointController::class, 'index'])->name('violation-management');
+// Route::get('/violation-management/add', [ViolationPointController::class, 'create'])->name('violation.create'); // ← INI WAJIB ADA
+// Route::post('/pelanggaran', [ViolationPointController::class, 'store'])->name('pelanggaran.store');
+// Route::get('/pelanggaran/{id}/edit', [ViolationPointController::class, 'edit'])->name('pelanggaran.edit');
+
 Route::get('/', function () {
     return view('welcome');
 });
