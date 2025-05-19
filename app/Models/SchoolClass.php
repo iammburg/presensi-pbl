@@ -38,4 +38,8 @@ class SchoolClass extends Model
     }
 
 
+    public function classSchedules()
+    {
+        return $this->hasMany(ClassSchedule::class, 'class_id');
+    }
 }
