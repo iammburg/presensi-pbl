@@ -258,7 +258,7 @@ $(function () {
             $('#studentDetailBody').html(`
                 <div class="row">
                     <div class="col-md-4 text-center">
-                        ${data.photo_url 
+                        ${data.photo_url
                             ? `<img src="${data.photo_url}" alt="Foto" class="img-thumbnail" style="max-width: 150px;">`
                             : `<div class="text-muted mt-4">Mohon Edit Data Untuk Menambahkan Foto</div>`
                         }

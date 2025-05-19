@@ -16,4 +16,19 @@ class ClassSchedule extends Model
         'day_of_week',
         'hour_id',
     ];
+
+    public function schoolClass()
+    {
+        return $this->belongsTo(SchoolClass::class, 'class_id');
+    }
+
+    public function assignment()
+    {
+        return $this->belongsTo(TeachingAssignment::class, 'assignment_id');
+    }
+
+    public function hour()
+    {
+        return $this->belongsTo(Hour::class, 'hour_id');
+    }
 }

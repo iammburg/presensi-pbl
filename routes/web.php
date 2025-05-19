@@ -22,6 +22,7 @@ use App\Http\Controllers\ClassScheduleController;
 use App\Http\Controllers\ViolationController;
 use App\Http\Controllers\StudentClassAssignmentController;
 use App\Http\Controllers\TeachingAssignmentController;
+use App\Http\Controllers\AttendanceController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -60,6 +61,7 @@ Route::resource('manage-student-class-assignments', StudentClassAssignmentContro
     ->parameters(['manage-student-class-assignments' => 'studentAssignment']);
 Route::resource('manage-hours', HourController::class);
 Route::resource('manage-schedules', ClassScheduleController::class);
+Route::resource('manage-attendances', AttendanceController::class);
 
 // Route buat Guru BK
 Route::resource('violation-management', ViolationPointController::class);

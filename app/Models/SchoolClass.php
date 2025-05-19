@@ -27,4 +27,8 @@ class SchoolClass extends Model
         return $this->hasMany(HomeroomAssignment::class, 'class_id');
     }
 
+    public function classSchedules()
+    {
+        return $this->hasMany(ClassSchedule::class, 'class_id');
+    }
 }
