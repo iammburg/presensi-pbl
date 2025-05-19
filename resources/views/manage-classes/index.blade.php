@@ -40,6 +40,7 @@
                                                 <th>No.</th>
                                                 <th>Nama Kelas</th>
                                                 <th>Paralel</th>
+                                                <th>Wali Kelas</th>
                                                 <th>Tahun Akademik</th>
                                                 <th>Status</th>
                                                 <th>Aksi</th>
@@ -53,6 +54,33 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="assignHomeroomModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <form id="assignHomeroomForm" method="POST" action="{{ route('classes.assignHomeroom') }}">
+                    @csrf
+                    <input type="hidden" name="class_id" id="classIdInput">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Pilih Wali Kelas</h5>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="text" id="searchTeacher" class="form-control mb-2"
+                                placeholder="Cari nama guru...">
+                            <select name="teacher_id" id="teacherSelect" class="form-control" size="10">
+                                @foreach ($teachers as $teacher)
+                                    <option value="{{ $teacher->nip }}">{{ $teacher->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     @endsection
 
     @push('css')
@@ -110,6 +138,10 @@
                         {
                             data: 'parallel_name',
                             name: 'parallel_name'
+                        },
+                        {
+                            data: 'homeroom_teacher',
+                            name: 'homeroom_teacher'
                         },
                         // ← here we switch to academic_year
                         {
@@ -179,5 +211,24 @@
             @if (session('success'))
                 toastr.success('{{ session('success') }}');
             @endif
+        </script>
+        <script>
+            $('#assignHomeroomModal').on('show.bs.modal', function(event) {
+                let button = $(event.relatedTarget)
+                let classId = button.data('class-id')
+                $('#classIdInput').val(classId)
+            })
+
+            $('#searchTeacher').on('keyup', function() {
+                let value = $(this).val().toLowerCase()
+                $('#teacherSelect option').filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                })
+            })
+            $('#assignTeacherModal').on('show.bs.modal', function(event) {
+                var button = $(event.relatedTarget);
+                var classId = button.data('class-id');
+                $('#assign-class-id').val(classId); // pastikan input hidden dengan ID ini ada di form
+            });
         </script>
     @endpush

@@ -13,6 +13,7 @@ class SchoolClass extends Model
     protected $fillable = [
         'name',
         'parallel_name',
+        'teacher_id',
         'academic_year_id',
         'is_active',
     ];
@@ -26,5 +27,15 @@ class SchoolClass extends Model
     {
         return $this->hasMany(HomeroomAssignment::class, 'class_id');
     }
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class, 'teacher_id', 'nip');
+    }
+
+    public function homeroomTeacher()
+    {
+        return $this->hasOne(HomeroomAssignment::class, 'class_id')->with('teacher');
+    }
+
 
 }

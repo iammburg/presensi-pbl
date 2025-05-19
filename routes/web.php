@@ -46,6 +46,7 @@ Route::resource('manage-permission', PermissionController::class)->only('store',
 Route::resource('manage-curriculums', CurriculumController::class);
 Route::resource('manage-academic-years', AcademicYearController::class);
 Route::resource('manage-classes', SchoolClassController::class);
+Route::post('/classes/assign-homeroom', [SchoolClassController::class, 'assignHomeroom'])->name('classes.assignHomeroom');
 Route::resource('manage-subjects', SubjectController::class);
 Route::resource('manage-teachers', TeacherController::class);
 Route::post('manage-teachers/import', [TeacherController::class, 'import'])->name('manage-teachers.import');
