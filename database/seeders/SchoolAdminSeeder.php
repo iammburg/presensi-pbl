@@ -146,24 +146,24 @@ class SchoolAdminSeeder extends Seeder
             'urutan' => 3
         ]);
 
-        $subMenuId = Menu::create([
-            'nama_menu' => 'Plotting Wali Kelas',
-            'url' => 'manage-homeroom-assignments',
-            'parent_id' => $schoolAdminSubMenu->id,
-            'urutan' => 1
-        ]);
+        // $subMenuId = Menu::create([
+        //     'nama_menu' => 'Plotting Wali Kelas',
+        //     'url' => 'manage-homeroom-assignments',
+        //     'parent_id' => $schoolAdminSubMenu->id,
+        //     'urutan' => 1
+        // ]);
 
-        Permission::create(['name' => 'create_homeroom_assignment', 'menu_id' => $subMenuId->id]);
-        Permission::create(['name' => 'read_homeroom_assignment', 'menu_id' => $subMenuId->id]);
-        Permission::create(['name' => 'update_homeroom_assignment', 'menu_id' => $subMenuId->id]);
-        Permission::create(['name' => 'delete_homeroom_assignment', 'menu_id' => $subMenuId->id]);
+        // Permission::create(['name' => 'create_homeroom_assignment', 'menu_id' => $subMenuId->id]);
+        // Permission::create(['name' => 'read_homeroom_assignment', 'menu_id' => $subMenuId->id]);
+        // Permission::create(['name' => 'update_homeroom_assignment', 'menu_id' => $subMenuId->id]);
+        // Permission::create(['name' => 'delete_homeroom_assignment', 'menu_id' => $subMenuId->id]);
 
-        $subMenuId = Menu::create([
-            'nama_menu' => 'Plotting Siswa ke Kelas',
-            'url' => 'manage-student-class-assignments',
-            'parent_id' => $schoolAdminSubMenu->id,
-            'urutan' => 2
-        ]);
+        // $subMenuId = Menu::create([
+        //     'nama_menu' => 'Plotting Siswa ke Kelas',
+        //     'url' => 'manage-student-class-assignments',
+        //     'parent_id' => $schoolAdminSubMenu->id,
+        //     'urutan' => 2
+        // ]);
 
         Permission::create(['name' => 'create_student_class_assignment', 'menu_id' => $subMenuId->id]);
         Permission::create(['name' => 'read_student_class_assignment', 'menu_id' => $subMenuId->id]);
@@ -230,8 +230,8 @@ class SchoolAdminSeeder extends Seeder
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [22, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [23, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [24, 2]);
-        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [25, 2]);
-        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [26, 2]);
+        // DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [25, 2]);
+        // DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [26, 2]);
 
         User::factory()->create([
             'name' => 'Admin Sekolah 1',
@@ -273,10 +273,10 @@ class SchoolAdminSeeder extends Seeder
             'read_schedules',
             'update_schedules',
             'delete_schedules',
-            'create_homeroom_assignment',
-            'read_homeroom_assignment',
-            'update_homeroom_assignment',
-            'delete_homeroom_assignment',
+            // 'create_homeroom_assignment',
+            // 'read_homeroom_assignment',
+            // 'update_homeroom_assignment',
+            // 'delete_homeroom_assignment',
             'create_student_class_assignment',
             'read_student_class_assignment',
             'update_student_class_assignment',
