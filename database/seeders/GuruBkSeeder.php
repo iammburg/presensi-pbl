@@ -32,21 +32,21 @@ class GuruBkSeeder extends Seeder
 
         // Buat menu utama
         $mainMenu = Menu::create([
-            'nama_menu' => 'Menu Manajemen',
+            'nama_menu' => 'Menu Manajemen Guru BK',
             'url' => '#',
             'icon' => '',
             'parent_id' => '0',
             'urutan' => 1
         ]);
 
-        // Dashboard
-        $dashboardMenu = Menu::create([
-            'nama_menu' => 'Dashboard',
-            'url' => 'home',
-            'icon' => 'fas fa-home',
-            'parent_id' => $mainMenu->id,
-            'urutan' => 1
-        ]);
+        // // Dashboard
+        // $dashboardMenu = Menu::create([
+        //     'nama_menu' => 'Dashboard',
+        //     'url' => 'home',
+        //     'icon' => 'fas fa-home',
+        //     'parent_id' => $mainMenu->id,
+        //     'urutan' => 1
+        // ]);
 
         // Pelanggaran
         $pelanggaranMenu = Menu::create([
@@ -54,7 +54,7 @@ class GuruBkSeeder extends Seeder
             'url' => '#',
             'icon' => 'fas fa-school',
             'parent_id' => $mainMenu->id,
-            'urutan' => 2
+            'urutan' => 1
         ]);
         $kelolaPelanggaran = Menu::create([
             'nama_menu' => 'Kelola Pelanggaran',
@@ -77,7 +77,7 @@ class GuruBkSeeder extends Seeder
             'url' => '#',
             'icon' => 'fas fa-star',
             'parent_id' => $mainMenu->id,
-            'urutan' => 3
+            'urutan' => 2
         ]);
         $kelolaPrestasi = Menu::create([
             'nama_menu' => 'Kelola Prestasi',
@@ -117,7 +117,7 @@ class GuruBkSeeder extends Seeder
         // Assign menu ke role Guru BK (role_id didapat dari $guruBkRole)
         DB::table('role_has_menus')->insert([
             ['menu_id' => $mainMenu->id, 'role_id' => $guruBkRole->id],
-            ['menu_id' => $dashboardMenu->id, 'role_id' => $guruBkRole->id],
+            // ['menu_id' => $dashboardMenu->id, 'role_id' => $guruBkRole->id],
             ['menu_id' => $pelanggaranMenu->id, 'role_id' => $guruBkRole->id],
             ['menu_id' => $kelolaPelanggaran->id, 'role_id' => $guruBkRole->id],
             ['menu_id' => $laporanPelanggaran->id, 'role_id' => $guruBkRole->id],

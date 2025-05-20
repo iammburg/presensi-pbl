@@ -50,7 +50,7 @@
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table id="teachersTable" class="table table-bordered table-striped"
-                                    style="border-radius: 10px; overflow: hidden;">
+                                    style="border-radius: 10px;">
                                     <thead style="background-color: #009cf3; color: white;">
                                         <tr>
                                             <th>No.</th>
@@ -113,6 +113,17 @@
     <link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
     <!-- Toastr -->
     <link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
+    <style>
+        .dropdown-menu { min-width: 100px; z-index: 1050 !important; }
+        .dropdown-menu a { font-size: 0.95rem; }
+        .dropdown-menu .dropdown-item.text-danger { color: #e74c3c !important; font-weight: 500; }
+        .dropdown-menu .dropdown-item.text-danger:hover { background: #ffeaea; color: #c0392b !important; }
+        .dropdown-menu .dropdown-item { padding: 10px 18px; }
+        .dropdown-menu { border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+        .dropdown .d-flex.bg-white { background: #fff !important; border: 1.5px solid #009cf3 !important; color: #009cf3 !important; }
+        .dropdown .d-flex.bg-white i { color: #fff; background: #009cf3; border-radius: 50%; padding: 4px; font-size: 18px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+        .dropdown .d-flex.bg-white:focus { outline: none; box-shadow: 0 0 0 2px #009cf333; }
+    </style>
 @endpush
 
 @push('js')
@@ -192,40 +203,19 @@
             });
         });
 
-        function deleteTeacher(nip) {
+        function confirmDelete(nip) {
             Swal.fire({
-                title: 'Apakah Anda yakin?',
-                text: "Data guru akan dihapus secara permanen!",
+                title: 'Yakin ingin menghapus?',
+                text: "Data yang dihapus tidak bisa dikembalikan!",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Ya, hapus!',
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/manage-teachers/${nip}`,
-                        type: 'DELETE',
-                        data: {
-                            "_token": "{{ csrf_token() }}"
-                        },
-                        success: function(response) {
-                            Swal.fire(
-                                'Terhapus!',
-                                response.message,
-                                'success'
-                            );
-                            $('#teachersTable').DataTable().ajax.reload();
-                        },
-                        error: function(xhr) {
-                            Swal.fire(
-                                'Error!',
-                                'Terjadi kesalahan saat menghapus data.',
-                                'error'
-                            );
-                        }
-                    });
+                    document.getElementById('delete-form-' + nip).submit();
                 }
             });
         }
@@ -234,5 +224,38 @@
         @if (session('success'))
             toastr.success('{{ session('success') }}');
         @endif
+
+        function jadikanGuruBk(nip) {
+            Swal.fire({
+                title: 'Jadikan Guru BK?',
+                text: 'Guru akan mendapatkan role Guru BK.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, jadikan!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/manage-teachers/' + nip + '/jadikan-guru-bk',
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            if (response.status) {
+                                Swal.fire('Berhasil', response.message, 'success');
+                            } else {
+                                Swal.fire('Info', response.message, 'info');
+                            }
+                            $('#teachersTable').DataTable().ajax.reload();
+                        },
+                        error: function() {
+                            Swal.fire('Gagal', 'Terjadi kesalahan.', 'error');
+                        }
+                    });
+                }
+            });
+        }
     </script>
 @endpush

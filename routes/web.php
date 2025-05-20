@@ -25,6 +25,11 @@ use App\Http\Controllers\AttendanceController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+// Route::get('/violation-management', [ViolationPointController::class, 'index'])->name('violation-management');
+// Route::get('/violation-management/add', [ViolationPointController::class, 'create'])->name('violation.create'); // ← INI WAJIB ADA
+// Route::post('/pelanggaran', [ViolationPointController::class, 'store'])->name('pelanggaran.store');
+// Route::get('/pelanggaran/{id}/edit', [ViolationPointController::class, 'edit'])->name('pelanggaran.edit');
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -51,6 +56,7 @@ Route::resource('manage-subjects', SubjectController::class);
 Route::resource('manage-teachers', TeacherController::class);
 Route::post('manage-teachers/import', [TeacherController::class, 'import'])->name('manage-teachers.import');
 Route::get('manage-teachers/template/download', [TeacherController::class, 'downloadTemplate'])->name('manage-teachers.template');
+Route::post('manage-teachers/{nip}/jadikan-guru-bk', [TeacherController::class, 'jadikanGuruBk'])->name('manage-teachers.jadikan-guru-bk');
 Route::resource('manage-students', StudentController::class);
 Route::post('manage-students/import', [StudentController::class, 'import'])->name('manage-students.import');
 Route::get('manage-students/template/download', [StudentController::class, 'downloadTemplate'])->name('manage-students.template');
