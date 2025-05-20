@@ -14,7 +14,6 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViolationPointController;
-use App\Http\Controllers\HomeroomAssignmentController;
 use App\Http\Controllers\HourController;
 use App\Http\Controllers\AchievementPointController;
 use App\Http\Controllers\AchievementController;
@@ -22,6 +21,7 @@ use App\Http\Controllers\ClassScheduleController;
 use App\Http\Controllers\ViolationController;
 use App\Http\Controllers\StudentClassAssignmentController;
 use App\Http\Controllers\TeachingAssignmentController;
+use App\Http\Controllers\AttendanceController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +46,7 @@ Route::resource('manage-permission', PermissionController::class)->only('store',
 Route::resource('manage-curriculums', CurriculumController::class);
 Route::resource('manage-academic-years', AcademicYearController::class);
 Route::resource('manage-classes', SchoolClassController::class);
+Route::post('/classes/assign-homeroom', [SchoolClassController::class, 'assignHomeroom'])->name('classes.assignHomeroom');
 Route::resource('manage-subjects', SubjectController::class);
 Route::resource('manage-teachers', TeacherController::class);
 Route::post('manage-teachers/import', [TeacherController::class, 'import'])->name('manage-teachers.import');
@@ -53,13 +54,13 @@ Route::get('manage-teachers/template/download', [TeacherController::class, 'down
 Route::resource('manage-students', StudentController::class);
 Route::post('manage-students/import', [StudentController::class, 'import'])->name('manage-students.import');
 Route::get('manage-students/template/download', [StudentController::class, 'downloadTemplate'])->name('manage-students.template');
-Route::resource('manage-homeroom-assignments', HomeroomAssignmentController::class);
 Route::resource('manage-teacher-subject-assignments', TeachingAssignmentController::class)
     ->parameters(['manage-teacher-subject-assignments' => 'teacherAssignment']);
 Route::resource('manage-student-class-assignments', StudentClassAssignmentController::class)
     ->parameters(['manage-student-class-assignments' => 'studentAssignment']);
 Route::resource('manage-hours', HourController::class);
 Route::resource('manage-schedules', ClassScheduleController::class);
+Route::resource('manage-attendances', AttendanceController::class);
 
 // Route buat Guru BK
 Route::resource('violation-management', ViolationPointController::class);

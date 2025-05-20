@@ -15,4 +15,9 @@ class Hour extends Model
         'start_time',
         'end_time',
     ];
+
+    public function classSchedules()
+    {
+        return $this->hasMany(ClassSchedule::class, 'hour_id');
+    }
 }
