@@ -22,8 +22,11 @@
                     <label for="nis">NIS</label>
                     <input type="text" class="form-control @error('nis') is-invalid @enderror" id="nis" name="nis" value="{{ old('nis') }}" required>
                     @error('nis')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        <div class="invalid-feedback">
+                            NIS tidak boleh lebih dari 10 karakter.
+                        </div>
                     @enderror
+
                 </div>
 
                 <div class="form-group">

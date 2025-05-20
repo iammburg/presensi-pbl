@@ -54,40 +54,96 @@ class StudentController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'nis' => 'required|string|size:5',
-        'nisn' => 'required|string|size:18|unique:students,nisn',
-        'name' => 'required|string|max:255',
-        'address' => 'required|string',
-        'gender' => 'required|in:L,P',
-        'birth_date' => 'required|date',
-        'phone' => 'nullable|string|max:20',
-        'parent_name' => 'required|string|max:255',
-        'parent_phone' => 'nullable|string|max:20',
-        'parent_email' => 'required|email|unique:users,email',
-        'enter_year' => 'required|digits:4',
-        'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-    ]);
-
-    try {
-        // Buat user akun orangtua
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['parent_email'],
-            'password' => Hash::make($validated['nisn'] . date('dmY', strtotime($validated['birth_date']))),
+    {
+        $validated = $request->validate([
+            'nis' => 'required|string|max:10',
+            'nisn' => 'required|string|size:10|unique:students,nisn',
+            'name' => 'required|string|max:255',
+            'address' => 'required|string',
+            'gender' => 'required|in:L,P',
+            'birth_date' => 'required|date',
+            'phone' => 'nullable|string|max:20',
+            'parent_name' => 'required|string|max:255',
+            'parent_phone' => 'nullable|string|max:20',
+            'parent_email' => 'required|email|unique:users,email',
+            'enter_year' => 'required|digits:4',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        if (method_exists($user, 'assignRole')) {
-            $user->assignRole('Siswa');
+        try {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['parent_email'],
+                'password' => Hash::make($validated['nisn'] . date('dmY', strtotime($validated['birth_date']))),
+            ]);
+
+            if (method_exists($user, 'assignRole')) {
+                $user->assignRole('Siswa');
+            }
+
+            $photoPath = $request->hasFile('photo')
+                ? $request->file('photo')->store('student-photos', 'public')
+                : null;
+
+            Student::create([
+                'nis' => $validated['nis'],
+                'nisn' => $validated['nisn'],
+                'name' => $validated['name'],
+                'address' => $validated['address'],
+                'gender' => $validated['gender'],
+                'birth_date' => $validated['birth_date'],
+                'phone' => $validated['phone'],
+                'parent_name' => $validated['parent_name'],
+                'parent_phone' => $validated['parent_phone'],
+                'parent_email' => $validated['parent_email'],
+                'enter_year' => $validated['enter_year'],
+                'photo' => $photoPath,
+                'user_id' => $user->id,
+                'is_active' => true,
+            ]);
+
+            return redirect()->route('manage-students.index')->with('success', 'Data siswa berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            Log::error('Gagal menambahkan siswa', ['error' => $e->getMessage()]);
+            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat menyimpan data siswa.');
+        }
+    }
+
+    public function edit($nisn)
+    {
+        $student = Student::where('nisn', $nisn)->firstOrFail();
+        return view('students.edit', compact('student'));
+    }
+
+    public function update(Request $request, $nisn)
+    {
+        $student = Student::where('nisn', $nisn)->firstOrFail();
+
+        $validated = $request->validate([
+            'nis' => 'required|string|max:10',
+            'nisn' => 'required|string|size:10|unique:students,nisn,' . $student->nisn . ',nisn',
+            'name' => 'required|string|max:255',
+            'address' => 'required|string',
+            'gender' => 'required|in:L,P',
+            'birth_date' => 'required|date',
+            'phone' => 'nullable|string|max:20',
+            'parent_name' => 'required|string|max:255',
+            'parent_phone' => 'nullable|string|max:20',
+            'parent_email' => 'required|email|unique:users,email,' . $student->user_id,
+            'enter_year' => 'required|digits:4',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        if ($request->hasFile('photo')) {
+            if ($student->photo && Storage::disk('public')->exists($student->photo)) {
+                Storage::disk('public')->delete($student->photo);
+            }
+            $validated['photo'] = $request->file('photo')->store('student-photos', 'public');
+        } else {
+            $validated['photo'] = $student->photo;
         }
 
-        $photoPath = $request->hasFile('photo')
-            ? $request->file('photo')->store('student-photos', 'public')
-            : null;
-
-        // Simpan data siswa
-        Student::create([
+        $student->update([
             'nis' => $validated['nis'],
             'nisn' => $validated['nisn'],
             'name' => $validated['name'],
@@ -99,77 +155,16 @@ class StudentController extends Controller
             'parent_phone' => $validated['parent_phone'],
             'parent_email' => $validated['parent_email'],
             'enter_year' => $validated['enter_year'],
-            'photo' => $photoPath,
-            'user_id' => $user->id,
-            'is_active' => true,
+            'photo' => $validated['photo'],
         ]);
 
-        return redirect()->route('manage-students.index')->with('success', 'Data siswa berhasil ditambahkan.');
-    } catch (\Exception $e) {
-        Log::error('Gagal menambahkan siswa', ['error' => $e->getMessage()]);
-        return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat menyimpan data siswa.');
+        $student->user->update([
+            'email' => $validated['parent_email'],
+            'name' => $validated['name'],
+        ]);
+
+        return redirect()->route('manage-students.index')->with('success', 'Data siswa berhasil diperbarui.');
     }
-}
-    // app/Http/Controllers/StudentController.php
-    public function edit($nisn)
-    {
-        $student = Student::where('nisn', $nisn)->firstOrFail();
-        return view('students.edit', compact('student'));
-    }    
-
-    public function update(Request $request, $nisn)
-{
-    $student = Student::where('nisn', $nisn)->firstOrFail();
-
-    $validated = $request->validate([
-        'nis' => 'required|string|size:5',
-        'nisn' => 'required|string|size:18|unique:students,nisn,' . $student->nisn . ',nisn',
-        'name' => 'required|string|max:255',
-        'address' => 'required|string',
-        'gender' => 'required|in:L,P',
-        'birth_date' => 'required|date',
-        'phone' => 'nullable|string|max:20',
-        'parent_name' => 'required|string|max:255',
-        'parent_phone' => 'nullable|string|max:20',
-        'parent_email' => 'required|email|unique:users,email,' . $student->user_id,
-        'enter_year' => 'required|digits:4',
-        'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-    ]);
-
-    // Handle photo
-    if ($request->hasFile('photo')) {
-        if ($student->photo && Storage::disk('public')->exists($student->photo)) {
-            Storage::disk('public')->delete($student->photo);
-        }
-        $validated['photo'] = $request->file('photo')->store('student-photos', 'public');
-    } else {
-        $validated['photo'] = $student->photo;
-    }
-
-    // Update student
-    $student->update([
-        'nis' => $validated['nis'],
-        'nisn' => $validated['nisn'],
-        'name' => $validated['name'],
-        'address' => $validated['address'],
-        'gender' => $validated['gender'],
-        'birth_date' => $validated['birth_date'],
-        'phone' => $validated['phone'],
-        'parent_name' => $validated['parent_name'],
-        'parent_phone' => $validated['parent_phone'],
-        'parent_email' => $validated['parent_email'],
-        'enter_year' => $validated['enter_year'],
-        'photo' => $validated['photo'],
-    ]);
-
-    // Update user email dan name
-    $student->user->update([
-        'email' => $validated['parent_email'],
-        'name' => $validated['name'],
-    ]);
-
-    return redirect()->route('manage-students.index')->with('success', 'Data siswa berhasil diperbarui.');
-}
 
     public function destroy($nisn)
     {
@@ -192,7 +187,6 @@ class StudentController extends Controller
             return response()->json(['message' => 'Terjadi kesalahan saat menghapus data siswa.'], 500);
         }
     }
-
 
     public function import(Request $request)
     {

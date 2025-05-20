@@ -27,7 +27,7 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
     {
         $this->headerMap = [
             'nis' => ['nis', 'nis_5_karakter', 'nis (5 karakter)'],
-            'nisn' => ['nisn', 'nisn_18_karakter', 'nisn (18 karakter)'],
+            'nisn' => ['nisn', 'nisn_10_karakter', 'nisn (10 karakter)'],
             'nama' => ['nama', 'name'],
             'alamat' => ['alamat', 'address'],
             'telepon' => ['telepon', 'telp', 'hp', 'no_hp'],
@@ -41,9 +41,9 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
     }
 
     protected function normalizeHeader($text)
-{
-    return strtolower(preg_replace('/[^a-z0-9]/', '', $text));
-}
+    {
+        return strtolower(preg_replace('/[^a-z0-9]/', '', $text));
+    }
 
     protected function findHeaderKey($row, $field)
     {
@@ -79,8 +79,11 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             $tanggalLahirKey = $this->findHeaderKey($row, 'tanggal_lahir');
             $tahunMasukKey = $this->findHeaderKey($row, 'tahun_masuk');
 
-            $requiredKeys = [$nisKey, $nisnKey, $namaKey, $alamatKey, $teleponKey, $namaOrangTuaKey,
-                $teleponOrangTuaKey, $emailOrangTuaKey, $jenisKelaminKey, $tanggalLahirKey, $tahunMasukKey];
+            $requiredKeys = [
+                $nisKey, $nisnKey, $namaKey, $alamatKey, $teleponKey,
+                $namaOrangTuaKey, $teleponOrangTuaKey, $emailOrangTuaKey,
+                $jenisKelaminKey, $tanggalLahirKey, $tahunMasukKey
+            ];
 
             if (in_array(null, $requiredKeys)) {
                 throw new \Exception('Ada kolom wajib yang tidak ditemukan di file Excel');
@@ -96,16 +99,20 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
                 throw new \Exception('Format tanggal lahir tidak valid.');
             }
 
-            if (strlen($row[$nisKey]) !== 5) {
-                throw new \Exception('NIS harus terdiri dari 5 karakter.');
+            // Validasi NIS
+            $nisValue = (string) $row[$nisKey];
+            if (strlen($nisValue) > 10 || !ctype_digit($nisValue)) {
+                throw new \Exception('NIS harus berupa angka dan panjang maksimal 10 karakter.');
             }
 
-            if (strlen($row[$nisnKey]) !== 18) {
-                throw new \Exception('NISN harus terdiri dari 18 karakter.');
+            // Validasi NISN
+            $nisnValue = (string) $row[$nisnKey];
+            if (strlen($nisnValue) !== 10 || !ctype_digit($nisnValue)) {
+                throw new \Exception('NISN harus berupa 10 digit angka.');
             }
 
-            if (Student::where('nisn', $row[$nisnKey])->exists()) {
-                Log::warning('NISN sudah ada, dilewati: ' . $row[$nisnKey]);
+            if (Student::where('nisn', $nisnValue)->exists()) {
+                Log::warning('NISN sudah ada, dilewati: ' . $nisnValue);
                 return null;
             }
 
