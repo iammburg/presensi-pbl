@@ -15,4 +15,34 @@ class TeachingAssignment extends Model
         'teacher_id',
         'class_id',
     ];
+
+ public function teacher()
+    {
+        return $this->belongsTo(Teacher::class, 'teacher_id', 'nip');
+    }
+
+    /**
+     * Get the subject that belongs to this teaching assignment.
+     */
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
+
+    /**
+     * Get the class that belongs to this teaching assignment.
+     */
+    public function schoolClass()
+    {
+        return $this->belongsTo(SchoolClass::class, 'class_id');
+    }
+
+    /**
+     * Get the academic year that belongs to this teaching assignment.
+     */
+    public function academicYear()
+    {
+        return $this->belongsTo(AcademicYear::class);
+    }
+    
 }
