@@ -26,10 +26,10 @@
                             <div class="form-group">
                                 <label for="nis" class="font-weight-bold">NIS</label>
                                 <input type="text" class="form-control @error('nis') is-invalid @enderror"
-                                    id="nis" name="nis" value="{{ old('nis', $student->nis) }}" maxlength="15" required>
+                                    id="nis" name="nis" value="{{ old('nis', $student->nis) }}" maxlength="25" required>
                                 @error('nis')
                                     <div class="invalid-feedback">
-                                        NIS tidak boleh lebih dari 10 karakter.
+                                        NIS tidak boleh lebih dari 20 karakter.
                                     </div>
                                 @enderror
 

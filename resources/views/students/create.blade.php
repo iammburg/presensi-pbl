@@ -23,7 +23,7 @@
                     <input type="text" class="form-control @error('nis') is-invalid @enderror" id="nis" name="nis" value="{{ old('nis') }}" required>
                     @error('nis')
                         <div class="invalid-feedback">
-                            NIS tidak boleh lebih dari 10 karakter.
+                            NIS tidak boleh lebih dari 20 karakter.
                         </div>
                     @enderror
 

@@ -56,7 +56,7 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nis' => 'required|string|max:10',
+            'nis' => 'required|string|max:20',
             'nisn' => 'required|string|size:10|unique:students,nisn',
             'name' => 'required|string|max:255',
             'address' => 'required|string',
@@ -120,7 +120,7 @@ class StudentController extends Controller
         $student = Student::where('nisn', $nisn)->firstOrFail();
 
         $validated = $request->validate([
-            'nis' => 'required|string|max:10',
+            'nis' => 'required|string|max:20',
             'nisn' => 'required|string|size:10|unique:students,nisn,' . $student->nisn . ',nisn',
             'name' => 'required|string|max:255',
             'address' => 'required|string',

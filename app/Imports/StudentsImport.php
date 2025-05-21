@@ -26,7 +26,7 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
     public function __construct()
     {
         $this->headerMap = [
-            'nis' => ['nis', 'nis_5_karakter', 'nis (5 karakter)'],
+            'nis' => ['nis', 'nis_20_karakter', 'nis (20 karakter)'],
             'nisn' => ['nisn', 'nisn_10_karakter', 'nisn (10 karakter)'],
             'nama' => ['nama', 'name'],
             'alamat' => ['alamat', 'address'],
@@ -101,8 +101,8 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
 
             // Validasi NIS
             $nisValue = (string) $row[$nisKey];
-            if (strlen($nisValue) > 10 || !ctype_digit($nisValue)) {
-                throw new \Exception('NIS harus berupa angka dan panjang maksimal 10 karakter.');
+            if (strlen($nisValue) > 20 || !ctype_digit($nisValue)) {
+                throw new \Exception('NIS harus berupa angka dan panjang maksimal 20 karakter.');
             }
 
             // Validasi NISN

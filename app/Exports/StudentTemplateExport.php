@@ -15,7 +15,7 @@ class StudentTemplateExport implements FromArray, WithHeadings, WithStyles, With
     {
         return [
             [
-                'nis' => '12345', // NIS (maksimal 10 karakter)
+                'nis' => '1234567', // NIS (maksimal 20 karakter)
                 'nisn' => '1234567890', // NISN (10 karakter)
                 'nama' => 'Contoh: Rudi Hartono',
                 'alamat' => 'Jl. Contoh No. 123',
@@ -80,7 +80,7 @@ class StudentTemplateExport implements FromArray, WithHeadings, WithStyles, With
         ]);
 
         // Set lebar kolom
-        $sheet->getColumnDimension('A')->setWidth(15); // NIS
+        $sheet->getColumnDimension('A')->setWidth(25); // NIS
         $sheet->getColumnDimension('B')->setWidth(10); // NISN
         $sheet->getColumnDimension('C')->setWidth(30); // Nama
         $sheet->getColumnDimension('D')->setWidth(35); // Alamat
