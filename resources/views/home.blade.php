@@ -16,42 +16,53 @@
     <div class="container-fluid">
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white text-center py-2">
-                <h6 class="m-0">REKAP SISWA KEHADIRAN HARI INI</h6>
+                <h6 class="m-0">REKAP SISWA KEHADIRAN HARI INI - {{ now()->format('d F Y') }}</h6>
             </div>
-            <div class="card-body p-3" style="background-color: rgba(0, 123, 255, 0.1);">
-                @php
-                    $data = [
-                        ['jam' => 'Jam 1 (07.00 - 07.45)', 'kelas' => 'XI-A', 'hadir' => 25, 'total' => 30],
-                        ['jam' => 'Jam 2 - Jam 3 (07.45 - 09.00)', 'kelas' => 'XII-B', 'hadir' => 20, 'total' => 30],
-                        ['jam' => 'Jam 2 - Jam 3 (07.45 - 09.00)', 'kelas' => 'XII-B', 'hadir' => 28, 'total' => 30],
-                        ['jam' => 'Jam 4 - Jam 5 (09.00 - 10.30)', 'kelas' => 'X-D', 'hadir' => 10, 'total' => 30],
-                        ['jam' => 'Jam 4 - Jam 5 (09.00 - 10.30)', 'kelas' => 'X-D', 'hadir' => 10, 'total' => 30],
-                        ['jam' => 'Jam 6 - Jam 9 (10.30 - 14.00)', 'kelas' => 'X-F', 'hadir' => 30, 'total' => 30],
-                        ['jam' => 'Jam 6 - Jam 9 (10.30 - 14.00)', 'kelas' => 'X-F', 'hadir' => 30, 'total' => 30],
-                        ['jam' => 'Jam 6 - Jam 9 (10.30 - 14.00)', 'kelas' => 'X-F', 'hadir' => 30, 'total' => 30],
-                        ['jam' => 'Jam 6 - Jam 9 (10.30 - 14.00)', 'kelas' => 'X-F', 'hadir' => 30, 'total' => 30],
-                    ];
-                @endphp
 
-                @foreach($data as $item)
-                    @php
-                        $percentage = ($item['hadir'] / $item['total']) * 100;
-                    @endphp
-                    <div class="mb-3" style="font-size: 0.875rem;">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <div><strong>{{ $item['jam'] }}</strong> - {{ $item['kelas'] }}</div>
-                            <div>{{ $item['hadir'] }}/{{ $item['total'] }} Siswa</div>
+            <div class="card-body p-3" style="background-color: rgba(0, 123, 255, 0.1);">
+                @if($data->count())
+                    @php $totalHadir = $data->sum('hadir'); @endphp
+                    @if($totalHadir == 0)
+                        <div class="alert alert-warning text-center">
+                            Belum ada siswa yang hadir hari ini.
                         </div>
-                        <div class="progress" style="height: 16px;">
-                            <div class="progress-bar bg-primary" role="progressbar"
-                                style="width: {{ $percentage }}%;"
-                                aria-valuenow="{{ $percentage }}"
-                                aria-valuemin="0" aria-valuemax="100">
+                    @endif
+
+                    @foreach($data as $item)
+                        @php
+                            $percentage = ($item->total > 0) ? ($item->hadir / $item->total) * 100 : 0;
+                            $percentage = round($percentage, 2);
+                        @endphp
+
+                        <div class="mb-3" style="font-size: 0.875rem;">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div>
+                                    <strong>{{ $item->jam_pelajaran }}</strong> - Kelas {{ $item->kelas }}
+                                </div>
+                                <div>
+                                    @if ($item->hadir > 0)
+                                        <span class="badge bg-primary">{{ $item->hadir }}/{{ $item->total }} Hadir</span>
+                                    @else
+                                        <span class="badge bg-danger">Tidak Ada yang Hadir</span>
+                                    @endif
+                                    @if ($item->terlambat > 0)
+                                        <span class="badge bg-warning text-dark">{{ $item->terlambat }} Terlambat</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 16px;">
+                                <div class="progress-bar bg-primary" role="progressbar"
+                                     style="width: {{ $percentage }}%;"
+                                     aria-valuenow="{{ $percentage }}"
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    {{ $percentage }}%
+                                </div>
                             </div>
                         </div>
-                    </div>
-                @endforeach
-
+                    @endforeach
+                @else
+                    <p class="text-center text-muted mb-0">Belum ada data kehadiran hari ini.</p>
+                @endif
             </div>
         </div>
     </div>
