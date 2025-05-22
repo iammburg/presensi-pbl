@@ -226,17 +226,13 @@ $(function () {
             orderable: false,
             searchable: false,
             render: function (data, type, row) {
-                return `
-                    <div class="dropdown dropleft position-static">
-                        <button class="d-flex align-items-center justify-content-center bg-white border border-primary rounded shadow-sm"
-                            style="width: 60px; height: 30px; padding: 0;" type="button" id="actionMenu-${row.nisn}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-cog" style="font-size: 16px; color: white; -webkit-text-stroke: 1px #007bff;"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right shadow-sm" aria-labelledby="actionMenu-${row.nisn}" style="z-index:9999 !important;">
-                            <a class="dropdown-item" href="/manage-students/${row.nisn}/edit">Edit</a>
-                            <a class="dropdown-item text-danger" href="#" onclick="deleteStudent('${row.nisn}')">Hapus</a>
-                        </div>
-                    </div>
+            return `
+                    <a href="/manage-students/${row.nisn}/edit" class="btn btn-sm btn-warning mr-1" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="btn btn-sm btn-danger" title="Hapus" onclick="deleteStudent('${row.nisn}')">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
                 `;
             }
         }
@@ -299,8 +295,8 @@ function deleteStudent(nisn) {
         text: "Data siswa akan dihapus secara permanen!",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
         confirmButtonText: 'Ya, hapus!',
         cancelButtonText: 'Batal'
     }).then((result) => {
