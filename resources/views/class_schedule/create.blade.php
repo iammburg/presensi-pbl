@@ -39,7 +39,7 @@
 
                 @foreach($days as $day)
                     <div class="card mb-3 border-light border">
-                        <div class="card-header bg-light fw-semibold py-2 px-3">{{ $day }}</div>
+                        <div class="card-header fw-semibold py-2 px-3 text-white" style="background-color: #1D3F72;">{{ $day }}</div>
                         <div class="card-body p-3" id="schedule-{{ $day }}"></div>
                         <div class="card-footer bg-white text-end py-2 px-3">
                             <button type="button" class="btn btn-outline-primary btn-sm" onclick="addScheduleRow('{{ $day }}')">+ Tambah</button>
@@ -107,7 +107,7 @@
             </div>
 
             <div class="col-md-4 assignment-container">
-                <label class="form-label">Guru & Mata Pelajaran</label>
+                <label class="form-label">Mata Pelajaran & Guru</label>
                 <select 
                     name="schedules[${day}][${index}][assignment_id]" 
                     class="form-select assignment-select"

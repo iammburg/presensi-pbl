@@ -166,87 +166,169 @@ public function store(Request $request)
 }
 
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        $schedule = ClassSchedule::findOrFail($id);
-        $classes = SchoolClass::orderBy('name')->get();
-        $subjects = Subject::orderBy('name')->get();
-        $teachers = TeachingAssignment::with('teacher')
-        ->select('teacher_id')
-        ->distinct()
+   /**
+ * Show the form for editing the specified resource.
+ *
+ * @param  ClassSchedule  $manageSchedule
+ * @return \Illuminate\Http\Response
+ */
+public function edit(ClassSchedule $manageSchedule)
+{
+    $class_id = $manageSchedule->class_id;
+    $class = SchoolClass::findOrFail($class_id);
+
+    // Ambil semua jadwal untuk kelas ini
+    $existingSchedules = ClassSchedule::with(['hour', 'assignment.subject', 'assignment.teacher'])
+        ->where('class_id', $class_id)
         ->get()
-        ->pluck('teacher');
+        ->groupBy('day_of_week');
 
-        return view('class_schedule.edit', compact('schedule', 'classes', 'subjects', 'teachers'));
+    // Konversi jadwal yang ada ke format yang sesuai dengan form
+    $dayMap = [
+        1 => 'Senin',
+        2 => 'Selasa', 
+        3 => 'Rabu',
+        4 => 'Kamis',
+        5 => 'Jumat',
+    ];
+
+    // Proses data jadwal untuk form
+    $scheduleData = [];
+    foreach ($existingSchedules as $dayNumber => $daySchedules) {
+        $dayName = $dayMap[$dayNumber];
+        $scheduleData[$dayName] = [];
+        
+        // Group consecutive hours with same assignment
+        $groupedSchedules = [];
+        $currentGroup = null;
+        
+        foreach ($daySchedules->sortBy('hour.slot_number') as $schedule) {
+            $sessionType = $schedule->assignment_id ? 'Jam Pelajaran' : 'Jam Istirahat';
+            $assignmentId = $schedule->assignment_id;
+            
+            if ($currentGroup && 
+                $currentGroup['session_type'] === $sessionType && 
+                $currentGroup['assignment_id'] === $assignmentId &&
+                $currentGroup['end_hour_id'] + 1 === $schedule->hour_id) {
+                // Extend current group
+                $currentGroup['end_hour_id'] = $schedule->hour_id;
+            } else {
+                // Start new group
+                if ($currentGroup) {
+                    $groupedSchedules[] = $currentGroup;
+                }
+                $currentGroup = [
+                    'session_type' => $sessionType,
+                    'start_hour_id' => $schedule->hour_id,
+                    'end_hour_id' => $schedule->hour_id,
+                    'assignment_id' => $assignmentId,
+                    'hour_session_type' => $schedule->hour->session_type ?? $sessionType, // tambahkan ini
+                ];
+            }
+        }
+        
+        if ($currentGroup) {
+            $groupedSchedules[] = $currentGroup;
+        }
+        
+        $scheduleData[$dayName] = $groupedSchedules;
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'class_id' => 'required|exists:classes,id',
-            'subject_id' => 'required|exists:subjects,id',
-            'teacher_id' => 'required|exists:teachers,nip',
-            'day' => 'required|string|max:20',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time'
-        ]);
+    // Data untuk form (sama seperti create)
+    $classes = SchoolClass::orderBy('name')->get();
+    $subjects = Subject::orderBy('name')->get();
+    $hours = Hour::orderBy('start_time')->get();
+    
+    $teachingAssignments = TeachingAssignment::with(['teacher', 'subject'])->get()
+        ->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'teacher_id' => $item->teacher_id,
+                'teacher_name' => $item->teacher->name ?? '',
+                'subject_id' => $item->subject_id,
+                'subject_name' => $item->subject->name ?? '',
+            ];
+        });
 
-        $schedule = ClassSchedule::findOrFail($id);
+    // Default semester (bisa disesuaikan logic bisnis)
+    $semester = '1'; // atau ambil dari database jika ada field semester
 
-        // Check for schedule conflicts (excluding this record)
-        $conflicts = ClassSchedule::where('id', '!=', $id)
-            ->where('class_id', $validated['class_id'])
-            ->where('day', $validated['day'])
-            ->where(function($query) use ($validated) {
-                $query->whereBetween('start_time', [$validated['start_time'], $validated['end_time']])
-                    ->orWhereBetween('end_time', [$validated['start_time'], $validated['end_time']])
-                    ->orWhere(function($q) use ($validated) {
-                        $q->where('start_time', '<=', $validated['start_time'])
-                            ->where('end_time', '>=', $validated['end_time']);
-                    });
-            })
-            ->exists();
+    return view('class_schedule.edit', compact(
+        'class', 'classes', 'subjects', 'hours', 'teachingAssignments', 
+        'scheduleData', 'manageSchedule', 'semester'
+    ));
+}
 
-        if ($conflicts) {
-            return redirect()->back()->withInput()->with('error', 'Jadwal bentrok dengan jadwal yang sudah ada di kelas ini pada hari dan waktu yang sama.');
+/**
+ * Update the specified resource in storage.
+ *
+ * @param  \Illuminate\Http\Request  $request
+ * @param  ClassSchedule  $manageSchedule
+ * @return \Illuminate\Http\Response
+ */
+public function update(Request $request, ClassSchedule $manageSchedule)
+{
+    $class_id = $manageSchedule->class_id;
+
+    $validated = $request->validate([
+        'semester' => 'required|string',
+        'class_id' => 'required|exists:classes,id',
+        'schedules' => 'required|array',
+        'schedules.*.*.session_type' => 'required|string|in:Jam Pelajaran,Jam Istirahat',
+        'schedules.*.*.start_hour_id' => 'required|exists:hours,id',
+        'schedules.*.*.end_hour_id' => 'required|exists:hours,id',
+        'schedules.*.*.assignment_id' => 'nullable|exists:teaching_assignments,id',
+    ]);
+
+    $schedules = $request->input('schedules', []);
+    $dayMapping = [
+        'Senin'  => 1,
+        'Selasa' => 2,
+        'Rabu'   => 3,
+        'Kamis'  => 4,
+        'Jumat'  => 5,
+    ];
+
+    DB::beginTransaction();
+    try {
+        // Hapus semua jadwal lama untuk kelas ini
+        ClassSchedule::where('class_id', $class_id)->delete();
+
+        // Buat jadwal baru
+        foreach ($schedules as $day => $entries) {
+            $dayNumber = $dayMapping[$day] ?? null;
+
+            foreach ($entries as $entry) {
+                $start = (int) $entry['start_hour_id'];
+                $end   = (int) $entry['end_hour_id'];
+                $sessionType = $entry['session_type'];
+
+                $assignmentId = $sessionType === 'Jam Istirahat'
+                    ? null
+                    : ($entry['assignment_id'] ?? null);
+
+                if ($sessionType === 'Jam Pelajaran' && !$assignmentId) {
+                    throw new \Exception("Assignment tidak boleh kosong untuk sesi Jam Pelajaran pada hari $day.");
+                }
+
+                for ($hourId = $start; $hourId <= $end; $hourId++) {
+                    ClassSchedule::create([
+                        'class_id'      => $class_id,
+                        'assignment_id' => $assignmentId,
+                        'day_of_week'   => $dayNumber,
+                        'hour_id'       => $hourId,
+                    ]);
+                }
+            }
         }
 
-        // Check teacher availability (excluding this record)
-        $teacherConflicts = ClassSchedule::where('id', '!=', $id)
-            ->where('academic_year_id', $validated['academic_year_id'])
-            ->where('teacher_id', $validated['teacher_id'])
-            ->where('day', $validated['day'])
-            ->where(function($query) use ($validated) {
-                $query->whereBetween('start_time', [$validated['start_time'], $validated['end_time']])
-                    ->orWhereBetween('end_time', [$validated['start_time'], $validated['end_time']])
-                    ->orWhere(function($q) use ($validated) {
-                        $q->where('start_time', '<=', $validated['start_time'])
-                            ->where('end_time', '>=', $validated['end_time']);
-                    });
-            })
-            ->exists();
-
-        if ($teacherConflicts) {
-            return redirect()->back()->withInput()->with('error', 'Guru sudah memiliki jadwal pada hari dan waktu yang sama.');
-        }
-
-        $schedule->update($validated);
-
+        DB::commit();
         return redirect()->route('manage-schedules.index')->with('success', 'Jadwal berhasil diperbarui!');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Gagal memperbarui jadwal: ' . $e->getMessage());
     }
+}
 
     /**
      * Remove the specified resource from storage.
