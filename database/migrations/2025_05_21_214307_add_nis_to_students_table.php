@@ -13,6 +13,7 @@ return new class extends Migration
         });
     }
 
+    //
     public function down(): void
     {
         if (Schema::hasColumn('students', 'nis')) {
