@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('student_class_assignments', function (Blueprint $table) {
             $table->id();
-            $table->char('student_id', 10);
-            $table->foreign('student_id')->references('nisn')->on('students')->onDelete('cascade');
+            $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
+            $table->foreignId('class_id')->constrained('school_classes')->onDelete('cascade');
             $table->foreignId('academic_year_id')->constrained('academic_years')->onDelete('cascade');
-            $table->foreignId('class_id')->constrained('classes')->onDelete('cascade');
+            $table->foreignId('assigned_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
+            
+            // Unique constraint agar siswa tidak bisa masuk 2 kelas dalam 1 tahun ajaran yang sama
+            $table->unique(['student_id', 'academic_year_id']);
         });
     }
 

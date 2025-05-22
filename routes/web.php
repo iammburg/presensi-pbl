@@ -64,6 +64,10 @@ Route::resource('manage-teacher-subject-assignments', TeachingAssignmentControll
     ->parameters(['manage-teacher-subject-assignments' => 'teacherAssignment']);
 Route::resource('manage-student-class-assignments', StudentClassAssignmentController::class)
     ->parameters(['manage-student-class-assignments' => 'studentAssignment']);
+Route::get('manage-student-class-assignments/classes-by-year', 
+    [StudentClassAssignmentController::class,'getClassesByYear']
+)->name('manage-student-class-assignments.getClassesByYear');
+
 Route::resource('manage-hours', HourController::class);
 Route::resource('manage-schedules', ClassScheduleController::class);
 Route::resource('manage-attendances', AttendanceController::class);

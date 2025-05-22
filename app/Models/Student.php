@@ -34,6 +34,24 @@ class Student extends Model
     {
         return $this->belongsTo(User::class);
     }
+    
+    public function classAssignments()
+    {
+        // pivot table student_class_assignments.student_id menyimpan nisn
+        return $this->hasMany(StudentClassAssignment::class,);
+    }
+     public function latestClassAssignment()
+    {
+        return $this->hasOne(StudentClassAssignment::class)
+            ->latest(); // Ambil yang paling baru berdasarkan created_at
+    }
+    public function schoolClass()
+    {
+        return $this->belongsToMany(SchoolClass::class, 'student_class_assignments', 'student_id', 'class_id')
+            ->withPivot('academic_year_id')
+            ->orderByDesc('student_class_assignments.created_at')
+            ->limit(1);
+    }
 
     /**
      * Override agar route model binding pakai 'nisn' sebagai key.
