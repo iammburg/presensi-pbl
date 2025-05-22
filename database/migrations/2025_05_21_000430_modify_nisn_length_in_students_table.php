@@ -29,9 +29,19 @@ return new class extends Migration
             });
         }
 
+        if ($this->foreignKeyExists('attendances', 'attendances_student_id_foreign')) {
+            Schema::table('attendances', function (Blueprint $table) {
+                $table->dropForeign(['student_id']);
+            });
+        }
+
         // UBAH PANJANG NISN DI TABLE STUDENTS
         Schema::table('students', function (Blueprint $table) {
             $table->char('nisn', 10)->change();
+        });
+
+        Schema::table('attendances', function (Blueprint $table) {
+            $table->foreign('student_id')->references('nisn')->on('students')->onDelete('cascade');
         });
 
         // UBAH PANJANG student_id DI TABLE student_class_assignments
@@ -85,6 +95,12 @@ return new class extends Migration
             });
         }
 
+        if ($this->foreignKeyExists('attendances', 'attendances_student_id_foreign')) {
+            Schema::table('attendances', function (Blueprint $table) {
+                $table->dropForeign(['student_id']);
+            });
+        }
+
         // BALIKKAN PANJANG NISN DI TABLE STUDENTS
         Schema::table('students', function (Blueprint $table) {
             $table->char('nisn', 18)->change();
@@ -105,6 +121,11 @@ return new class extends Migration
             $table->char('student_id', 18)->change();
         });
 
+        // BALIKKAN PANJANG student_id DI TABLE attendances
+        Schema::table('attendances', function (Blueprint $table) {
+            $table->char('student_id', 18)->change();
+        });
+
         // RE-ADD FOREIGN KEY LAMA
         Schema::table('student_class_assignments', function (Blueprint $table) {
             $table->foreign('student_id')->references('nisn')->on('students')->onDelete('cascade');
@@ -117,6 +138,10 @@ return new class extends Migration
         Schema::table('violations', function (Blueprint $table) {
             $table->foreign('student_id')->references('nisn')->on('students')->onDelete('cascade');
         });
+
+        Schema::table('attendances', function (Blueprint $table) {
+            $table->foreign('student_id')->references('nisn')->on('students')->onDelete('cascade');
+        });
     }
 
     /**
@@ -125,11 +150,11 @@ return new class extends Migration
     protected function foreignKeyExists(string $tableName, string $foreignKeyName): bool
     {
         $result = DB::select(
-            "SELECT CONSTRAINT_NAME 
-             FROM information_schema.TABLE_CONSTRAINTS 
-             WHERE CONSTRAINT_TYPE = 'FOREIGN KEY' 
-             AND TABLE_SCHEMA = DATABASE() 
-             AND TABLE_NAME = ? 
+            "SELECT CONSTRAINT_NAME
+             FROM information_schema.TABLE_CONSTRAINTS
+             WHERE CONSTRAINT_TYPE = 'FOREIGN KEY'
+             AND TABLE_SCHEMA = DATABASE()
+             AND TABLE_NAME = ?
              AND CONSTRAINT_NAME = ?",
             [$tableName, $foreignKeyName]
         );

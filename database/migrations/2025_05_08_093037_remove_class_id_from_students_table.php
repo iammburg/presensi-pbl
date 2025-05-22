@@ -23,11 +23,14 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('students', function (Blueprint $table) {
+            $table->unsignedBigInteger('class_id')->after('nisn');
+        });
+
+        Schema::table('students', function (Blueprint $table) {
             $table->foreign('class_id')
                 ->references('id')
                 ->on('classes')
                 ->onDelete('cascade');
-            $table->unsignedBigInteger('class_id')->after('nisn');
         });
     }
 };
