@@ -24,21 +24,22 @@
 
                             <!-- NIS -->
                             <div class="form-group">
-                                <label for="nis" class="font-weight-bold">NIS (5 digits)</label>
+                                <label for="nis" class="font-weight-bold">NIS</label>
                                 <input type="text" class="form-control @error('nis') is-invalid @enderror"
-                                    id="nis" name="nis" value="{{ old('nis', $student->nis) }}" maxlength="5" required>
+                                    id="nis" name="nis" value="{{ old('nis', $student->nis) }}" maxlength="25" required>
                                 @error('nis')
                                     <div class="invalid-feedback">
-                                        {{ $message }}
+                                        NIS tidak boleh lebih dari 20 karakter.
                                     </div>
                                 @enderror
+
                             </div>
 
                             <!-- NISN -->
                             <div class="form-group">
-                                <label for="nisn" class="font-weight-bold">NISN (18 digits)</label>
+                                <label for="nisn" class="font-weight-bold">NISN</label>
                                 <input type="text" class="form-control @error('nisn') is-invalid @enderror"
-                                    id="nisn" name="nisn" value="{{ old('nisn', $student->nisn) }}" maxlength="18" required readonly>
+                                    id="nisn" name="nisn" value="{{ old('nisn', $student->nisn) }}" maxlength="10" required readonly>
                                 @error('nisn')
                                     <div class="invalid-feedback">
                                         {{ $message }}

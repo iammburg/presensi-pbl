@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Kelola Pelanggaran
+    Manajemen Kurikulum
 @endsection
 
 @push('css')
@@ -16,7 +16,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6 text-uppercase">
-                    <h4 class="m-0">Kelola Pelanggaran</h4>
+                    <h4 class="m-0">Manajemen Kurikulum</h4>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -33,9 +33,9 @@
                 <div class="col-md-12">
                     <div class="card card-primary card-outline">
                         <div class="card-header">
-                            <h3 class="card-title">Data Pelanggaran</h3>
+                            <h3 class="card-title">Kelola Data Kurikulum</h3>
                             <div class="card-tools">
-                                <a href="{{ route('violation-management.create') }}" class="btn btn-primary">
+                                <a href="{{ route('manage-curriculums.create') }}" class="btn btn-primary">
                                     <i class="fas fa-plus-circle"></i> Tambah Data
                                 </a>
                             </div>
@@ -46,19 +46,17 @@
                                     <thead class="bg-tertiary text-white">
                                         <tr>
                                             <th>No</th>
-                                            <th>Nama Pelanggaran</th>
-                                            <th>Jenis Pelanggaran</th>
-                                            <th>Poin</th>
+                                            <th>Nama Kurikulum</th>
+                                            {{-- <th>Status</th> --}}
                                             <th>Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($violationPoints as $index => $violation)
+                                        @foreach ($curriculums as $curriculum)
                                             <tr>
-                                                <td>{{ $index + $violationPoints->firstItem() }}</td>
-                                                <td>{{ $violation->violation_type }}</td>
-                                                <td>{{ $violation->violation_level }}</td>
-                                                <td>{{ $violation->points }}</td>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $curriculum->curriculum_name }}</td>
+                                                {{-- <td>{{ $curriculum->is_active ? 'Aktif' : 'Tidak Aktif' }}</td> --}}
                                                 <td>
                                                     <div class="btn-group">
                                                         <button type="button"
@@ -69,16 +67,16 @@
                                                         </button>
                                                         <div class="dropdown-menu">
                                                             <a class="dropdown-item"
-                                                                href="{{ route('violation-management.edit', $violation->id) }}">Edit</a>
-                                                            <form id="delete-form-{{ $violation->id }}"
-                                                                action="{{ route('violation-management.destroy', $violation->id) }}"
+                                                                href="{{ route('manage-curriculums.edit', $curriculum->id) }}">Edit</a>
+                                                            <form id="delete-form-{{ $curriculum->id }}"
+                                                                action="{{ route('manage-curriculums.destroy', $curriculum->id) }}"
                                                                 method="POST" style="display: none;">
                                                                 @csrf
                                                                 @method('DELETE')
                                                             </form>
 
                                                             <button type="button" class="dropdown-item text-danger"
-                                                                onclick="confirmDelete({{ $violation->id }})">
+                                                                onclick="confirmDelete({{ $curriculum->id }})">
                                                                 Hapus
                                                             </button>
                                                         </div>

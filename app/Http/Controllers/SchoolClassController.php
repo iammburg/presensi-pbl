@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
 use App\Models\SchoolClass;
+use App\Models\Teacher;
+use App\Models\HomeroomAssignment;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Log;
 
 class SchoolClassController extends Controller
 {
@@ -15,36 +18,60 @@ class SchoolClassController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            // Ambil data beserta relasi academicYear
-            $classes = SchoolClass::with('academicYear')->select('classes.*');
+            $classes = SchoolClass::with('academicYear', 'homeroomTeacher.teacher')->select('classes.*');
 
             return DataTables::of($classes)
                 ->addIndexColumn()
                 ->addColumn('academic_year', function ($class) {
                     if ($class->academicYear) {
                         $semesterText = $class->academicYear->semester == 0 ? 'Ganjil' : 'Genap';
-                        return $class->academicYear->start_year . ' - ' . $class->academicYear->end_year . ' ' . $semesterText . '';
+                        return $class->academicYear->start_year . ' - ' . $class->academicYear->end_year . ' ' . $semesterText;
                     }
                     return '-';
                 })
-                
                 ->addColumn('status', function ($class) {
-                    return $class->is_active
-                        ? '<span class="badge badge-success">Aktif</span>'
-                        : '<span class="badge badge-danger">Tidak Aktif</span>';
+                    return $class->is_active ? 'Aktif' : 'Tidak Aktif';
                 })
+                ->addColumn('homeroom_teacher', function ($class) {
+                    if ($class->homeroomTeacher && $class->homeroomTeacher->teacher) {
+                        return $class->homeroomTeacher->teacher->name;
+                    }
+                    return '-';
+                })
+
                 ->addColumn('action', function ($class) {
                     $editUrl = route('manage-classes.edit', $class->id);
                     return <<<HTML
-                        <a href="{$editUrl}" class="btn btn-sm btn-info mr-1"><i class="fas fa-edit"></i></a>
-                        <button class="btn btn-sm btn-danger" onclick="deleteClass({$class->id})"><i class="fas fa-trash"></i></button>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-info btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{$editUrl}">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </a>
+                                <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="deleteClass({$class->id})">
+                                    <i class="fas fa-trash-alt me-1"></i>Delete
+                                </a>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#assignHomeroomModal"
+                                    data-class-id="{$class->id}" title="Pilih Wali Kelas">
+                                <i class="fas fa-user-check"></i>
+                            </button>
+                        </div>
                     HTML;
                 })
-                ->rawColumns(['status', 'action']) // Render HTML pada kolom status & action
+
+
+                ->rawColumns(['status', 'action'])
                 ->make(true);
         }
 
-        return view('manage-classes.index');
+        // ✅ Tambahkan baris ini jika kamu ingin data guru langsung dimuat ke view (tanpa AJAX)
+        $teachers = Teacher::all(); // atau User::where('role', 'guru')->get();
+        $classes = SchoolClass::with('homeroomTeacher')->get(); // Pastikan relasi `homeroomTeacher` ada di model
+
+        return view('manage-classes.index', compact('classes', 'teachers'));
     }
 
 
@@ -89,6 +116,28 @@ class SchoolClassController extends Controller
     public function show(SchoolClass $schoolClass)
     {
         //
+    }
+    public function assignHomeroom(Request $request)
+    {
+        $request->validate([
+            'class_id' => 'required|exists:classes,id',
+            'teacher_id' => 'required|exists:teachers,nip',
+        ]);
+
+        $class = SchoolClass::findOrFail($request->class_id);
+
+        // Ambil tahun akademik dari relasi kelas
+        $academicYearId = $class->academic_year_id;
+
+        HomeroomAssignment::updateOrCreate(
+            ['class_id' => $request->class_id],
+            [
+                'teacher_id' => (string) $request->teacher_id,
+                'academic_year_id' => $academicYearId
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Wali kelas berhasil ditetapkan.');
     }
 
     /**
@@ -137,7 +186,8 @@ class SchoolClassController extends Controller
 
         $class->delete();
 
-        return redirect()->route('manage-classes.index')
-            ->with('success', 'Data kelas berhasil dihapus.');
+        return response()->json([
+            'message' => 'Data kelas berhasil dihapus.'
+        ], 200);
     }
 }

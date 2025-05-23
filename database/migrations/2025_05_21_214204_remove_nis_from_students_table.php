@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('students', function (Blueprint $table) {
-            $table->dropForeign(['class_id']);
-            $table->dropColumn('class_id');
+            $table->dropColumn('nis');
         });
     }
 
@@ -22,16 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
         Schema::table('students', function (Blueprint $table) {
-            $table->unsignedBigInteger('class_id')->after('nisn');
-        });
-
-        Schema::table('students', function (Blueprint $table) {
-            $table->foreign('class_id')
-                ->references('id')
-                ->on('classes')
-                ->onDelete('cascade');
+            $table->char('nis', 10)->after('nisn');
         });
     }
 };
