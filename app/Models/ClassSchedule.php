@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\SchoolClass;
-use App\Models\ClassSchedule;
 use App\Models\AcademicYear;
 
 class ClassSchedule extends Model
@@ -28,7 +27,7 @@ class ClassSchedule extends Model
      */
     /**
      * Get formatted time
-     * 
+     *
      * @return string
      */
     public function getTimeRangeAttribute()
@@ -46,20 +45,6 @@ class ClassSchedule extends Model
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
-    public function assignment()
-    {
-        return $this->belongsTo(TeachingAssignment::class, 'assignment_id');
-    }
-
-    public function hour()
-    {
-        return $this->belongsTo(Hour::class, 'hour_id');
-    }
-
-    public function schoolClass()
-    {
-        return $this->belongsTo(SchoolClass::class, 'class_id');
-    }
 
     public function subject()
     {
@@ -79,6 +64,4 @@ class ClassSchedule extends Model
     {
         return $this->belongsTo(TeachingAssignment::class, 'assignment_id');
     }
-
-
 }
