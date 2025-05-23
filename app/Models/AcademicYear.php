@@ -34,4 +34,9 @@ class AcademicYear extends Model
     {
         return $this->hasMany(HomeroomAssignment::class);
     }
+    public function schedules()
+    {
+        return $this->hasMany(ClassSchedule::class, 'academic_year_id');
+    }
+
 }
