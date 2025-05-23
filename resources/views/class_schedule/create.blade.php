@@ -1,45 +1,66 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h4 class="mb-3" style="margin-top: 30px;">Manajemen Jadwal</h4>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6 text-uppercase">
+                    <h4 class="m-0">Manajemen Jadwal</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right"></ol>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
+    <div class="content">
+        <div class="container-fluid">
+            @if(session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body px-4 py-3">
-            <form method="POST" action="{{ route('manage-schedules.store') }}">
-                @csrf
-
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label for="semester" class="form-label">Kurikulum</label>
-                        <select name="semester" id="semester" class="form-select form-select-sm" required>
-                            <option value="">Pilih</option>
-                            <option value="1" {{ old('semester') == 1 ? 'selected' : '' }}>2013</option>
-                            <option value="2" {{ old('semester') == 2 ? 'selected' : '' }}>Merdeka</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="class_id" class="form-label">Kelas</label>
-                        <select name="class_id" id="class_id" class="form-select form-select-sm" required>
-                            <option value="">Pilih</option>
-                            @foreach($classes as $class)
-                                <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>
-                                    {{ $class->name }} - {{ $class->parallel_name }}
-                                </option>
-                            @endforeach
-                        </select>
+            <div class="card card-primary card-outline">
+                <div class="card-header">
+                    <h5 class="card-title m-0">Form Buat Jadwal</h5>
+                    <div class="card-tools">
+                        <a href="{{ route('manage-schedules.index') }}" class="btn btn-tool" title="Kembali">
+                            <i class="fas fa-arrow-alt-circle-left"></i>
+                        </a>
                     </div>
                 </div>
+
+                <div class="card-body px-4 py-3">
+                    <form method="POST" action="{{ route('manage-schedules.store') }}">
+                        @csrf
+
+                                            <div class="row mb-3">
+                        <div class="col-auto me-3">
+                            <label for="semester" class="form-label">Kurikulum</label>
+                            <select name="semester" id="semester" class="form-select form-select-sm" required style="min-width: 150px;">
+                                <option value="">Pilih</option>
+                                <option value="1" {{ old('semester') == 1 ? 'selected' : '' }}>2013</option>
+                                <option value="2" {{ old('semester') == 2 ? 'selected' : '' }}>Merdeka</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <label for="class_id" class="form-label">Kelas</label>
+                            <select name="class_id" id="class_id" class="form-select form-select-sm" required style="min-width: 200px;">
+                                <option value="">Pilih</option>
+                                @foreach($classes as $class)
+                                    <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>
+                                        {{ $class->name }} - {{ $class->parallel_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
 
                 @php $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']; @endphp
 
                 @foreach($days as $day)
                     <div class="card mb-3 border-light border">
-                        <div class="card-header fw-semibold py-2 px-3 text-white" style="background-color: #1D3F72;">{{ $day }}</div>
+                        <div class="card-header fw-semibold py-2 px-3 text-white" style="background-color: #1D3F72">{{ $day }}</div>
                         <div class="card-body p-3" id="schedule-{{ $day }}"></div>
                         <div class="card-footer bg-white text-end py-2 px-3">
                             <button type="button" class="btn btn-outline-primary btn-sm" onclick="addScheduleRow('{{ $day }}')">+ Tambah</button>
@@ -47,7 +68,7 @@
                     </div>
                 @endforeach
 
-                <button type="submit" class="btn btn-block btn-flat text-white" style="background-color: #1777E5">
+                <button type="submit" class="btn btn-block btn-flat text-white" style="background-color: #1D3F72">
                     <i class="fa fa-save"></i> Simpan
                 </button>
             </form>
@@ -84,7 +105,7 @@
             </div>
 
             <div class="col-md-2">
-                <label class="form-label">Jam Mulai</label>
+                <label class="form-label d-block">Jam Mulai</label>
                 <select 
                     name="schedules[${day}][${index}][start_hour_id]" 
                     class="form-select hour-select-start" 
@@ -96,7 +117,7 @@
             </div>
 
             <div class="col-md-2">
-                <label class="form-label">Jam Selesai</label>
+                <label class="form-label d-block">Jam Selesai</label>
                 <select 
                     name="schedules[${day}][${index}][end_hour_id]" 
                     class="form-select hour-select-end" 

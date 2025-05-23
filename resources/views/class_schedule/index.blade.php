@@ -69,7 +69,7 @@
                                         </td>
                                         <td>
                                             <a href="{{ route('manage-schedules.show', $schedule->class_id) }}" class="btn btn-sm btn-info">
-                                                <i class="fas fa-eye"></i> Detail
+                                                <i class="fas fa-eye"></i> Lihat Detail Jadwal
                                             </a>
                                             <a href="{{ route('manage-schedules.edit', $schedule->id) }}" class="btn btn-sm btn-warning">
                                                 <i class="fas fa-edit"></i> Edit

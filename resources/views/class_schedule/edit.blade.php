@@ -1,152 +1,175 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h4 class="mb-3" style="margin-top: 30px;">Edit Jadwal Kelas</h4>
-
-    @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
-
-    <div class="card shadow-sm border-0">
-        <div class="card-body px-4 py-3">
-            <form method="POST" action="{{ route('manage-schedules.update', $manageSchedule->id) }}">
-                @csrf
-                @method('PUT')
-
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label for="semester" class="form-label">Kurikulum</label>
-                        <select name="semester" id="semester" class="form-select form-select-sm" required>
-                            <option value="">Pilih</option>
-                            <option value="1" {{ old('semester', $semester) == '1' ? 'selected' : '' }}>2013</option>
-                            <option value="2" {{ old('semester', $semester) == '2' ? 'selected' : '' }}>Merdeka</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="class_id" class="form-label">Kelas</label>
-                        <select name="class_id" id="class_id" class="form-select form-select-sm" required>
-                            <option value="">Pilih</option>
-                            @foreach($classes as $classItem)
-                                <option value="{{ $classItem->id }}" 
-                                    {{ old('class_id', $class->id) == $classItem->id ? 'selected' : '' }}>
-                                    {{ $classItem->name }} - {{ $classItem->parallel_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6 text-uppercase">
+                    <h4 class="m-0">Edit Jadwal Kelas</h4>
                 </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right"></ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-primary card-outline">
+                        <div class="card-header">
+                            <h5 class="card-title m-0">Form Edit Jadwal</h5>
+                            <div class="card-tools">
+                                <a href="{{ route('manage-schedules.index') }}" class="btn btn-tool">
+                                    <i class="fas fa-arrow-alt-circle-left"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="card-body px-4 py-3">
+                            @if(session('error'))
+                                <div class="alert alert-danger">{{ session('error') }}</div>
+                            @endif
+
+                            <form method="POST" action="{{ route('manage-schedules.update', $manageSchedule->id) }}">
+                                @csrf
+                                @method('PUT')
+                                <div class="row mb-3">
+    <div class="row mb-3">
+    <div class="col-auto me-3">
+        <label for="semester" class="form-label">Kurikulum</label>
+        <select name="semester" id="semester" class="form-select form-select-sm" required style="min-width: 150px;">
+            <option value="">Pilih</option>
+            <option value="1" {{ old('semester', $semester) == '1' ? 'selected' : '' }}>2013</option>
+            <option value="2" {{ old('semester', $semester) == '2' ? 'selected' : '' }}>Merdeka</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <label for="class_id" class="form-label">Kelas</label>
+        <select name="class_id" id="class_id" class="form-select form-select-sm" required style="min-width: 200px;">
+            <option value="">Pilih</option>
+            @foreach($classes as $classItem)
+                <option value="{{ $classItem->id }}" 
+                    {{ old('class_id', $class->id) == $classItem->id ? 'selected' : '' }}>
+                    {{ $classItem->name }} - {{ $classItem->parallel_name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+</div>
 
                 @php $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']; @endphp
 
-                @foreach($days as $day)
-                    <div class="card mb-3 border-light border">
-                        <div class="card-header fw-semibold py-2 px-3 text-white" style="background-color: #1D3F72;">{{ $day }}</div>
-                        <div class="card-body p-3" id="schedule-{{ $day }}">
-                            {{-- Load existing schedules --}}
-                            @if(isset($scheduleData[$day]))
-                                @foreach($scheduleData[$day] as $index => $schedule)
-                                    <div class="row g-2 align-items-end mb-3">
-                                        <div class="col-md-2">
-                                            <label class="form-label">Tipe Sesi</label>
-                                            <select 
-                                                name="schedules[{{ $day }}][{{ $index }}][session_type]" 
-                                                class="form-select session-type" 
-                                                onchange="filterHours(this)" 
-                                                required
-                                            >
-                                                <option value="">-- Pilih --</option>
-                                                <option value="Jam Pelajaran" {{ $schedule['session_type'] == 'Jam Pelajaran' ? 'selected' : '' }}>Jam Pelajaran</option>
-                                                <option value="Jam Istirahat" {{ $schedule['session_type'] == 'Jam Istirahat' ? 'selected' : '' }}>Jam Istirahat</option>
-                                            </select>
-                                        </div>
+<div class="container-fluid px-4"> {{-- Full width --}}
+    @foreach($days as $day)
+        <div class="card mb-3 border-light border">
+            <div class="card-header fw-semibold py-2 px-3 text-white" style="background-color: #1D3F72;">{{ $day }}</div>
+            <div class="card-body p-3 schedule-body" id="schedule-{{ $day }}">
+                {{-- Load existing schedules --}}
+                @if(isset($scheduleData[$day]))
+                    @foreach($scheduleData[$day] as $index => $schedule)
+                        <div class="row g-2 align-items-end mb-3">
+                            <div class="col-md-2">
+                                <label class="form-label">Tipe Sesi</label>
+                                <select 
+                                    name="schedules[{{ $day }}][{{ $index }}][session_type]" 
+                                    class="form-select session-type" 
+                                    onchange="filterHours(this)" 
+                                    required
+                                >
+                                    <option value="">-- Pilih --</option>
+                                    <option value="Jam Pelajaran" {{ $schedule['session_type'] == 'Jam Pelajaran' ? 'selected' : '' }}>Jam Pelajaran</option>
+                                    <option value="Jam Istirahat" {{ $schedule['session_type'] == 'Jam Istirahat' ? 'selected' : '' }}>Jam Istirahat</option>
+                                </select>
+                            </div>
 
-                                        <div class="col-md-2">
-                                            <label class="form-label">Jam Mulai</label>
-                                            <select 
-                                                name="schedules[{{ $day }}][{{ $index }}][start_hour_id]" 
-                                                class="form-select hour-select-start" 
-                                                onchange="toggleSubjectTeacher(this)" 
-                                                required
-                                            >
-                                                <option value="">Jam ke-</option>
-                                                @foreach($hours as $hour)
-                                                    <option value="{{ $hour->id }}" 
-                                                        data-type="{{ $hour->session_type }}" 
-                                                        data-start="{{ $hour->start_time }}" 
-                                                        data-end="{{ $hour->end_time }}"
-                                                        {{ $schedule['start_hour_id'] == $hour->id ? 'selected' : '' }}
-                                                        style="{{ $hour->session_type != $schedule['session_type'] ? 'display:none;' : '' }}">
-                                                        Jam ke-{{ $hour->slot_number }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Jam Mulai</label>
+                                <select 
+                                    name="schedules[{{ $day }}][{{ $index }}][start_hour_id]" 
+                                    class="form-select hour-select-start" 
+                                    onchange="toggleSubjectTeacher(this)" 
+                                    required
+                                >
+                                    <option value="">Jam ke-</option>
+                                    @foreach($hours as $hour)
+                                        <option value="{{ $hour->id }}" 
+                                            data-type="{{ $hour->session_type }}" 
+                                            data-start="{{ $hour->start_time }}" 
+                                            data-end="{{ $hour->end_time }}"
+                                            {{ $schedule['start_hour_id'] == $hour->id ? 'selected' : '' }}
+                                            style="{{ $hour->session_type != $schedule['session_type'] ? 'display:none;' : '' }}">
+                                            Jam ke-{{ $hour->slot_number }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                                        <div class="col-md-2">
-                                            <label class="form-label">Jam Selesai</label>
-                                            <select 
-                                                name="schedules[{{ $day }}][{{ $index }}][end_hour_id]" 
-                                                class="form-select hour-select-end" 
-                                                required
-                                            >
-                                                <option value="">Jam ke-</option>
-                                                @foreach($hours as $hour)
-                                                    <option value="{{ $hour->id }}"
-                                                        data-type="{{ $hour->session_type }}"
-                                                        {{ $schedule['end_hour_id'] == $hour->id ? 'selected' : '' }}
-                                                        style="{{ $hour->session_type != $schedule['session_type'] ? 'display:none;' : '' }}">
-                                                        Jam ke-{{ $hour->slot_number }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Jam Selesai</label>
+                                <select 
+                                    name="schedules[{{ $day }}][{{ $index }}][end_hour_id]" 
+                                    class="form-select hour-select-end" 
+                                    required
+                                >
+                                    <option value="">Jam ke-</option>
+                                    @foreach($hours as $hour)
+                                        <option value="{{ $hour->id }}"
+                                            data-type="{{ $hour->session_type }}"
+                                            {{ $schedule['end_hour_id'] == $hour->id ? 'selected' : '' }}
+                                            style="{{ $hour->session_type != $schedule['session_type'] ? 'display:none;' : '' }}">
+                                            Jam ke-{{ $hour->slot_number }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                                        <div class="col-md-4 assignment-container" 
-                                             style="{{ $schedule['session_type'] == 'Jam Istirahat' ? 'display: none;' : '' }}">
-                                            <label class="form-label">Guru & Mata Pelajaran</label>
-                                            <select 
-                                                name="schedules[{{ $day }}][{{ $index }}][assignment_id]" 
-                                                class="form-select assignment-select"
-                                                {{ $schedule['session_type'] == 'Jam Pelajaran' ? 'required' : '' }}
-                                                {{ $schedule['session_type'] == 'Jam Istirahat' ? 'disabled' : '' }}
-                                            >
-                                                <option value="">Pilih</option>
-                                                @foreach($teachingAssignments as $assignment)
-                                                    <option value="{{ $assignment['id'] }}"
-                                                        {{ $schedule['assignment_id'] == $assignment['id'] ? 'selected' : '' }}>
-                                                        {{ $assignment['subject_name'] }} - {{ $assignment['teacher_name'] }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                            <div class="col-md-4 assignment-container" 
+                                 style="{{ $schedule['session_type'] == 'Jam Istirahat' ? 'display: none;' : '' }}">
+                                <label class="form-label">Guru & Mata Pelajaran</label>
+                                <select 
+                                    name="schedules[{{ $day }}][{{ $index }}][assignment_id]" 
+                                    class="form-select assignment-select"
+                                    {{ $schedule['session_type'] == 'Jam Pelajaran' ? 'required' : '' }}
+                                    {{ $schedule['session_type'] == 'Jam Istirahat' ? 'disabled' : '' }}
+                                >
+                                    <option value="">Pilih</option>
+                                    @foreach($teachingAssignments as $assignment)
+                                        <option value="{{ $assignment['id'] }}"
+                                            {{ $schedule['assignment_id'] == $assignment['id'] ? 'selected' : '' }}>
+                                            {{ $assignment['subject_name'] }} - {{ $assignment['teacher_name'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                                        <div class="col-md-1 text-center">
-                                            <button 
-                                                type="button" 
-                                                class="btn btn-sm btn-outline-danger mt-4" 
-                                                onclick="this.closest('.row').remove()"
-                                            >
-                                                ✖
-                                            </button>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            @endif
+                            <div class="col-md-1 text-center">
+                                <button 
+                                    type="button" 
+                                    class="btn btn-sm btn-outline-danger mt-4" 
+                                    onclick="this.closest('.row').remove()"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
                         </div>
-                        <div class="card-footer bg-white text-end py-2 px-3">
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addScheduleRow('{{ $day }}')">+ Tambah</button>
-                        </div>
-                    </div>
-                @endforeach
-
-                <button type="submit" class="btn btn-block btn-flat text-white" style="background-color: #1777E5">
-                    <i class="fa fa-save"></i> Update Jadwal
-                </button>
-            </form>
+                    @endforeach
+                @endif
+            </div>
+            <div class="card-footer bg-white text-end py-2 px-3">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addScheduleRow('{{ $day }}')">+ Tambah</button>
+            </div>
         </div>
-    </div>
+    @endforeach
+
+    <button type="submit" class="btn btn-block btn-flat text-white" style="background-color: #1D3F72">
+        <i class="fa fa-save"></i> Update Jadwal
+    </button>
 </div>
+
+
 
 {{-- SCRIPT --}}
 <script>
@@ -176,31 +199,31 @@
                 </select>
             </div>
 
-            <div class="col-md-2">
-                <label class="form-label">Jam Mulai</label>
-                <select 
-                    name="schedules[${day}][${index}][start_hour_id]" 
-                    class="form-select hour-select-start" 
-                    onchange="toggleSubjectTeacher(this)" 
-                    required
-                >
-                    <option value="">Jam ke-</option>
-                </select>
+                    <div class="col-md-2">
+            <label class="form-label d-block">Jam Mulai</label>
+            <select 
+                name="schedules[${day}][${index}][start_hour_id]" 
+                class="form-select hour-select-start" 
+                onchange="toggleSubjectTeacher(this)" 
+                required
+            >
+                <option value="">Jam ke-</option>
+            </select>
             </div>
 
             <div class="col-md-2">
-                <label class="form-label">Jam Selesai</label>
-                <select 
-                    name="schedules[${day}][${index}][end_hour_id]" 
-                    class="form-select hour-select-end" 
-                    required
-                >
-                    <option value="">Jam ke-</option>
-                </select>
+            <label class="form-label d-block">Jam Selesai</label>
+            <select 
+                name="schedules[${day}][${index}][end_hour_id]" 
+                class="form-select hour-select-end" 
+                required
+            >
+                <option value="">Jam ke-</option>
+            </select>
             </div>
 
             <div class="col-md-4 assignment-container">
-                <label class="form-label">Guru & Mata Pelajaran</label>
+                <label class="form-label">Mata Pelajaran & Guru</label>
                 <select 
                     name="schedules[${day}][${index}][assignment_id]" 
                     class="form-select assignment-select"
