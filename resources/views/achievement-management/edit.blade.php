@@ -135,45 +135,17 @@
                 <form method="POST" action="{{ route('achievement-management.update', ['achievement_management' => $achievement->id]) }}">
                     @csrf
                     @method('PUT')
-
-                    <!-- Dropdown Jenis Prestasi -->
+                    <!-- Dropdown Jenis & Kategori Prestasi (dari achievement_points) -->
                     <div class="form-group select-wrapper">
-                        <label for="jenis_prestasi">Jenis Prestasi</label>
-                        <select id="jenis_prestasi" name="jenis_prestasi" class="form-control" required>
-                            <option value="" disabled {{ old('jenis_prestasi', $achievement->jenis_prestasi) ? '' : 'selected' }}>Pilih jenis prestasi</option>
-                            @php
-                                $jenisOptions = [
-                                    'Juara 1 Internasional',
-                                    'Juara 2 Internasional',
-                                    'Juara 3 Internasional',
-                                    'Juara 1 Nasional',
-                                    'Juara 2 Nasional',
-                                    'Juara 3 Nasional',
-                                    'Juara 1 Kota/Kabupaten',
-                                    'Juara 2 Kota/Kabupaten',
-                                    'Juara 3 Kota/Kabupaten',
-                                ];
-                            @endphp
-                            @foreach ($jenisOptions as $option)
-                                <option value="{{ $option }}" {{ old('jenis_prestasi', $achievement->jenis_prestasi) == $option ? 'selected' : '' }}>{{ $option }}</option>
+                        <label for="achievement_points_id">Jenis & Kategori Prestasi</label>
+                        <select id="achievement_points_id" name="achievement_points_id" class="form-control" required>
+                            <option value="" disabled {{ old('achievement_points_id', $achievement->achievement_points_id) ? '' : 'selected' }}>Pilih jenis & kategori prestasi</option>
+                            @foreach($achievementPoints as $point)
+                                <option value="{{ $point->id }}" {{ old('achievement_points_id', $achievement->achievement_points_id) == $point->id ? 'selected' : '' }}>
+                                    {{ $point->jenis_prestasi }} ({{ $point->kategori_prestasi }}, {{ $point->poin }} poin)
+                                </option>
                             @endforeach
                         </select>
-                    </div>
-
-                    <!-- Dropdown Kategori Prestasi -->
-                    <div class="form-group select-wrapper">
-                        <label for="kategori_prestasi">Kategori Prestasi</label>
-                        <select id="kategori_prestasi" name="kategori_prestasi" class="form-control" required>
-                            <option value="" disabled {{ old('kategori_prestasi', $achievement->kategori_prestasi) ? '' : 'selected' }}>Pilih kategori prestasi</option>
-                            <option value="Akademik" {{ old('kategori_prestasi', $achievement->kategori_prestasi) == 'Akademik' ? 'selected' : '' }}>Akademik</option>
-                            <option value="Non Akademik" {{ old('kategori_prestasi', $achievement->kategori_prestasi) == 'Non Akademik' ? 'selected' : '' }}>Non Akademik</option>
-                        </select>
-                    </div>
-
-                    <!-- Input Poin -->
-                    <div class="form-group">
-                        <label for="poin">Poin</label>
-                        <input type="number" id="poin" name="poin" class="form-control" value="{{ old('poin', $achievement->poin) }}" required>
                     </div>
 
                     <button type="submit" class="btn-save">

@@ -22,6 +22,7 @@ use App\Http\Controllers\ViolationController;
 use App\Http\Controllers\StudentClassAssignmentController;
 use App\Http\Controllers\TeachingAssignmentController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AchievementValidationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -82,3 +83,10 @@ Route::resource('subjects', SubjectController::class);
 
 // Route tambahan untuk mendapatkan nama jadwal pelajaran
 Route::get('subjects/schedule-names', [SubjectController::class, 'getScheduleNames'])->name('subjects.schedule-names');
+
+// Validasi prestasi oleh Guru BK
+Route::post('achievements/{achievement}/validate', [AchievementController::class, 'validateAchievement'])->name('achievements.validate');
+
+// Route untuk validasi prestasi oleh Guru BK
+Route::resource('achievement-validations', AchievementValidationController::class)->only(['index', 'show']);
+Route::post('achievement-validations/{achievement}/validate', [AchievementValidationController::class, 'validateAchievement'])->name('achievement-validations.validate');
