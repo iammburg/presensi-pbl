@@ -65,23 +65,20 @@
                                                     <div class="btn-group">
                                                         <button type="button"
                                                             class="btn btn-sm btn-outline-info dropdown-toggle"
-                                                            data-toggle="dropdown" aria-haspopup="true"
-                                                            aria-expanded="false">
+                                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             <i class="fas fa-cog"></i>
                                                         </button>
                                                         <div class="dropdown-menu">
                                                             <a class="dropdown-item"
                                                                 href="{{ route('manage-academic-years.edit', $academicYear->id) }}">Edit</a>
-                                                            <form id="delete-form-{{ $academicYear->id }}"
-                                                                action="{{ route('manage-academic-years.destroy', $academicYear->id) }}"
-                                                                method="POST" style="display: none;">
+                                                            <form action="{{ route('manage-academic-years.destroy', $academicYear->id) }}"
+                                                                method="POST"
+                                                                onsubmit="return confirm('Yakin ingin menghapus data ini?')">
                                                                 @csrf
                                                                 @method('DELETE')
+                                                                <button type="submit"
+                                                                    class="dropdown-item text-danger">Hapus</button>
                                                             </form>
-                                                            <button type="button" class="dropdown-item text-danger"
-                                                                onclick="confirmDelete({{ $academicYear->id }})">
-                                                                Hapus
-                                                            </button>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -106,24 +103,16 @@
     <script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function confirmDelete(id) {
-            Swal.fire({
-                title: 'Yakin ingin menghapus?',
-                text: "Data yang dihapus tidak bisa dikembalikan!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('delete-form-' + id).submit();
+
+    {{-- <script>
+        $(function () {
+            $('#datatable-main').DataTable({
+                responsive: true,
+                autoWidth: false,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
                 }
             });
-        }
-    </script>
+        });
+    </script> --}}
 @endpush
