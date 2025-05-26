@@ -21,7 +21,10 @@ use App\Http\Controllers\ClassScheduleController;
 use App\Http\Controllers\ViolationController;
 use App\Http\Controllers\StudentClassAssignmentController;
 use App\Http\Controllers\TeachingAssignmentController;
+use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AchievementValidationController;
+use App\Http\Controllers\ViolationValidationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -75,6 +78,11 @@ Route::resource('achievements', AchievementController::class);
 Route::resource('violations', ViolationController::class);
 Route::resource('kelola-pelanggaran', ViolationPointController::class);
 
+// Route buat Siswa
+Route::get('/manage-attendance-students', [StudentAttendanceController::class, 'index'])
+    ->middleware(['role:Siswa']);
+Route::get('/student/attendance', [StudentAttendanceController::class, 'index'])->name('student.attendance');
+
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
 
 // Route tambahan untuk subjects
@@ -82,3 +90,15 @@ Route::resource('subjects', SubjectController::class);
 
 // Route tambahan untuk mendapatkan nama jadwal pelajaran
 Route::get('subjects/schedule-names', [SubjectController::class, 'getScheduleNames'])->name('subjects.schedule-names');
+
+// Validasi prestasi oleh Guru BK
+Route::post('achievements/{achievement}/validate', [AchievementController::class, 'validateAchievement'])->name('achievements.validate');
+
+// Route untuk validasi prestasi oleh Guru BK
+Route::resource('achievement-validations', AchievementValidationController::class)->only(['index', 'show']);
+Route::post('achievement-validations/{achievement}/validate', [AchievementValidationController::class, 'validateAchievement'])->name('achievement-validations.validate');
+
+// Route untuk validasi pelanggaran oleh Guru BK
+Route::post('violations/{violation}/validate', [ViolationController::class, 'validateViolation'])->name('violations.validate');
+Route::resource('violation-validations', ViolationValidationController::class)->only(['index', 'show']);
+Route::post('violation-validations/{violation}/validate', [ViolationValidationController::class, 'validateViolation'])->name('violation-validations.validate');

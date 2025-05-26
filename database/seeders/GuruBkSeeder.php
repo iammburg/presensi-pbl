@@ -88,7 +88,7 @@ class GuruBkSeeder extends Seeder
         ]);
         $laporanPrestasi = Menu::create([
             'nama_menu' => 'Laporan Prestasi',
-            'url' => 'achievement-report',
+            'url' => 'achievement-validations',
             'icon' => '',
             'parent_id' => $prestasiMenu->id,
             'urutan' => 2

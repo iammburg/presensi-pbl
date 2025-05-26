@@ -18,13 +18,19 @@ class Violation extends Model
         'penalty',
         'reported_by',
         'evidence',
-        'status'
+        'status',
+        // Tambahan validasi
+        'validation_status',
+        'validator_id',
+        'validation_notes',
+        'validated_at',
     ];
 
     protected $casts = [
         'violation_date' => 'date',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
+        'validated_at' => 'datetime',
     ];
 
     public function student()
@@ -45,5 +51,10 @@ class Violation extends Model
     public function teacher()
     {
         return $this->belongsTo(Teacher::class, 'reported_by', 'nip');
+    }
+
+    public function validator()
+    {
+        return $this->belongsTo(Teacher::class, 'validator_id');
     }
 }

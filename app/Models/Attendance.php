@@ -19,4 +19,23 @@ class Attendance extends Model
         'notes',
         'recorded_by'
     ];
+
+    public function classSchedule()
+    {
+        return $this->belongsTo(ClassSchedule::class);
+    }
+    public function student()
+    {
+        return $this->belongsTo(Student::class);
+    }
+
+    public function academicYear()
+    {
+        return $this->belongsTo(AcademicYear::class, 'academic_year_id');
+    }
+
+    public function schoolClass()
+    {
+        return $this->belongsTo(SchoolClass::class, 'school_class_id');
+    }
 }

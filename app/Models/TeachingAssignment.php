@@ -18,9 +18,10 @@ class TeachingAssignment extends Model
         'class_id',
     ];
 
-    public function academicYear()
+
+    public function teacher()
     {
-        return $this->belongsTo(AcademicYear::class);
+        return $this->belongsTo(Teacher::class, 'teacher_id', 'nip');
     }
 
     public function subject()
@@ -28,15 +29,16 @@ class TeachingAssignment extends Model
         return $this->belongsTo(Subject::class);
     }
 
-    public function teacher()
-    {
-        return $this->belongsTo(Teacher::class, 'teacher_id', 'nip');
-    }
-
     public function class()
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
+
+    public function academicYear()
+    {
+        return $this->belongsTo(AcademicYear::class);
+    }
+
 
     public function classSchedules()
     {
