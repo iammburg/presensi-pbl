@@ -21,6 +21,7 @@ use App\Http\Controllers\ClassScheduleController;
 use App\Http\Controllers\ViolationController;
 use App\Http\Controllers\StudentClassAssignmentController;
 use App\Http\Controllers\TeachingAssignmentController;
+use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AchievementValidationController;
 use App\Http\Controllers\ViolationValidationController;
@@ -76,6 +77,11 @@ Route::resource('achievement-management', AchievementPointController::class);
 Route::resource('achievements', AchievementController::class);
 Route::resource('violations', ViolationController::class);
 Route::resource('kelola-pelanggaran', ViolationPointController::class);
+
+// Route buat Siswa
+Route::get('/manage-attendance-students', [StudentAttendanceController::class, 'index'])
+    ->middleware(['role:Siswa']);
+Route::get('/student/attendance', [StudentAttendanceController::class, 'index'])->name('student.attendance');
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
 
