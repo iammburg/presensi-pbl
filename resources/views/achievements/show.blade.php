@@ -34,7 +34,7 @@
                                     </tr>
                                     <tr>
                                         <th>Jenis Prestasi</th>
-                                        <td>{{ $achievement->achievementPoint->jenis_prestasi ?? '-' }} ({{ $achievement->achievementPoint->poin ?? '-' }} poin)</td>
+                                        <td>{{ $achievement->achievementPoint->achievement_type ?? '-' }} ({{ $achievement->achievementPoint->points ?? '-' }} poin)</td>
                                     </tr>
                                     <tr>
                                         <th>Tanggal Prestasi</th>
