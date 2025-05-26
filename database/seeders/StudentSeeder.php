@@ -99,7 +99,7 @@ class StudentSeeder extends Seeder
 
         // 6. Buat user siswa contoh
         User::factory()->create([
-            'name' => 'Siswa Contoh 1',
+            'name' => 'Popay',
             'email' => 'siswa1@example.com',
             'password' => Hash::make('Siswa123'),
         ]);
