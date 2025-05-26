@@ -42,9 +42,9 @@
                             @forelse ($achievements as $index => $item)
                                 <tr>
                                     <td>{{ $index + $achievements->firstItem() }}</td>
-                                    <td>{{ $item->jenis_prestasi }}</td>
-                                    <td>{{ $item->kategori_prestasi }}</td>
-                                    <td>{{ $item->poin }}</td>
+                                    <td>{{ $item->achievement_type }}</td>
+                                    <td>{{ $item->achievement_category }}</td>
+                                    <td>{{ $item->points }}</td>
                                     <td>
                                         <a href="{{ route('achievement-management.edit', $item->id) }}" class="btn btn-sm btn-warning">
                                             <i class="fas fa-edit"></i> Edit

@@ -21,9 +21,9 @@
         <div class="form-group">
             <label for="achievement_points_id">Jenis Prestasi</label>
             <select name="achievement_points_id" id="achievement_points_id" class="form-control" required>
-                <option value="">-- Pilih Jenis Prestasi --</option>
+                <option value="">Pilih Jenis Prestasi</option>
                 @foreach($achievementPoints as $point)
-                    <option value="{{ $point->id }}" {{ old('achievement_points_id') == $point->id ? 'selected' : '' }}>{{ $point->jenis_prestasi }} ({{ $point->kategori_prestasi }}, {{ $point->poin }} poin)</option>
+                    <option value="{{ $point->id }}" {{ old('achievement_points_id') == $point->id ? 'selected' : '' }}>{{ $point->achievement_type }} ({{ $point->achievement_category }}, {{ $point->points }} poin)</option>
                 @endforeach
             </select>
         </div>

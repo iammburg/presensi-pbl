@@ -36,9 +36,9 @@
 
                                 {{-- Jenis Prestasi --}}
                                 <div class="form-group">
-                                    <label for="jenis_prestasi">Jenis Prestasi</label>
-                                    <select id="jenis_prestasi" name="jenis_prestasi" class="form-control @error('jenis_prestasi') is-invalid @enderror" required>
-                                        <option value="" disabled {{ old('jenis_prestasi', $achievement->jenis_prestasi) ? '' : 'selected' }}>Pilih jenis prestasi</option>
+                                    <label for="achievement_type">Jenis Prestasi</label>
+                                    <select id="achievement_type" name="achievement_type" class="form-control @error('achievement_type') is-invalid @enderror" required>
+                                        <option value="" disabled {{ old('achievement_type', $achievement->achievement_type) ? '' : 'selected' }}>Pilih jenis prestasi</option>
                                         @php
                                             $jenisOptions = [
                                                 'Juara 1 Internasional',
@@ -47,38 +47,41 @@
                                                 'Juara 1 Nasional',
                                                 'Juara 2 Nasional',
                                                 'Juara 3 Nasional',
+                                                'Juara 1 Provinsi',
+                                                'Juara 2 Provinsi',
+                                                'Juara 3 Provinsi',
                                                 'Juara 1 Kota/Kabupaten',
                                                 'Juara 2 Kota/Kabupaten',
                                                 'Juara 3 Kota/Kabupaten',
                                             ];
                                         @endphp
                                         @foreach ($jenisOptions as $option)
-                                            <option value="{{ $option }}" {{ old('jenis_prestasi', $achievement->jenis_prestasi) == $option ? 'selected' : '' }}>{{ $option }}</option>
+                                            <option value="{{ $option }}" {{ old('achievement_type', $achievement->achievement_type) == $option ? 'selected' : '' }}>{{ $option }}</option>
                                         @endforeach
                                     </select>
-                                    @error('jenis_prestasi')
+                                    @error('achievement_type')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
                                 {{-- Kategori Prestasi --}}
                                 <div class="form-group">
-                                    <label for="kategori_prestasi">Kategori Prestasi</label>
-                                    <select id="kategori_prestasi" name="kategori_prestasi" class="form-control @error('kategori_prestasi') is-invalid @enderror" required>
-                                        <option value="" disabled {{ old('kategori_prestasi', $achievement->kategori_prestasi) ? '' : 'selected' }}>Pilih kategori prestasi</option>
-                                        <option value="Akademik" {{ old('kategori_prestasi', $achievement->kategori_prestasi) == 'Akademik' ? 'selected' : '' }}>Akademik</option>
-                                        <option value="Non Akademik" {{ old('kategori_prestasi', $achievement->kategori_prestasi) == 'Non Akademik' ? 'selected' : '' }}>Non Akademik</option>
+                                    <label for="achievement_category">Kategori Prestasi</label>
+                                    <select id="achievement_category" name="achievement_category" class="form-control @error('achievement_category') is-invalid @enderror" required>
+                                        <option value="" disabled {{ old('achievement_category', $achievement->achievement_category) ? '' : 'selected' }}>Pilih kategori prestasi</option>
+                                        <option value="Akademik" {{ old('achievement_category', $achievement->achievement_category) == 'Akademik' ? 'selected' : '' }}>Akademik</option>
+                                        <option value="Non Akademik" {{ old('achievement_category', $achievement->achievement_category) == 'Non Akademik' ? 'selected' : '' }}>Non Akademik</option>
                                     </select>
-                                    @error('kategori_prestasi')
+                                    @error('achievement_category')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
-                                {{-- Poin --}}
+                                {{-- Points --}}
                                 <div class="form-group">
-                                    <label for="poin">Poin</label>
-                                    <input type="number" id="poin" name="poin" class="form-control @error('poin') is-invalid @enderror" value="{{ old('poin', $achievement->poin) }}" required>
-                                    @error('poin')
+                                    <label for="points">Points</label>
+                                    <input type="number" id="points" name="points" class="form-control @error('points') is-invalid @enderror" value="{{ old('points', $achievement->points) }}" required>
+                                    @error('points')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
