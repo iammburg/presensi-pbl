@@ -5,10 +5,18 @@
 @endsection
 
 @push('css')
-    <!-- DataTables -->
     <link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        .dropdown-menu { min-width: 100px; z-index: 1050 !important; }
+        .dropdown-menu a, .dropdown-menu button.dropdown-item { font-size: 0.95rem; padding: 10px 18px; }
+        .dropdown-menu .dropdown-item.text-danger { color: #e74c3c !important; font-weight: 500; }
+        .dropdown-menu .dropdown-item.text-danger:hover { background: #ffeaea; color: #c0392b !important; }
+        .dropdown-menu { border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    </style>
 @endpush
 
 @section('content')
@@ -35,7 +43,7 @@
                         <div class="card-header">
                             <h3 class="card-title">Kelola Data Tahun Akademik</h3>
                             <div class="card-tools">
-                                <a href="{{ route('manage-academic-years.create') }}" class="btn btn-primary">
+                                <a href="{{ route('manage-academic-years.create') }}" class="btn btn-primary btn-sm">
                                     <i class="fas fa-plus-circle"></i> Tambah Data
                                 </a>
                             </div>
@@ -60,25 +68,35 @@
                                                 <td>{{ $academicYear->start_year }}</td>
                                                 <td>{{ $academicYear->end_year }}</td>
                                                 <td>{{ $academicYear->semester == 0 ? 'Ganjil' : 'Genap' }}</td>
-                                                <td>{{ $academicYear->is_active ? 'Aktif' : 'Tidak Aktif' }}</td>
+                                                <td>
+                                                    @if ($academicYear->is_active)
+                                                        <span class="badge badge-success">Aktif</span>
+                                                    @else
+                                                        <span class="badge badge-danger">Tidak Aktif</span>
+                                                    @endif
+                                                </td>
                                                 <td>
                                                     <div class="btn-group">
                                                         <button type="button"
-                                                            class="btn btn-sm btn-outline-info dropdown-toggle"
-                                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                class="btn btn-sm btn-outline-info dropdown-toggle"
+                                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             <i class="fas fa-cog"></i>
                                                         </button>
                                                         <div class="dropdown-menu">
                                                             <a class="dropdown-item"
-                                                                href="{{ route('manage-academic-years.edit', $academicYear->id) }}">Edit</a>
-                                                            <form action="{{ route('manage-academic-years.destroy', $academicYear->id) }}"
-                                                                method="POST"
-                                                                onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                                                href="{{ route('manage-academic-years.edit', $academicYear->id) }}">
+                                                                <i class="fas fa-edit mr-2"></i>Edit
+                                                            </a>
+                                                            <form id="delete-form-{{ $academicYear->id }}"
+                                                                  action="{{ route('manage-academic-years.destroy', $academicYear->id) }}"
+                                                                  method="POST" style="display: none;">
                                                                 @csrf
                                                                 @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="dropdown-item text-danger">Hapus</button>
                                                             </form>
+                                                            <button type="button" class="dropdown-item text-danger"
+                                                                    onclick="confirmDelete('{{ $academicYear->id }}', '{{ $academicYear->start_year }}/{{ $academicYear->end_year }} - {{ $academicYear->semester == 0 ? 'Ganjil' : 'Genap' }}')">
+                                                                <i class="fas fa-trash mr-2"></i>Hapus
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -96,23 +114,75 @@
 @endsection
 
 @push('js')
-    <!-- DataTables Scripts -->
     <script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('plugins/toastr/toastr.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- <script>
-        $(function () {
+    <script>
+        // Debugging to track script execution
+        console.log('DataTable script loaded at: ' + new Date().toISOString());
+
+        // Initialize DataTable on page load or Turbolinks load
+        document.addEventListener('turbolinks:load', function () {
+            console.log('Turbolinks load event triggered');
+
+            // Destroy existing DataTable instance if it exists
+            if ($.fn.DataTable.isDataTable('#datatable-main')) {
+                console.log('Destroying existing DataTable instance');
+                $('#datatable-main').DataTable().destroy();
+            }
+
+            // Initialize DataTable
+            console.log('Initializing new DataTable instance');
             $('#datatable-main').DataTable({
                 responsive: true,
                 autoWidth: false,
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                },
+                columnDefs: [
+                    { "orderable": false, "targets": 5 } // Disable ordering for 'Aksi' column
+                ]
+            });
+
+            // Toastr notifications for errors from validation
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    toastr.error('{{ $error }}');
+                @endforeach
+            @endif
+
+            // Toastr notification for success message from session
+            @if (session('success'))
+                toastr.success('{{ session('success') }}');
+            @endif
+
+            // Toastr notification for error message from session
+            @if (session('error'))
+                toastr.error('{{ session('error') }}');
+            @endif
+        });
+
+        function confirmDelete(academicYearId, academicYearName) {
+            Swal.fire({
+                title: 'Yakin ingin menghapus?',
+                html: "Anda akan menghapus tahun akademik: <br><strong>" + academicYearName + "</strong><br>Data yang dihapus tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + academicYearId).submit();
                 }
             });
-        });
-    </script> --}}
+        }
+    </script>
 @endpush
