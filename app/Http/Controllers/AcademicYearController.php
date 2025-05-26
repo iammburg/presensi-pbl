@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule; // << Import kelas Rule
 
 class AcademicYearController extends Controller
 {
@@ -30,10 +31,22 @@ class AcademicYearController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'start_year' => 'required|integer|min:2000|max:2100',
-            'end_year' => 'required|integer|gt:start_year',
-            'semester' => 'required|in:0,1',
-            'is_active' => 'required|in:0,1',
+            'start_year' => 'required|integer|min:2000|max:2100|digits:4',
+            'end_year' => 'required|integer|gt:start_year|digits:4',
+            'semester' => [
+                'required',
+                'in:0,1',
+                Rule::unique('academic_years')->where(function ($query) use ($request) {
+                    return $query->where('start_year', $request->start_year);
+                }),
+                // Aturan di atas akan memeriksa apakah ada baris di tabel 'academic_years'
+                // yang memiliki 'semester' SAMA DENGAN $request->semester DAN
+                // 'start_year' SAMA DENGAN $request->start_year.
+            ],
+            'is_active' => 'required|boolean',
+        ], [
+            // Pesan error kustom untuk aturan unique pada field semester
+            'semester.unique' => 'Kombinasi Tahun Mulai dan Semester ini sudah ada.',
         ]);
 
         AcademicYear::create([
@@ -59,12 +72,23 @@ class AcademicYearController extends Controller
      */
     public function update(Request $request, AcademicYear $manage_academic_year)
     {
-        $request->validate([
-            'tahun' => 'required|integer',
-            'semester' => 'required|in:ganjil,genap',
+        $validatedData = $request->validate([
+            'start_year' => 'required|integer|min:2000|max:2100|digits:4',
+            'end_year' => 'required|integer|gt:start_year|digits:4',
+            'semester' => [
+                'required',
+                'in:0,1',
+                Rule::unique('academic_years')->where(function ($query) use ($request) {
+                    return $query->where('start_year', $request->start_year);
+                })->ignore($manage_academic_year->id), // Abaikan record saat ini ketika memeriksa keunikan
+            ],
+            'is_active' => 'required|boolean',
+        ], [
+            // Pesan error kustom
+            'semester.unique' => 'Kombinasi Tahun Mulai dan Semester ini sudah ada.',
         ]);
 
-        $manage_academic_year->update($request->only('tahun', 'semester'));
+        $manage_academic_year->update($validatedData);
 
         return redirect()->route('manage-academic-years.index')
             ->with('success', 'Tahun akademik berhasil diperbarui.');
