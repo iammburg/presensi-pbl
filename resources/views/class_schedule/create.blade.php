@@ -148,7 +148,7 @@
                     class="btn btn-sm btn-outline-danger mt-4" 
                     onclick="this.closest('.row').remove()"
                 >
-                    ✖
+                    Hapus
                 </button>
             </div>
         `;
