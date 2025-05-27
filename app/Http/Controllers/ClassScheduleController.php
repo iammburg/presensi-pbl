@@ -269,135 +269,103 @@ public function store(Request $request)
 
     public function exportPdf(ClassSchedule $manage_schedule)
 {
-    try {
-        // Ambil semua jadwal untuk kelas yang sama
-        $allSchedules = ClassSchedule::with([
-                'assignment.subject', 
-                'assignment.teacher', 
-                'hour', 
-                'schoolClass'
-            ])
-            ->where('class_id', $manage_schedule->class_id)
-            ->orderBy('day_of_week')
-            ->orderBy('hour_id')
-            ->get();
+    // Ambil semua jadwal untuk kelas yang sama
+    $allSchedules = ClassSchedule::with([
+            'assignment.subject', 
+            'assignment.teacher', 
+            'hour', 
+            'schoolClass'
+        ])
+        ->where('class_id', $manage_schedule->class_id)
+        ->orderBy('day_of_week')
+        ->orderBy('hour_id')
+        ->get();
 
-        $days = [
-            1 => 'Senin',
-            2 => 'Selasa', 
-            3 => 'Rabu',
-            4 => 'Kamis',
-            5 => 'Jumat'
-        ];
+    $days = [
+        1 => 'Senin',
+        2 => 'Selasa', 
+        3 => 'Rabu',
+        4 => 'Kamis',
+        5 => 'Jumat'
+    ];
 
-        $schedulesPerDay = [];
+    $schedulesPerDay = [];
+    
+    foreach ($days as $dayNumber => $dayName) {
+        $daySchedules = $allSchedules->where('day_of_week', $dayNumber);
+        $groupedSchedules = [];
         
-        foreach ($days as $dayNumber => $dayName) {
-            $daySchedules = $allSchedules->where('day_of_week', $dayNumber);
-            $groupedSchedules = [];
+        if ($daySchedules->isNotEmpty()) {
+            $currentGroup = null;
             
-            if ($daySchedules->isNotEmpty()) {
-                $currentGroup = null;
+            foreach ($daySchedules->sortBy('hour.slot_number') as $schedule) {
+                $sessionType = $schedule->assignment_id ? 'Jam Pelajaran' : 'Jam Istirahat';
+                $assignmentId = $schedule->assignment_id;
                 
-                foreach ($daySchedules->sortBy('hour.slot_number') as $schedule) {
-                    $sessionType = $schedule->assignment_id ? 'Jam Pelajaran' : 'Jam Istirahat';
-                    $assignmentId = $schedule->assignment_id;
+                if ($currentGroup && 
+                    $currentGroup['session_type'] === $sessionType && 
+                    $currentGroup['assignment_id'] === $assignmentId &&
+                    $currentGroup['end_hour_id'] + 1 === $schedule->hour_id) {
                     
-                    if ($currentGroup && 
-                        $currentGroup['session_type'] === $sessionType && 
-                        $currentGroup['assignment_id'] === $assignmentId &&
-                        $currentGroup['end_hour_id'] + 1 === $schedule->hour_id) {
-                        
-                        $currentGroup['end_hour_id'] = $schedule->hour_id;
-                        $currentGroup['end_hour_slot'] = $schedule->hour->slot_number;
-                        $currentGroup['end_time'] = $schedule->hour->end_time ?? $currentGroup['end_time'];
-                        $currentGroup['hour_times'][$schedule->hour->slot_number] = $schedule->hour->start_time;
-                        $currentGroup['hour_end_times'][$schedule->hour->slot_number] = $schedule->hour->end_time;
-                        $currentGroup['hour_schedules'][$schedule->hour->slot_number] = $schedule;
-                    } else {
-                        if ($currentGroup) {
-                            $groupedSchedules[] = $currentGroup;
-                        }
-                        $currentGroup = [
-                            'session_type' => $sessionType,
-                            'start_hour_id' => $schedule->hour_id,
-                            'end_hour_id' => $schedule->hour_id,
-                            'start_hour_slot' => $schedule->hour->slot_number,
-                            'end_hour_slot' => $schedule->hour->slot_number,
-                            'assignment_id' => $assignmentId,
-                            'subject_name' => $schedule->assignment->subject->name ?? null,
-                            'teacher_name' => $schedule->assignment->teacher->name ?? null,
-                            'start_time' => $schedule->hour->start_time ?? null,
-                            'end_time' => $schedule->hour->end_time ?? null,
-                            'hour_times' => [
-                                $schedule->hour->slot_number => $schedule->hour->start_time
-                            ],
-                            'hour_end_times' => [
-                                $schedule->hour->slot_number => $schedule->hour->end_time
-                            ],
-                            'hour_schedules' => [
-                                $schedule->hour->slot_number => $schedule
-                            ]
-                        ];
+                    $currentGroup['end_hour_id'] = $schedule->hour_id;
+                    $currentGroup['end_hour_slot'] = $schedule->hour->slot_number;
+                    $currentGroup['end_time'] = $schedule->hour->end_time ?? $currentGroup['end_time'];
+                    $currentGroup['hour_times'][$schedule->hour->slot_number] = $schedule->hour->start_time;
+                    $currentGroup['hour_end_times'][$schedule->hour->slot_number] = $schedule->hour->end_time;
+                    $currentGroup['hour_schedules'][$schedule->hour->slot_number] = $schedule;
+                } else {
+                    if ($currentGroup) {
+                        $groupedSchedules[] = $currentGroup;
                     }
-                }
-
-                if ($currentGroup) {
-                    $groupedSchedules[] = $currentGroup;
+                    $currentGroup = [
+                        'session_type' => $sessionType,
+                        'start_hour_id' => $schedule->hour_id,
+                        'end_hour_id' => $schedule->hour_id,
+                        'start_hour_slot' => $schedule->hour->slot_number,
+                        'end_hour_slot' => $schedule->hour->slot_number,
+                        'assignment_id' => $assignmentId,
+                        'subject_name' => $schedule->assignment->subject->name ?? null,
+                        'teacher_name' => $schedule->assignment->teacher->name ?? null,
+                        'start_time' => $schedule->hour->start_time ?? null,
+                        'end_time' => $schedule->hour->end_time ?? null,
+                        'hour_times' => [
+                            $schedule->hour->slot_number => $schedule->hour->start_time
+                        ],
+                        'hour_end_times' => [
+                            $schedule->hour->slot_number => $schedule->hour->end_time
+                        ],
+                        'hour_schedules' => [
+                            $schedule->hour->slot_number => $schedule
+                        ]
+                    ];
                 }
             }
-            
-            $schedulesPerDay[$dayName] = $groupedSchedules;
+
+            if ($currentGroup) {
+                $groupedSchedules[] = $currentGroup;
+            }
         }
-
-        // Render HTML dengan error handling
-        $html = view('class_schedule.pdf', [
-            'schedule' => $manage_schedule,
-            'schedulesPerDay' => $schedulesPerDay,
-            'days' => array_values($days),
-            'class' => $manage_schedule->schoolClass
-        ])->render();
-
-        // Debugging: Uncomment baris ini untuk melihat HTML yang dihasilkan
-        // return response($html);
-
-        // Kirim ke html2pdf.app
-        $response = Http::timeout(30)->asForm()->post('https://html2pdf.app/api/v1/generate', [
-            'html' => $html,
-            'apiKey' => 'demo',
-            'format' => 'A4',
-            'orientation' => 'portrait'
-        ]);
-
-        // Cek response dari API
-        if (!$response->successful()) {
-            \Log::error('PDF Generation Failed', [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
-            
-            return response()->json([
-                'error' => 'Gagal generate PDF. Status: ' . $response->status()
-            ], 500);
-        }
-
-        // Return PDF
-        return response($response->body(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="jadwal-kelas-' . 
-                ($manage_schedule->schoolClass->name ?? 'unknown') . '.pdf"',
-        ]);
-
-    } catch (\Exception $e) {
-        \Log::error('PDF Export Error', [
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
         
-        return response()->json([
-            'error' => 'Terjadi kesalahan: ' . $e->getMessage()
-        ], 500);
+        $schedulesPerDay[$dayName] = $groupedSchedules;
     }
+
+    // ✅ GANTI view() agar mengarah ke view yang benar
+    $html = view('class_schedule.pdf', [
+        'schedule' => $manage_schedule,
+        'schedulesPerDay' => $schedulesPerDay,
+        'days' => array_values($days),
+        'class' => $manage_schedule->schoolClass
+    ])->render();
+
+    $response = Http::asForm()->post('https://html2pdf.app/api/v1/generate', [
+        'html' => $html,
+        'apiKey' => 'demo', // Ganti jika punya API Key sendiri
+    ]);
+
+    return response($response->body(), 200, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'attachment; filename="jadwal-kelas.pdf"',
+    ]);
 }
 
 
