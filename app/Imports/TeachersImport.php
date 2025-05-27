@@ -28,6 +28,7 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
         // Mapping berbagai kemungkinan nama kolom
         $this->headerMap = [
             'nip' => ['nip', 'nomor_induk', 'nomor_induk_pegawai', 'no_induk', 'nip_guru'],
+            'dapodik_number' => ['dapodik_number', 'nomor_dapodik', 'no_dapodik', 'dapodik'],
             'nama' => ['nama', 'name', 'nama_lengkap', 'nama_guru'],
             'email' => ['email', 'surel', 'alamat_email', 'email_guru'],
             'telepon' => ['telepon', 'telp', 'hp', 'no_hp', 'nomor_telepon', 'no_telepon', 'handphone', 'phone'],
@@ -74,6 +75,7 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             $alamatKey = $this->findHeaderKey($row, 'alamat');
             $jenisKelaminKey = $this->findHeaderKey($row, 'jenis_kelamin');
             $tanggalLahirKey = $this->findHeaderKey($row, 'tanggal_lahir');
+            $dapodikKey = $this->findHeaderKey($row, 'dapodik_number');
 
             // Validasi semua field required ada
             if (!$nipKey || !$namaKey || !$emailKey || !$teleponKey ||
@@ -99,12 +101,12 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             $nip = $this->formatNIP($row[$nipKey]);
 
             // Mulai transaksi database
-            return DB::transaction(function() use ($row, $nip, $namaKey, $emailKey, $teleponKey, $alamatKey, $gender, $birthDate) {
+            return DB::transaction(function() use ($row, $nip, $namaKey, $emailKey, $teleponKey, $alamatKey, $gender, $birthDate, $dapodikKey) {
                 // Buat user account
                 $user = User::create([
                     'name' => $row[$namaKey],
                     'email' => $row[$emailKey],
-                    'password' => Hash::make('password123')
+                    'password' => Hash::make($nip . date('dmY', strtotime($birthDate))) // Password berisi NIP(1234567890) dan tanggal lahir(1990-01-01): 123456789001011190
                 ]);
 
                 try {
@@ -117,6 +119,7 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
                 // Buat data guru
                 $teacher = new Teacher([
                     'nip' => $nip,
+                    'dapodik_number' => $dapodikKey ? substr($row[$dapodikKey], 0, 16) : null,
                     'name' => $row[$namaKey],
                     'phone' => $row[$teleponKey],
                     'address' => $row[$alamatKey],

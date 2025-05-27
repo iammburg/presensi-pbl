@@ -23,6 +23,15 @@
                                     </span>
                                 @enderror
                             </div>
+                            <div class="form-group">
+                                <label for="dapodik_number">Nomor Dapodik</label>
+                                <input type="text" maxlength="16" class="form-control @error('dapodik_number') is-invalid @enderror" id="dapodik_number" name="dapodik_number" value="{{ old('dapodik_number') }}">
+                                @error('dapodik_number')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
 
                             <div class="form-group">
                                 <label for="name">Nama Lengkap</label>
