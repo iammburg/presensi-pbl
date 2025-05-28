@@ -41,7 +41,8 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-10 offset-md-1">
-                <div class="card card-danger card-outline">
+                {{-- Mengubah card-danger menjadi card-primary --}}
+                <div class="card card-primary card-outline">
                     <div class="card-header">
                         <h3 class="card-title">Formulir Laporan Pelanggaran</h3>
                     </div>
@@ -49,6 +50,7 @@
                         @csrf
                         <div class="card-body">
                             @if ($errors->any())
+                                {{-- Pesan error tetap menggunakan alert-danger untuk penekanan --}}
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                     <strong><i class="fas fa-exclamation-triangle"></i> Terjadi Kesalahan:</strong>
                                     <ul>
@@ -63,6 +65,7 @@
                             @endif
 
                             <div class="form-group mb-3">
+                                {{-- Tanda * tetap text-danger untuk menandakan wajib --}}
                                 <label for="student_id">Siswa <span class="text-danger">*</span></label>
                                 <select name="student_id" id="student_id" class="form-control @error('student_id') is-invalid @enderror" required>
                                     <option value="">-- Pilih Siswa --</option>
@@ -177,7 +180,8 @@
                         <div class="card-footer">
                             <div class="d-flex justify-content-between">
                                 <a href="{{ route('violations.index') }}" class="btn btn-secondary"><i class="fas fa-times mr-1"></i> Batal</a>
-                                <button type="submit" class="btn btn-danger"><i class="fas fa-paper-plane mr-1"></i> Laporkan Pelanggaran</button>
+                                {{-- Mengubah btn-danger menjadi btn-primary --}}
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane mr-1"></i> Laporkan Pelanggaran</button>
                             </div>
                         </div>
                     </form>
@@ -203,8 +207,8 @@
         } else {
             // Fallback manual jika bsCustomFileInput tidak ada
             $('.custom-file-input').on('change', function() {
-               let fileName = $(this).val().split('\\').pop();
-               $(this).next('.custom-file-label').addClass("selected").html(fileName || "Pilih file...");
+                let fileName = $(this).val().split('\\').pop();
+                $(this).next('.custom-file-label').addClass("selected").html(fileName || "Pilih file...");
             });
         }
 

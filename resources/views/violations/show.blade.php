@@ -5,7 +5,7 @@
 @endsection
 
 @push('css')
-    {{-- Tambahan CSS jika diperlukan --}}
+    Tambahan CSS jika diperlukan
     <style>
         .table-borderless th,
         .table-borderless td {

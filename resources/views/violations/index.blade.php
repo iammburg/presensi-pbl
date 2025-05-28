@@ -33,7 +33,8 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="card card-danger card-outline">
+                    {{-- Card theme changed to primary --}}
+                    <div class="card card-primary card-outline">
                         <div class="card-header">
                             <h3 class="card-title">Data Laporan Pelanggaran</h3>
                             <div class="card-tools">
@@ -45,7 +46,9 @@
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table id="datatable-violations" class="table table-bordered table-striped">
-                                    <thead class="bg-danger text-white">
+                                    {{-- Table header background changed to bg-tertiary --}}
+                                    {{-- Ensure .bg-tertiary is defined in your CSS for the desired blue color --}}
+                                    <thead class="bg-tertiary text-white">
                                         <tr>
                                             <th>No</th>
                                             <th>Nama Siswa</th>
@@ -213,8 +216,8 @@
                 text: "Laporan pelanggaran ini akan dihapus secara permanen!",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
+                confirmButtonColor: '#d33', // Red color for delete button
+                cancelButtonColor: '#6c757d', // Secondary color for cancel button
                 confirmButtonText: 'Ya, hapus!',
                 cancelButtonText: 'Batal'
             }).then((result) => {
