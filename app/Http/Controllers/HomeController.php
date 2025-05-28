@@ -15,23 +15,22 @@ class HomeController extends Controller
 
     public function index()
     {
-        $today = Carbon::today()->toDateString();
+        if (auth()->user()->hasRole('superadmin')) {
+            return $this->superadminDashboard();
+        }
+
+        // Dashboard Guru (tidak diubah)
+        $selectedDate = request()->date ?? Carbon::today()->toDateString();
         $userId = Auth::id();
-
-        // Get teaching assignments for the current teacher
         $teacherId = DB::table('teachers')->where('user_id', $userId)->value('nip');
-        
-        $teachingAssignments = DB::table('teaching_assignments')
-            ->where('teacher_id', $teacherId)
-            ->pluck('class_id');
 
-        $dataQuery = DB::table('attendances')
+        $data = DB::table('attendances')
             ->join('class_schedules', 'attendances.class_schedule_id', '=', 'class_schedules.id')
             ->join('classes', 'class_schedules.class_id', '=', 'classes.id')
             ->join('hours', 'class_schedules.hour_id', '=', 'hours.id')
             ->join('teaching_assignments', 'class_schedules.assignment_id', '=', 'teaching_assignments.id')
             ->where('teaching_assignments.teacher_id', $teacherId)
-            ->whereDate('attendances.meeting_date', $today)
+            ->whereDate('attendances.meeting_date', $selectedDate)
             ->select(
                 'hours.slot_number',
                 'hours.start_time',
@@ -44,53 +43,78 @@ class HomeController extends Controller
                 DB::raw("SUM(CASE WHEN LOWER(attendances.status) IN ('abses', 'sakit', 'izin') THEN 1 ELSE 0 END) as tidak_hadir")
             )
             ->groupBy('hours.slot_number', 'hours.start_time', 'hours.end_time', 'classes.name', 'classes.parallel_name')
-            ->orderBy('hours.slot_number');
-
-        $data = $dataQuery->get()
+            ->orderBy('hours.slot_number')
+            ->get()
             ->map(function ($item) {
                 $item->jam_pelajaran = "Jam {$item->slot_number} (" . date('H:i', strtotime($item->start_time)) . " - " . date('H:i', strtotime($item->end_time)) . ")";
                 $item->kelas = "{$item->class_name}-{$item->parallel_name}";
                 return $item;
             });
 
-        // If no data, create sample data similar to the screenshot
-        if ($data->isEmpty()) {
-            $data = collect([
-                (object)[
-                    'jam_pelajaran' => 'Jam 1 (07.00 - 07.45)',
-                    'kelas' => 'XI-A',
-                    'hadir' => 25,
-                    'total' => 30,
-                    'terlambat' => 0,
-                    'tidak_hadir' => 5
-                ],
-                (object)[
-                    'jam_pelajaran' => 'Jam 2 - Jam 3 (07.45 - 09.00)',
-                    'kelas' => 'XII-B',
-                    'hadir' => 20,
-                    'total' => 30,
-                    'terlambat' => 2,
-                    'tidak_hadir' => 8
-                ],
-                (object)[
-                    'jam_pelajaran' => 'Jam 4 - Jam 5 (09.00 - 10.30)',
-                    'kelas' => 'X-D',
-                    'hadir' => 28,
-                    'total' => 30,
-                    'terlambat' => 1,
-                    'tidak_hadir' => 1
-                ],
-                (object)[
-                    'jam_pelajaran' => 'Jam 6 - Jam 9 (10.30 - 14.00)',
-                    'kelas' => 'X-F',
-                    'hadir' => 30,
-                    'total' => 30,
-                    'terlambat' => 0,
-                    'tidak_hadir' => 0
-                ]
-            ]);
+        return view('home', compact('data', 'selectedDate'));
+    }
+
+    protected function superadminDashboard()
+    {
+        // Get user statistics from database
+        $userStats = [
+            'total_users' => DB::table('users')->count(),
+            'total_admins' => DB::table('model_has_roles')
+                ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+                ->where('roles.name', 'Admin Sekolah')->count(),
+            'total_teachers' => DB::table('teachers')->count(),
+            'total_students' => DB::table('students')->count(),
+            'active_users' => 0, // kolom belum tersedia
+            'inactive_users' => 0,
+        ];
+
+
+        // Get activity logs from database (assuming you have an activity_logs table)
+        $activityLogs = DB::table('users')
+            ->join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+            ->select(
+                'users.name as user',
+                'roles.name as role',
+                DB::raw("'Melakukan aktivitas' as activity"), // Placeholder - replace with actual activity column if available
+                'users.updated_at as time'
+            )
+            ->orderBy('users.updated_at', 'desc')
+            ->limit(3)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'user' => $item->user,
+                    'role' => $item->role,
+                    'activity' => $item->activity,
+                    'time' => Carbon::parse($item->time)->format('d.m.Y - h:i A')
+                ];
+            });
+
+        // Get monthly user data for chart
+        $monthlyData = DB::table('users')
+            ->select(
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('COUNT(*) as count')
+            )
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        $chartData = [
+            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            'current_year' => array_fill(0, 12, 0),
+        ];
+
+        foreach ($monthlyData as $data) {
+            $chartData['current_year'][$data->month - 1] = $data->count;
         }
 
-        return view('home', compact('data'));
+        return view('home', [
+            'userStats' => $userStats,
+            'chartData' => $chartData,
+            'activityLogs' => $activityLogs,
+        ]);
     }
 }
