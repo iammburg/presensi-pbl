@@ -30,7 +30,7 @@ class HomeController extends Controller
 
     public function index()
     {
-        if (auth()->user()->hasRole('Admin Sekolah')) {
+        if (Auth::user()->hasRole('Admin Sekolah')) {
 
             // Total siswa aktif
             $activeStudents = Student::where('is_active', true)->count();
