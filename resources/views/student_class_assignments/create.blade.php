@@ -13,94 +13,129 @@
             font-family: 'Roboto', sans-serif;
         }
 
-        .table thead th,
-        .table tbody td {
-            vertical-align: middle;
-            text-align: center;
+       /* CSS Tambahan untuk DataTable Sorting dan Search */
+
+/* Perbaikan untuk header sorting */
+        .table thead th.sorting,
+        .table thead th.sorting_asc,
+        .table thead th.sorting_desc {
+            position: relative;
+            cursor: pointer;
+            padding-right: 30px !important;
         }
 
-        .table thead th:nth-child(4),
-        .table tbody td:nth-child(4) {
-            text-align: left;
+        .table thead th.sorting:after,
+        .table thead th.sorting_asc:after,
+        .table thead th.sorting_desc:after {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: block;
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-size: 12px;
         }
 
-        .table-sm th,
-        .table-sm td {
-            padding: 0.3rem;
+        .table thead th.sorting:after {
+            content: '\f0dc'; /* fa-sort */
+            opacity: 0.6;
         }
 
-        .btn-primary {
-            background-color: #1777e5;
-            border: none;
+        .table thead th.sorting_asc:after {
+            content: '\f0de'; /* fa-sort-up */
+            opacity: 1;
         }
 
-        .btn-primary:hover {
-            background-color: #1266c4;
+        .table thead th.sorting_desc:after {
+            content: '\f0dd'; /* fa-sort-down */
+            opacity: 1;
         }
 
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            padding: 0.2rem 0.4rem;
-            margin-left: 2px;
-            background-color: #f4f4f4;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            color: #1777e5 !important;
-            font-size: 0.75rem;
+        /* Style untuk search box */
+        .dataTables_filter {
+            margin-bottom: 15px;
         }
 
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background-color: #1777e5 !important;
-            color: white !important;
-            border: 1px solid #1777e5;
-            font-size: 0.75rem;
-        }
-
-        .dataTables_wrapper .dataTables_paginate {
-            margin-top: 0.5rem;
-            display: flex;
-            justify-content: end;
-            align-items: center;
-            font-size: 0.75rem;
-        }
-
-        .dataTables_info {
-            color: #1777e5;
-            font-size: 0.90rem;
-            margin-top: 0.5rem;
-        }
-
-        .dataTables_length label {
+        .dataTables_filter label {
             font-weight: 500;
-            color: #1777e5;
-            font-size: 0.9rem;
+            color: #183C70;
             display: flex;
             align-items: center;
+            gap: 10px;
         }
 
-        .dataTables_length select {
-            min-width: 50px;
-            margin: 0 0.3rem;
-            padding: 0.3rem 0.5rem;
-            font-size: 0.85rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: #fff;
-            color: #1777e5;
-            appearance: none;
+        .dataTables_filter input {
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            min-width: 250px;
         }
 
-        .dataTables_length select:focus {
-            outline: none;
-            border-color: #1777e5;
-            box-shadow: 0 0 0 0.1rem rgba(23, 119, 229, 0.25);
+        .dataTables_filter input:focus {
+            border-color: #183C70;
+            box-shadow: 0 0 0 0.2rem rgba(24, 60, 112, 0.25);
+            outline: 0;
         }
 
-        #studentsTable tbody tr:nth-child(odd) {
-            background-color: #f4f4f4;
+        /* Style untuk custom sort buttons (jika digunakan) */
+        .btn-group .btn-outline-primary {
+            border-color: #183C70;
+            color: #183C70;
+            font-size: 12px;
+            padding: 6px 12px;
         }
 
-        #studentsTable tbody tr:nth-child(even) {
-            background-color: #ffffff;
+        .btn-group .btn-outline-primary:hover,
+        .btn-group .btn-outline-primary.active {
+            background-color: #183C70;
+            border-color: #183C70;
+            color: white;
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            .dataTables_filter input {
+                min-width: 200px;
+            }
+            
+            .btn-group {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            .btn-group .btn-outline-primary {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+        }
+
+        /* Loading spinner untuk processing */
+        .dataTables_processing {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            margin-left: -100px;
+            margin-top: -25px;
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Highlight untuk baris yang dipilih */
+        #studentsTable tbody tr:has(.row-select:checked) {
+            background-color: rgba(24, 60, 112, 0.1) !important;
+        }
+
+        #studentsTable tbody tr:has(.row-select:checked):hover {
+            background-color: rgba(24, 60, 112, 0.15) !important;
         }
 
         .badge-no-class {
@@ -122,6 +157,21 @@
         .row-select {
             transform: scale(1.2);
             cursor: pointer;
+        }
+
+        #studentsTable tbody td:last-child {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 0.3rem !important;
+            height: 100% !important;
+            min-height: 40px !important;
+        }
+
+/* Pastikan semua sel td memiliki tinggi yang sama */
+        #studentsTable tbody td {
+            vertical-align: middle !important;
+            height: 40px !important;
         }
 
         .select-all-container {
@@ -409,305 +459,434 @@
     <script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        $(function() {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            });
+   <script>
+    $(function() {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    });
 
-            // Store selected students across pages
-            let selectedStudents = new Set();
+    // Store selected students across pages
+    let selectedStudents = new Set();
 
-            const table = $('#studentsTable').DataTable({
-                processing: true,
-                serverSide: true,
-                responsive: true,
-                pagingType: 'simple_numbers',
-                pageLength: 10,
-                lengthMenu: [
-                    [10, 25, 50, 100],
-                    [10, 25, 50, 100]
-                ],
-                ajax: '{{ route('manage-student-class-assignments.create') }}',
-                columns: [{
-                        data: 'DT_RowIndex',
-                        name: 'DT_RowIndex',
-                        className: 'text-center',
-                        orderable: false,
-                        searchable: false,
-                        width: '60px'
-                    },
-                    {
-                        data: 'nisn',
-                        name: 'nisn',
-                        className: 'text-center',
-                        width: '100px'
-                    },
-                    {
-                        data: 'nis',
-                        name: 'nis',
-                        className: 'text-center',
-                        width: '100px'
-                    },
-                    {
-                        data: 'name',
-                        name: 'name',
-                        className: 'text-left'
-                    },
-                    {
-                        data: 'gender',
-                        name: 'gender',
-                        className: 'text-center',
-                        width: '120px'
-                    },
-                    {
-                        data: 'enter_year',
-                        name: 'enter_year',
-                        className: 'text-center',
-                        width: '100px'
-                    },
-                    {
-                        data: 'class_name',
-                        name: 'class_name',
-                        className: 'text-center',
-                        orderable: true,
-                        searchable: true,
-                        width: '150px',
-                        render: function(data, type, row) {
-                            if (type === 'display') {
-                                if (!data || data === '-' || data === '' || data === null) {
-                                    return '<span class="badge-no-class">Belum Ada Kelas</span>';
-                                }
-                                return '<span class="badge-has-class">' + data + '</span>';
-                            }
-                            // Untuk sorting dan filtering: return raw value
-                            return data || '';
+    const table = $('#studentsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        responsive: true,
+        pagingType: 'simple_numbers',
+        pageLength: 10,
+        lengthMenu: [
+            [10, 25, 50, 100],
+            [10, 25, 50, 100]
+        ],
+        ajax: '{{ route('manage-student-class-assignments.create') }}',
+        columns: [{
+                data: 'DT_RowIndex',
+                name: 'DT_RowIndex',
+                className: 'text-center',
+                orderable: false,
+                searchable: false,
+                width: '60px'
+            },
+            {
+                data: 'nisn',
+                name: 'nisn',
+                className: 'text-center',
+                width: '100px',
+                orderable: true,
+                searchable: true
+            },
+            {
+                data: 'nis',
+                name: 'nis',
+                className: 'text-center',
+                width: '100px',
+                orderable: true,
+                searchable: true
+            },
+            {
+                data: 'name',
+                name: 'name',
+                className: 'text-left',
+                orderable: true,
+                searchable: true
+            },
+            {
+                data: 'gender',
+                name: 'gender',
+                className: 'text-center',
+                width: '120px',
+                orderable: true,
+                searchable: true
+            },
+            {
+                data: 'enter_year',
+                name: 'enter_year',
+                className: 'text-center',
+                width: '100px',
+                orderable: true,
+                searchable: true
+            },
+            {
+                data: 'class_name',
+                name: 'class_name',
+                className: 'text-center',
+                orderable: true,
+                searchable: true,
+                width: '150px',
+                render: function(data, type, row) {
+                    // Untuk sorting dan filtering, return raw value
+                    if (type === 'type-detect' || type === 'sort') {
+                        // Untuk sorting, berikan nilai khusus untuk yang belum ada kelas
+                        if (!data || data === '-' || data === '' || data === null) {
+                            return 'ZZZZ_NO_CLASS'; // Ini akan membuat "Belum Ada Kelas" muncul di bawah saat sort ascending
                         }
-                    },
-                    {
-                        data: 'nisn',
-                        orderable: false,
-                        searchable: false,
-                        className: 'text-center',
-                        width: '80px',
-                        render: function(data, type, row) {
-                            return '<input type="checkbox" class="row-select form-check-input" value="' +
-                                data + '">';
+                        return data;
+                    }
+                    
+                    if (type === 'search') {
+                        // Untuk pencarian, sertakan text "Belum Ada Kelas" agar bisa dicari
+                        if (!data || data === '-' || data === '' || data === null) {
+                            return 'Belum Ada Kelas';
                         }
+                        return data;
                     }
-                ],
-                order: [
-                    [6, 'asc'],
-                    [3, 'asc']
-                ], // Default: Kelas A-Z, lalu Nama A-Z
-                language: {
-                    processing: '<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden"></span></div></div>',
-                    emptyTable: 'Tidak ada data siswa yang tersedia',
-                    zeroRecords: 'Tidak ditemukan data yang sesuai dengan pencarian',
-                    info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
-                    infoEmpty: 'Menampilkan 0 sampai 0 dari 0 data',
-                    infoFiltered: '(difilter dari _MAX_ total data)',
-                    search: 'Cari:',
-                    lengthMenu: 'Tampilkan _MENU_ data',
-                    paginate: {
-                        first: 'Pertama',
-                        last: 'Terakhir',
-                        next: 'Selanjutnya',
-                        previous: 'Sebelumnya'
+                    
+                    // Untuk display
+                    if (type === 'display') {
+                        if (!data || data === '-' || data === '' || data === null) {
+                            return '<span class="badge-no-class">Belum Ada Kelas</span>';
+                        }
+                        return '<span class="badge-has-class">' + data + '</span>';
                     }
-                },
-                drawCallback: function() {
-                    // Restore checkbox state after redraw
-                    $('.row-select').each(function() {
-                        const nisn = $(this).val();
-                        $(this).prop('checked', selectedStudents.has(nisn));
-                    });
-                    updateCount();
-                    updateSelectAllState();
+                    
+                    // Default return
+                    return data || '';
                 }
-            });
-
-            function updateCount() {
-                const count = selectedStudents.size;
-                $('#selectedCount').text(count + ' Siswa');
-
-                if (count > 0) {
-                    $('#selectedCount').removeClass('bg-primary').addClass('bg-success');
-                } else {
-                    $('#selectedCount').removeClass('bg-success').addClass('bg-primary');
-                }
-
-                // Enable/disable confirm button based on selections and form completion
-                updateConfirmButton();
-            }
-
-            function updateSelectAllState() {
-                const visibleCheckboxes = $('.row-select');
-                const checkedVisibleCheckboxes = $('.row-select:checked');
-
-                if (visibleCheckboxes.length === 0) {
-                    $('#selectAll').prop('indeterminate', false);
-                    $('#selectAll').prop('checked', false);
-                } else if (checkedVisibleCheckboxes.length === visibleCheckboxes.length) {
-                    $('#selectAll').prop('indeterminate', false);
-                    $('#selectAll').prop('checked', true);
-                } else if (checkedVisibleCheckboxes.length > 0) {
-                    $('#selectAll').prop('indeterminate', true);
-                    $('#selectAll').prop('checked', false);
-                } else {
-                    $('#selectAll').prop('indeterminate', false);
-                    $('#selectAll').prop('checked', false);
+            },
+            {
+                data: 'nisn',
+                orderable: false,
+                searchable: false,
+                className: 'text-center',
+                width: '80px',
+                render: function(data, type, row) {
+                    return '<input type="checkbox" class="row-select form-check-input" value="' +
+                        data + '">';
                 }
             }
-
-            function updateConfirmButton() {
-                const hasSelectedStudents = selectedStudents.size > 0;
-                const hasTargetYear = $('#targetYear').val() !== '';
-                const hasTargetClass = $('#targetClass').val() !== '';
-
-                const enableButton = hasSelectedStudents && hasTargetYear && hasTargetClass;
-                $('#confirmBtn').prop('disabled', !enableButton);
+        ],
+        // Default order: Kelas ascending (A-Z), lalu Nama ascending (A-Z)
+        order: [
+            [6, 'asc'], // Kolom kelas
+            [3, 'asc']  // Kolom nama
+        ],
+        // Konfigurasi pencarian
+        search: {
+            smart: true,
+            regex: false,
+            caseInsensitive: true
+        },
+        language: {
+            processing: '<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden"></span></div></div>',
+            emptyTable: 'Tidak ada data siswa yang tersedia',
+            zeroRecords: 'Tidak ditemukan data yang sesuai dengan pencarian',
+            info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
+            infoEmpty: 'Menampilkan 0 sampai 0 dari 0 data',
+            infoFiltered: '(difilter dari _MAX_ total data)',
+            search: 'Cari:',
+            searchPlaceholder: 'Cari nama, NISN, NIS, atau kelas...',
+            lengthMenu: 'Tampilkan _MENU_ data',
+            paginate: {
+                first: 'Pertama',
+                last: 'Terakhir',
+                next: 'Selanjutnya',
+                previous: 'Sebelumnya'
             }
-
-            // Event handlers
-            $('#studentsTable tbody').on('change', '.row-select', function() {
+        },
+        // Konfigurasi tambahan untuk sorting
+        columnDefs: [
+            {
+                // Untuk kolom kelas, gunakan sorting khusus
+                targets: 6,
+                type: 'string',
+                render: function(data, type, row) {
+                    if (type === 'type-detect' || type === 'sort') {
+                        if (!data || data === '-' || data === '' || data === null) {
+                            return 'ZZZZ'; // Untuk sorting, taruh di akhir
+                        }
+                        return data;
+                    }
+                    
+                    if (type === 'search') {
+                        if (!data || data === '-' || data === '' || data === null) {
+                            return 'Belum Ada Kelas';
+                        }
+                        return data;
+                    }
+                    
+                    if (type === 'display') {
+                        if (!data || data === '-' || data === '' || data === null) {
+                            return '<span class="badge-no-class">Belum Ada Kelas</span>';
+                        }
+                        return '<span class="badge-has-class">' + data + '</span>';
+                    }
+                    
+                    return data || '';
+                }
+            }
+        ],
+        drawCallback: function() {
+            // Restore checkbox state after redraw
+            $('.row-select').each(function() {
                 const nisn = $(this).val();
-                if ($(this).is(':checked')) {
-                    selectedStudents.add(nisn);
-                } else {
-                    selectedStudents.delete(nisn);
-                }
-                updateCount();
-                updateSelectAllState();
+                $(this).prop('checked', selectedStudents.has(nisn));
             });
+            updateCount();
+            updateSelectAllState();
+        },
+        // Event handlers untuk sorting
+        initComplete: function() {
+            // Tambahkan placeholder untuk search box
+            $('.dataTables_filter input').attr('placeholder', 'Cari nama, NISN, NIS, atau kelas...');
+            
+            console.log('DataTable initialized successfully');
+        }
+    });
 
-            $('#selectAll').change(function() {
-                const isChecked = $(this).is(':checked');
-                $('.row-select').each(function() {
-                    const nisn = $(this).val();
-                    $(this).prop('checked', isChecked);
-                    if (isChecked) {
-                        selectedStudents.add(nisn);
-                    } else {
-                        selectedStudents.delete(nisn);
-                    }
-                });
-                updateCount();
+    // Event handler untuk custom sorting buttons (opsional)
+    function addCustomSortButtons() {
+        // Tambahkan button untuk sort kelas A-Z dan Z-A
+        const customControls = `
+            <div class="mb-3">
+                <div class="btn-group" role="group" aria-label="Sorting Controls">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="sortClassAZ">
+                        <i class="fas fa-sort-alpha-down"></i> Kelas A-Z
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="sortClassZA">
+                        <i class="fas fa-sort-alpha-up"></i> Kelas Z-A
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="sortNameAZ">
+                        <i class="fas fa-sort-alpha-down"></i> Nama A-Z
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="sortNameZA">
+                        <i class="fas fa-sort-alpha-up"></i> Nama Z-A
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Insert custom controls above the table
+        $('#studentsTable_wrapper').prepend(customControls);
+        
+        // Event handlers untuk custom sort buttons
+        $('#sortClassAZ').click(function() {
+            table.order([6, 'asc'], [3, 'asc']).draw();
+            $('.btn-group .btn').removeClass('active');
+            $(this).addClass('active');
+        });
+        
+        $('#sortClassZA').click(function() {
+            table.order([6, 'desc'], [3, 'asc']).draw();
+            $('.btn-group .btn').removeClass('active');
+            $(this).addClass('active');
+        });
+        
+        $('#sortNameAZ').click(function() {
+            table.order([3, 'asc']).draw();
+            $('.btn-group .btn').removeClass('active');
+            $(this).addClass('active');
+        });
+        
+        $('#sortNameZA').click(function() {
+            table.order([3, 'desc']).draw();
+            $('.btn-group .btn').removeClass('active');
+            $(this).addClass('active');
+        });
+    }
+
+    // Panggil fungsi untuk menambahkan custom sort buttons
+    // addCustomSortButtons(); // Uncomment jika ingin menambahkan button sort khusus
+
+    function updateCount() {
+        const count = selectedStudents.size;
+        $('#selectedCount').text(count + ' Siswa');
+
+        if (count > 0) {
+            $('#selectedCount').removeClass('bg-primary').addClass('bg-success');
+        } else {
+            $('#selectedCount').removeClass('bg-success').addClass('bg-primary');
+        }
+
+        updateConfirmButton();
+    }
+
+    function updateSelectAllState() {
+        const visibleCheckboxes = $('.row-select');
+        const checkedVisibleCheckboxes = $('.row-select:checked');
+
+        if (visibleCheckboxes.length === 0) {
+            $('#selectAll').prop('indeterminate', false);
+            $('#selectAll').prop('checked', false);
+        } else if (checkedVisibleCheckboxes.length === visibleCheckboxes.length) {
+            $('#selectAll').prop('indeterminate', false);
+            $('#selectAll').prop('checked', true);
+        } else if (checkedVisibleCheckboxes.length > 0) {
+            $('#selectAll').prop('indeterminate', true);
+            $('#selectAll').prop('checked', false);
+        } else {
+            $('#selectAll').prop('indeterminate', false);
+            $('#selectAll').prop('checked', false);
+        }
+    }
+
+    function updateConfirmButton() {
+        const hasSelectedStudents = selectedStudents.size > 0;
+        const hasTargetYear = $('#targetYear').val() !== '';
+        const hasTargetClass = $('#targetClass').val() !== '';
+
+        const enableButton = hasSelectedStudents && hasTargetYear && hasTargetClass;
+        $('#confirmBtn').prop('disabled', !enableButton);
+    }
+
+    // Event handlers
+    $('#studentsTable tbody').on('change', '.row-select', function() {
+        const nisn = $(this).val();
+        if ($(this).is(':checked')) {
+            selectedStudents.add(nisn);
+        } else {
+            selectedStudents.delete(nisn);
+        }
+        updateCount();
+        updateSelectAllState();
+    });
+
+    $('#selectAll').change(function() {
+        const isChecked = $(this).is(':checked');
+        $('.row-select').each(function() {
+            const nisn = $(this).val();
+            $(this).prop('checked', isChecked);
+            if (isChecked) {
+                selectedStudents.add(nisn);
+            } else {
+                selectedStudents.delete(nisn);
+            }
+        });
+        updateCount();
+    });
+
+    // Update confirm button when dropdowns change
+    $('#targetYear, #targetClass').change(function() {
+        updateConfirmButton();
+    });
+
+    $('#confirmBtn').click(function() {
+        const nisns = Array.from(selectedStudents);
+        const kelas = $('#targetClass').val();
+        const tahun = $('#targetYear').val();
+
+        if (!nisns.length) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Peringatan',
+                text: 'Pilih minimal satu siswa untuk dipindahkan!',
+                confirmButtonColor: '#183C70'
             });
+            return;
+        }
 
-            // Update confirm button when dropdowns change
-            $('#targetYear, #targetClass').change(function() {
-                updateConfirmButton();
+        if (!tahun) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Peringatan',
+                text: 'Pilih tahun akademik terlebih dahulu!',
+                confirmButtonColor: '#183C70'
             });
+            return;
+        }
 
-            $('#confirmBtn').click(function() {
-                const nisns = Array.from(selectedStudents);
-                const kelas = $('#targetClass').val();
-                const tahun = $('#targetYear').val();
+        if (!kelas) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Peringatan',
+                text: 'Pilih kelas tujuan terlebih dahulu!',
+                confirmButtonColor: '#183C70'
+            });
+            return;
+        }
 
-                if (!nisns.length) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Peringatan',
-                        text: 'Pilih minimal satu siswa untuk dipindahkan!',
-                        confirmButtonColor: '#183C70'
+        // Get selected class name for confirmation
+        const selectedClassName = $('#targetClass option:selected').text();
+        const selectedYear = $('#targetYear option:selected').text();
+
+        // Confirmation dialog
+        Swal.fire({
+            title: 'Konfirmasi Penempatan',
+            html: `
+            <div style="text-align: left; padding: 10px;">
+                <p><strong>Jumlah Siswa:</strong> ${nisns.length} siswa</p>
+                <p><strong>Tahun Akademik:</strong> ${selectedYear}</p>
+                <p><strong>Kelas Tujuan:</strong> ${selectedClassName}</p>
+                <hr>
+                <p style="color: #dc3545; font-weight: 600;">Apakah Anda yakin ingin melanjutkan?</p>
+            </div>
+        `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#183C70',
+            cancelButtonColor: '#dc3545',
+            confirmButtonText: 'Ya, Pindahkan!',
+            cancelButtonText: 'Batal',
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                return $.post(
+                    '{{ route('manage-student-class-assignments.store') }}', {
+                        nisns: nisns,
+                        academic_year_id: tahun,
+                        class_id: kelas
                     });
-                    return;
-                }
-
-                if (!tahun) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Peringatan',
-                        text: 'Pilih tahun akademik terlebih dahulu!',
-                        confirmButtonColor: '#183C70'
-                    });
-                    return;
-                }
-
-                if (!kelas) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Peringatan',
-                        text: 'Pilih kelas tujuan terlebih dahulu!',
-                        confirmButtonColor: '#183C70'
-                    });
-                    return;
-                }
-
-                // Get selected class name for confirmation
-                const selectedClassName = $('#targetClass option:selected').text();
-                const selectedYear = $('#targetYear option:selected').text();
-
-                // Confirmation dialog
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            if (result.isConfirmed) {
                 Swal.fire({
-                    title: 'Konfirmasi Penempatan',
+                    icon: 'success',
+                    title: 'Berhasil!',
                     html: `
-                    <div style="text-align: left; padding: 10px;">
-                        <p><strong>Jumlah Siswa:</strong> ${nisns.length} siswa</p>
-                        <p><strong>Tahun Akademik:</strong> ${selectedYear}</p>
-                        <p><strong>Kelas Tujuan:</strong> ${selectedClassName}</p>
-                        <hr>
-                        <p style="color: #dc3545; font-weight: 600;">Apakah Anda yakin ingin melanjutkan?</p>
+                    <div style="text-align: center;">
+                        <p>${result.value.message || 'Siswa berhasil dipindahkan ke kelas baru.'}</p>
+                        <p style="color: #28a745; font-weight: 600;">${nisns.length} siswa telah dipindahkan ke ${selectedClassName}</p>
                     </div>
                 `,
-                    icon: 'question',
-                    showCancelButton: true,
                     confirmButtonColor: '#183C70',
-                    cancelButtonColor: '#dc3545',
-                    confirmButtonText: 'Ya, Pindahkan!',
-                    cancelButtonText: 'Batal',
-                    showLoaderOnConfirm: true,
-                    preConfirm: () => {
-                        return $.post(
-                            '{{ route('manage-student-class-assignments.store') }}', {
-                                nisns: nisns,
-                                academic_year_id: tahun,
-                                class_id: kelas
-                            });
-                    },
-                    allowOutsideClick: () => !Swal.isLoading()
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            html: `
-                            <div style="text-align: center;">
-                                <p>${result.value.message || 'Siswa berhasil dipindahkan ke kelas baru.'}</p>
-                                <p style="color: #28a745; font-weight: 600;">${nisns.length} siswa telah dipindahkan ke ${selectedClassName}</p>
-                            </div>
-                        `,
-                            confirmButtonColor: '#183C70',
-                            timer: 4000,
-                            timerProgressBar: true
-                        });
-
-                        // Reset form and reload table
-                        selectedStudents.clear();
-                        table.ajax.reload();
-                        $('#selectAll').prop('checked', false);
-                        $('#targetYear').val('');
-                        $('#targetClass').val('');
-                        updateCount();
-                    }
-                }).catch((error) => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Terjadi Kesalahan',
-                        text: error.responseJSON?.message ||
-                            'Gagal memindahkan siswa. Silakan coba lagi.',
-                        confirmButtonColor: '#183C70'
-                    });
+                    timer: 4000,
+                    timerProgressBar: true
                 });
-            });
 
-            // Initialize
-            updateCount();
-            updateConfirmButton();
+                // Reset form and reload table
+                selectedStudents.clear();
+                table.ajax.reload();
+                $('#selectAll').prop('checked', false);
+                $('#targetYear').val('');
+                $('#targetClass').val('');
+                updateCount();
+            }
+        }).catch((error) => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi Kesalahan',
+                text: error.responseJSON?.message ||
+                    'Gagal memindahkan siswa. Silakan coba lagi.',
+                confirmButtonColor: '#183C70'
+            });
         });
+    });
+
+    // Initialize
+    updateCount();
+    updateConfirmButton();
+});
     </script>
 @endpush
