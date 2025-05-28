@@ -182,38 +182,6 @@ class SchoolAdminSeeder extends Seeder
         Permission::create(['name' => 'update_teacher_subject_assignment', 'menu_id' => $subMenuId->id]);
         Permission::create(['name' => 'delete_teacher_subject_assignment', 'menu_id' => $subMenuId->id]);
 
-        $schoolAdminSubMenu = Menu::create([
-            'nama_menu' => 'Menu Presensi',
-            'url' => '#',
-            'icon' => 'fas fa-expand',
-            'parent_id' => $schoolAdminMenu->id,
-            'urutan' => 4
-        ]);
-
-        $subMenuId = Menu::create([
-            'nama_menu' => 'Presensi Siswa',
-            'url' => 'manage-attendances',
-            'parent_id' => $schoolAdminSubMenu->id,
-            'urutan' => 1
-        ]);
-
-        Permission::create(['name' => 'create_attendances', 'menu_id' => $subMenuId->id]);
-        Permission::create(['name' => 'read_attendances', 'menu_id' => $subMenuId->id]);
-        Permission::create(['name' => 'update_attendances', 'menu_id' => $subMenuId->id]);
-        Permission::create(['name' => 'delete_attendances', 'menu_id' => $subMenuId->id]);
-
-        $subMenuId = Menu::create([
-            'nama_menu' => 'Riwayat Presensi',
-            'url' => 'manage-attendance-history',
-            'parent_id' => $schoolAdminSubMenu->id,
-            'urutan' => 2
-        ]);
-
-        Permission::create(['name' => 'create_attendance_history', 'menu_id' => $subMenuId->id]);
-        Permission::create(['name' => 'read_attendance_history', 'menu_id' => $subMenuId->id]);
-        Permission::create(['name' => 'update_attendance_history', 'menu_id' => $subMenuId->id]);
-        Permission::create(['name' => 'delete_attendance_history', 'menu_id' => $subMenuId->id]);
-
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [9, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [10, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [11, 2]);
@@ -227,9 +195,9 @@ class SchoolAdminSeeder extends Seeder
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [19, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [20, 2]);
         DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [21, 2]);
-        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [22, 2]);
-        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [23, 2]);
-        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [24, 2]);
+        // DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [22, 2]);
+        // DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [23, 2]);
+        // DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [24, 2]);
         // DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [25, 2]);
         // DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [26, 2]);
 
@@ -273,10 +241,6 @@ class SchoolAdminSeeder extends Seeder
             'read_schedules',
             'update_schedules',
             'delete_schedules',
-            // 'create_homeroom_assignment',
-            // 'read_homeroom_assignment',
-            // 'update_homeroom_assignment',
-            // 'delete_homeroom_assignment',
             'create_student_class_assignment',
             'read_student_class_assignment',
             'update_student_class_assignment',
@@ -285,15 +249,6 @@ class SchoolAdminSeeder extends Seeder
             'read_teacher_subject_assignment',
             'update_teacher_subject_assignment',
             'delete_teacher_subject_assignment',
-            'create_attendances',
-            'read_attendances',
-            'update_attendances',
-            'delete_attendances',
-            'create_attendance_history',
-            'read_attendance_history',
-            'update_attendance_history',
-            'delete_attendance_history',
-
         ]);
         User::firstWhere('email', 'adminsekolah1@gmail.com')->assignRole('Admin Sekolah');
     }

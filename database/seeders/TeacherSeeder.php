@@ -57,12 +57,37 @@ class TeacherSeeder extends Seeder
             'urutan' => 3
         ]);
 
+        $menuPresensi = Menu::create([
+            'nama_menu' => 'Menu Presensi',
+            'url' => '#',
+            'icon' => 'fas fa-expand',
+            'parent_id' => $mainMenu->id,
+            'urutan' => 4
+        ]);
+
+        $presensiSiswa = Menu::create([
+            'nama_menu' => 'Presensi Siswa',
+            'url' => 'manage-attendances',
+            'parent_id' => $menuPresensi->id,
+            'urutan' => 1
+        ]);
+
+        $riwayatPresensi = Menu::create([
+            'nama_menu' => 'Riwayat Presensi',
+            'url' => 'manage-attendances-history',
+            'parent_id' => $menuPresensi->id,
+            'urutan' => 2
+        ]);
+
         // Assign semua menu ke role Guru
         $menuIds = [
             $mainMenu->id,
             $dashboardMenu->id,
             $laporPrestasi->id,
-            $laporPelanggaran->id
+            $laporPelanggaran->id,
+            $menuPresensi->id,
+            $presensiSiswa->id,
+            $riwayatPresensi->id,
         ];
         foreach ($menuIds as $menuId) {
             DB::table('role_has_menus')->insert([
