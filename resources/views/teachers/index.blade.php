@@ -55,11 +55,11 @@
                                         <tr>
                                             <th>No.</th>
                                             <th>NIP</th>
+                                            <th>Nomor Dapodik</th>
                                             <th>Nama Guru</th>
                                             <th>Email</th>
                                             <th>No. Telp</th>
                                             <th>Alamat</th>
-                                            <th>Role</th>
                                             <th>Aksi</th>
                                         </tr>
                                     </thead>
@@ -169,6 +169,10 @@
                         name: 'nip'
                     },
                     {
+                        data: 'dapodik_number',
+                        name: 'dapodik_number'
+                    },
+                    {
                         data: 'name',
                         name: 'name'
                     },
@@ -183,10 +187,6 @@
                     {
                         data: 'address',
                         name: 'address'
-                    },
-                    {
-                        data: 'role',
-                        name: 'role'
                     },
                     {
                         data: 'action',

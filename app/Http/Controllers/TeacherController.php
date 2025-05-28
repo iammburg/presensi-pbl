@@ -38,8 +38,8 @@ class TeacherController extends Controller
 
             return DataTables::of($teachers)
                 ->addIndexColumn()
-                ->addColumn('role', function ($teacher) {
-                    return 'Guru'; // Karena semua teacher pasti rolenya Guru
+                ->addColumn('dapodik_number', function ($teacher) {
+                    return $teacher->dapodik_number ?? '-';
                 })
                 ->addColumn('action', function ($teacher) {
                     $id = $teacher->nip;
@@ -80,6 +80,7 @@ class TeacherController extends Controller
     {
         $request->validate([
             'nip' => 'required|unique:teachers,nip',
+            'dapodik_number' => 'nullable|string|max:16',
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'phone' => 'required',
@@ -106,6 +107,7 @@ class TeacherController extends Controller
         // Create teacher record
         Teacher::create([
             'nip' => $request->nip,
+            'dapodik_number' => $request->dapodik_number ? substr($request->dapodik_number, 0, 16) : null,
             'name' => $request->name,
             'phone' => $request->phone,
             'address' => $request->address,
@@ -146,6 +148,7 @@ class TeacherController extends Controller
 
         $request->validate([
             'name' => 'required',
+            'dapodik_number' => 'nullable|string|max:50',
             'phone' => 'required',
             'address' => 'required',
             'gender' => 'required|in:L,P',
@@ -165,6 +168,7 @@ class TeacherController extends Controller
 
         $teacher->update([
             'name' => $request->name,
+            'dapodik_number' => $request->dapodik_number ? substr($request->dapodik_number, 0, 16) : null,
             'phone' => $request->phone,
             'address' => $request->address,
             'gender' => $request->gender,
@@ -196,7 +200,8 @@ class TeacherController extends Controller
         // Delete teacher
         $teacher->delete();
 
-        return response()->json(['message' => 'Data guru berhasil dihapus']);
+        return redirect()->route('manage-teachers.index')
+            ->with('success', 'Data guru berhasil dihapus');
     }
 
     public function import(Request $request)
