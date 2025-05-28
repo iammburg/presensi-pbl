@@ -24,6 +24,15 @@
                                 @enderror
                             </div>
                             <div class="form-group">
+                                <label for="dapodik_number">Nomor Dapodik</label>
+                                <input type="text" maxlength="16" class="form-control @error('dapodik_number') is-invalid @enderror" id="dapodik_number" name="dapodik_number" value="{{ old('dapodik_number', $teacher->dapodik_number) }}">
+                                @error('dapodik_number')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                            <div class="form-group">
                                 <label for="name">Nama Lengkap</label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $teacher->name) }}">
                                 @error('name')
