@@ -34,9 +34,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::permanentRedirect('/', '/login');
-
-Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::resource('profil', ProfilController::class)->except('destroy');
@@ -82,3 +79,4 @@ Route::resource('subjects', SubjectController::class);
 
 // Route tambahan untuk mendapatkan nama jadwal pelajaran
 Route::get('subjects/schedule-names', [SubjectController::class, 'getScheduleNames'])->name('subjects.schedule-names');
+Auth::routes();
