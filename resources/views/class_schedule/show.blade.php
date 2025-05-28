@@ -56,20 +56,6 @@
         <div class="card mb-4 shadow-sm" style="font-family: 'Poppins', sans-serif;">
             <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #1D3F72; padding: 12px 20px;">
                 <h6 class="mb-0 fw-bold">{{ $day }}</h6>
-                {{-- Bagian jumlah sesi dihapus --}}
-                {{-- <small class="badge bg-light text-dark px-2 py-1">
-                    @php
-                        $totalSessions = 0;
-                        foreach($schedulesPerDay[$day] as $item) {
-                            if($item['start_hour_slot'] == $item['end_hour_slot']) {
-                                $totalSessions += 1;
-                            } else {
-                                $totalSessions += ($item['end_hour_slot'] - $item['start_hour_slot'] + 1);
-                            }
-                        }
-                    @endphp
-                    {{ $totalSessions }} Sesi
-                </small> --}}
             </div>
             <div class="card-body p-0">
                 @if(empty($schedulesPerDay[$day]))
@@ -100,8 +86,8 @@
                                             </td>
                                             <td class="text-center align-middle" style="padding: 15px 15px; border: 1px solid #dee2e6;">
                                                 @if($item['session_type'] == 'Jam Istirahat')
-                                                    <span class="badge bg-secondary px-3 py-2" style="font-weight: normal;">
-                                                        JAM ISTIRAHAT
+                                                    <span class="badge px-3 py-2" style="font-weight: normal; background-color: #ffda3c; color: black;">
+                                                    JAM ISTIRAHAT
                                                     </span>
                                                 @else
                                                     <span class="badge bg-primary px-3 py-2" style="font-weight: normal;">
@@ -149,9 +135,9 @@
                                                 </td>
                                                 <td class="text-center align-middle" style="padding: 15px 15px; border: 1px solid #dee2e6;">
                                                     @if($item['session_type'] == 'Jam Istirahat')
-                                                        <span class="badge bg-secondary px-3 py-2" style="font-weight: normal;">
-                                                            JAM ISTIRAHAT
-                                                        </span>
+                                                        <span class="badge px-3 py-2" style="font-weight: normal; background-color: #ffda3c; color: black;">
+                                                    JAM ISTIRAHAT
+                                                    </span>
                                                     @else
                                                         <span class="badge bg-primary px-3 py-2" style="font-weight: normal;">
                                                             JAM PELAJARAN
@@ -179,7 +165,7 @@
                                                 <td class="text-center align-middle" style="padding: 15px 20px; border: 1px solid #dee2e6;">
                                                 @if($item['session_type'] == 'Jam Istirahat')
                                                     <div class="d-flex align-items-center justify-content-center">
-                                                        <span class="text-muted">Waktu Istirahat</span>
+                                                        <span class="text-muted"> - </span>
                                                     </div>
                                                 @else
                                                     <div>

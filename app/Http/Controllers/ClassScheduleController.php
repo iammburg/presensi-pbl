@@ -9,7 +9,9 @@ use App\Models\Hour;
 use App\Models\TeachingAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class ClassScheduleController extends Controller
 {
@@ -264,19 +266,31 @@ class ClassScheduleController extends Controller
         ]);
     }
 
-    public function exportPdf(ClassSchedule $manage_schedule)
-    {
-        // Ambil semua jadwal untuk kelas yang sama dengan academic year dari class
+public function exportPdf(ClassSchedule $manage_schedule)
+{
+    try {
+        // Debug: Log informasi dasar
+        Log::info('Export PDF Debug', [
+            'schedule_id' => $manage_schedule->id,
+            'class_id' => $manage_schedule->class_id,
+        ]);
+
+        // Ambil semua jadwal untuk kelas yang sama
         $allSchedules = ClassSchedule::with([
                 'assignment.subject', 
                 'assignment.teacher', 
                 'hour', 
-                'schoolClass.academicYear' // Changed from just 'schoolClass'
+                'schoolClass.academicYear'
             ])
             ->where('class_id', $manage_schedule->class_id)
             ->orderBy('day_of_week')
             ->orderBy('hour_id')
             ->get();
+
+        // Debug: Log jumlah schedules yang ditemukan
+        Log::info('Total schedules found', [
+            'count' => $allSchedules->count(),
+        ]);
 
         $days = [
             1 => 'Senin',
@@ -286,6 +300,7 @@ class ClassScheduleController extends Controller
             5 => 'Jumat'
         ];
 
+        // GUNAKAN LOGIKA YANG SAMA SEPERTI SHOW METHOD
         $schedulesPerDay = [];
         
         foreach ($days as $dayNumber => $dayName) {
@@ -295,25 +310,33 @@ class ClassScheduleController extends Controller
             if ($daySchedules->isNotEmpty()) {
                 $currentGroup = null;
                 
-                foreach ($daySchedules->sortBy('hour.slot_number') as $schedule) {
+                // Urutkan berdasarkan start_time, bukan slot_number - SAMA SEPERTI SHOW
+                foreach ($daySchedules->sortBy('hour.start_time') as $schedule) {
                     $sessionType = $schedule->assignment_id ? 'Jam Pelajaran' : 'Jam Istirahat';
                     $assignmentId = $schedule->assignment_id;
                     
+                    // KONDISI PENGGABUNGAN YANG SAMA SEPERTI SHOW METHOD
                     if ($currentGroup && 
                         $currentGroup['session_type'] === $sessionType && 
                         $currentGroup['assignment_id'] === $assignmentId &&
-                        $currentGroup['end_hour_id'] + 1 === $schedule->hour_id) {
+                        $currentGroup['end_time'] === $schedule->hour->start_time) {
                         
+                        // Gabungkan dengan group sebelumnya
                         $currentGroup['end_hour_id'] = $schedule->hour_id;
                         $currentGroup['end_hour_slot'] = $schedule->hour->slot_number;
                         $currentGroup['end_time'] = $schedule->hour->end_time ?? $currentGroup['end_time'];
+                        
+                        // Tambahkan waktu individual untuk setiap jam
                         $currentGroup['hour_times'][$schedule->hour->slot_number] = $schedule->hour->start_time;
                         $currentGroup['hour_end_times'][$schedule->hour->slot_number] = $schedule->hour->end_time;
                         $currentGroup['hour_schedules'][$schedule->hour->slot_number] = $schedule;
                     } else {
+                        // Simpan group sebelumnya jika ada
                         if ($currentGroup) {
                             $groupedSchedules[] = $currentGroup;
                         }
+                        
+                        // Buat group baru - SAMA SEPERTI SHOW METHOD
                         $currentGroup = [
                             'session_type' => $sessionType,
                             'start_hour_id' => $schedule->hour_id,
@@ -325,6 +348,7 @@ class ClassScheduleController extends Controller
                             'teacher_name' => $schedule->assignment->teacher->name ?? null,
                             'start_time' => $schedule->hour->start_time ?? null,
                             'end_time' => $schedule->hour->end_time ?? null,
+                            // Tambahkan array untuk menyimpan waktu individual setiap jam
                             'hour_times' => [
                                 $schedule->hour->slot_number => $schedule->hour->start_time
                             ],
@@ -337,7 +361,8 @@ class ClassScheduleController extends Controller
                         ];
                     }
                 }
-
+                
+                // Jangan lupa simpan group terakhir
                 if ($currentGroup) {
                     $groupedSchedules[] = $currentGroup;
                 }
@@ -346,24 +371,38 @@ class ClassScheduleController extends Controller
             $schedulesPerDay[$dayName] = $groupedSchedules;
         }
 
-        // ✅ GANTI view() agar mengarah ke view yang benar
-        $html = view('class_schedule.pdf', [
+        // Debug: Log final result sebelum generate PDF
+        Log::info('Final schedulesPerDay for PDF', [
+            'data' => $schedulesPerDay,
+            'has_data' => !empty(array_filter($schedulesPerDay))
+        ]);
+
+        // Pastikan ada data sebelum generate PDF
+        if (empty(array_filter($schedulesPerDay))) {
+            Log::warning('No schedule data found for PDF export');
+            return redirect()->back()->with('error', 'Tidak ada data jadwal untuk diekspor.');
+        }
+
+        $pdf = Pdf::loadView('class_schedule.pdf', [
             'schedule' => $manage_schedule,
             'schedulesPerDay' => $schedulesPerDay,
             'days' => array_values($days),
             'class' => $manage_schedule->schoolClass
-        ])->render();
+        ])->setPaper('a4', 'landscape');
 
-        $response = Http::asForm()->post('https://html2pdf.app/api/v1/generate', [
-            'html' => $html,
-            'apiKey' => 'demo', // Ganti jika punya API Key sendiri
+        return $pdf->download('jadwal_kelas_' . optional($manage_schedule->schoolClass)->name . '.pdf');
+
+    } catch (\Exception $e) {
+        Log::error('Gagal export PDF', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
         ]);
 
-        return response($response->body(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="jadwal-kelas.pdf"',
-        ]);
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat export PDF: ' . $e->getMessage());
     }
+}
 
     /**
      * Show the form for editing the specified resource.
@@ -535,11 +574,19 @@ class ClassScheduleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        $schedule = ClassSchedule::findOrFail($id);
-        $schedule->delete();
+    public function destroy(ClassSchedule $manageSchedule)
+{
+    try {
+        $classId = $manageSchedule->class_id;
 
-        return redirect()->route('manage-schedules.index')->with('success', 'Jadwal berhasil dihapus!');
+        // Hapus semua jadwal yang memiliki class_id sama
+        ClassSchedule::where('class_id', $classId)->delete();
+
+        return redirect()->route('manage-schedules.index')
+            ->with('success', 'Semua jadwal untuk kelas ini berhasil dihapus.');
+    } catch (\Exception $e) {
+        return back()->with('error', 'Gagal menghapus jadwal: ' . $e->getMessage());
     }
+}
+
 }

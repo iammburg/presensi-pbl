@@ -69,7 +69,7 @@ Route::resource('manage-student-class-assignments', StudentClassAssignmentContro
     ->parameters(['manage-student-class-assignments' => 'studentAssignment']);
 Route::resource('manage-hours', HourController::class);
 Route::resource('manage-schedules', ClassScheduleController::class);
-Route::get('manage-schedules/{id}/export-pdf', [ClassScheduleController::class, 'exportPdf'])->name('manage-schedules.export-pdf');
+Route::get('manage-schedules/{manage_schedule}/export-pdf', [ClassScheduleController::class, 'exportPdf'])->name('manage-schedules.export-pdf');
 Route::resource('manage-attendances', AttendanceController::class);
 
 // Route buat Guru BK

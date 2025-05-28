@@ -69,7 +69,6 @@
                                             {{ $schedule->schoolClass ? $schedule->schoolClass->name . ' - ' . $schedule->schoolClass->parallel_name : '-' }}
                                         </td>
                                         <td>
-                                            {{-- UBAH: Ambil academic year dari schoolClass, bukan dari assignment --}}
                                             @if($schedule->schoolClass && $schedule->schoolClass->academicYear)
                                                 {{ $schedule->schoolClass->academicYear->start_year }} / {{ $schedule->schoolClass->academicYear->end_year }}
                                             @else
@@ -84,12 +83,12 @@
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
                                         <form action="{{ route('manage-schedules.destroy', $schedule->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="fas fa-trash-alt"></i> Hapus
-                                            </button>
-                                        </form>
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash-alt"></i> Hapus
+                                        </button>
+                                    </form>
                                     </td>
                                     </tr>
                                     @empty
