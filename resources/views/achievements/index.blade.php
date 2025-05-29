@@ -36,16 +36,19 @@
                             <table class="table table-bordered table-striped">
                                 <thead class="bg-tertiary text-white">
                                     <tr>
+                                        <th>No</th>
                                         <th>Siswa</th>
                                         <th>Nama Prestasi</th>
                                         <th>Tanggal</th>
                                         <th>Status</th>
+                                        <th>Divalidasi Oleh</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($achievements as $achievement)
                                         <tr>
+                                            <td>{{ ($achievements instanceof \Illuminate\Pagination\LengthAwarePaginator ? ($achievements->currentPage() - 1) * $achievements->perPage() : 0) + $loop->iteration }}</td>
                                             <td>{{ $achievement->student ? $achievement->student->name : '-' }}</td>
                                             <td>{{ $achievement->achievements_name }}</td>
                                             <td>{{ $achievement->achievement_date->format('d/m/Y') }}</td>
@@ -58,60 +61,35 @@
                                                     <span class="badge badge-danger">Ditolak</span>
                                                 @endif
                                             </td>
+                                            <td>{{ $achievement->validator ? $achievement->validator->name : '-' }}</td>
                                             <td>
-                                                <a href="{{ route('achievements.show', $achievement) }}" class="btn btn-info btn-sm">Detail</a>
-                                                @if($achievement->validation_status === 'pending')
-                                                    <a href="{{ route('achievements.edit', $achievement) }}" class="btn btn-warning btn-sm">Edit</a>
-                                                    <form action="{{ route('achievements.destroy', $achievement) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus prestasi ini?')">
-                                                            Hapus
-                                                        </button>
-                                                    </form>
-                                                    @can('update_laporan_prestasi')
-                                                    <!-- Tombol validasi hanya untuk Guru BK -->
-                                                    <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#validateModal-{{ $achievement->id }}">Validasi</button>
-                                                    <!-- Modal Validasi -->
-                                                    <div class="modal fade" id="validateModal-{{ $achievement->id }}" tabindex="-1" role="dialog" aria-labelledby="validateModalLabel" aria-hidden="true">
-                                                        <div class="modal-dialog" role="document">
-                                                            <form action="{{ route('achievements.validate', $achievement->id) }}" method="POST">
+                                                <div class="btn-group">
+                                                    <button class="btn btn-outline-info btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-cog"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item" href="{{ route('achievements.show', $achievement) }}">
+                                                            <i class="fas fa-info-circle me-1"></i>Detail
+                                                        </a>
+                                                        @if($achievement->validation_status === 'pending')
+                                                            <a class="dropdown-item" href="{{ route('achievements.edit', $achievement) }}">
+                                                                <i class="fas fa-edit me-1"></i>Edit
+                                                            </a>
+                                                            <form action="{{ route('achievements.destroy', $achievement) }}" method="POST" class="d-inline">
                                                                 @csrf
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title" id="validateModalLabel">Validasi Prestasi</h5>
-                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                            <span aria-hidden="true">&times;</span>
-                                                                        </button>
-                                                                    </div>
-                                                                    <div class="modal-body">
-                                                                        <div class="form-group">
-                                                                            <label>Status Validasi</label>
-                                                                            <select name="validation_status" class="form-control" required>
-                                                                                <option value="approved">Setujui</option>
-                                                                                <option value="rejected">Tolak</option>
-                                                                            </select>
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label>Catatan (Opsional)</label>
-                                                                            <textarea name="validation_notes" class="form-control" rows="2"></textarea>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                                                                        <button type="submit" class="btn btn-primary">Simpan</button>
-                                                                    </div>
-                                                                </div>
+                                                                @method('DELETE')
+                                                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus prestasi ini?')">
+                                                                    <i class="fas fa-trash-alt me-1"></i>Hapus
+                                                                </button>
                                                             </form>
-                                                        </div>
+                                                        @endif
                                                     </div>
-                                                    @endcan
-                                                @endif
+                                                </div>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="text-center text-gray-500">
+                                            <td colspan="7" class="text-center text-gray-500">
                                                 Belum ada prestasi yang dilaporkan
                                             </td>
                                         </tr>
@@ -120,7 +98,6 @@
                             </table>
                         </div>
                         <div class="mt-3">
-                            {{ $achievements->links() }}
                         </div>
                     </div>
                 </div>
@@ -129,3 +106,26 @@
     </div>
 </div>
 @endsection
+
+@push('js')
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap4.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
+<script>
+$(document).ready(function() {
+    $('.table').DataTable({
+        "ordering": true,
+        "responsive": true,
+        "autoWidth": false,
+        "language": {
+            "search": "Cari:",
+            "lengthMenu": "Tampilkan _MENU_ data",
+            "zeroRecords": "Tidak ada data ditemukan",
+            "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            "infoEmpty": "Tidak ada data",
+            "infoFiltered": "(disaring dari _MAX_ total data)"
+        }
+    });
+});
+</script>
+@endpush

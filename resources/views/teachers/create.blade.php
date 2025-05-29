@@ -15,7 +15,7 @@
                         <div class="card-body">
                             <div class="form-group">
                                 <label for="nip">NIP</label>
-                                <input type="text" class="form-control @error('nip') is-invalid @enderror" id="nip"
+                                <input type="text" maxlength="18" class="form-control @error('nip') is-invalid @enderror" id="nip"
                                     name="nip" value="{{ old('nip') }}" required>
                                 @error('nip')
                                     <span class="invalid-feedback" role="alert">
