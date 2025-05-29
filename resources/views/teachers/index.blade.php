@@ -104,6 +104,21 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Detail Guru -->
+    <div class="modal fade" id="teacherDetailModal" tabindex="-1" role="dialog" aria-labelledby="teacherDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Guru</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="teacherDetailBody"></div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('css')
@@ -250,7 +265,8 @@
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('manage-teachers.index') }}',
-                columns: [{
+                columns: [
+                    {
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
@@ -266,7 +282,10 @@
                     },
                     {
                         data: 'name',
-                        name: 'name'
+                        name: 'name',
+                        render: function(data, type, row) {
+                            return `<a href="#" class="teacher-detail-link" data-nip="${row.nip}">${data}</a>`;
+                        }
                     },
                     {
                         data: 'email',
@@ -292,6 +311,60 @@
             // Handle Import Excel button
             $('#importExcel').click(function() {
                 $('#importExcelModal').modal('show');
+            });
+
+            // Handler klik nama guru
+            $('#teachersTable').on('click', '.teacher-detail-link', function(e) {
+                e.preventDefault();
+                const nip = $(this).data('nip');
+                $.ajax({
+                    url: `/manage-teachers/${nip}`,
+                    method: 'GET',
+                    success: function(data) {
+                        let subjectsHtml = '';
+                        // if (data.subjects && data.subjects.length > 0) {
+                        //     subjectsHtml = '<tr><th>Mata Pelajaran</th><td><ul class="list-unstyled mb-0">';
+                        //     data.subjects.forEach(function(item) {
+                        //         subjectsHtml += `<li>${item.subject} (${item.class})</li>`;
+                        //     });
+                        //     subjectsHtml += '</ul></td></tr>';
+                        // } else {
+                        //     subjectsHtml = '<tr><th>Mata Pelajaran</th><td>Belum ada penugasan mengajar</td></tr>';
+                        // }
+
+                        $('#teacherDetailBody').html(`
+                            <div class="row">
+                                <div class="col-md-4 text-center">
+                                    ${data.photo_url
+                                        ? `<img src="${data.photo_url}" alt="Foto" class="img-thumbnail" style="max-width: 150px;">`
+                                        : `<div class="text-muted mt-4">Belum ada foto</div>`
+                                    }
+                                </div>
+                                <div class="col-md-8">
+                                    <table class="table table-sm">
+                                        <tr><th>NIP</th><td>${data.nip ?? '-'}</td></tr>
+                                        <tr><th>Nomor Dapodik</th><td>${data.dapodik_number ?? '-'}</td></tr>
+                                        <tr><th>Nama</th><td>${data.name}</td></tr>
+                                        <tr><th>Email</th><td>${data.email ?? '-'}</td></tr>
+                                        <tr><th>No. Telp</th><td>${data.phone ?? '-'}</td></tr>
+                                        <tr><th>Alamat</th><td>${data.address ?? '-'}</td></tr>
+                                        <tr><th>Jenis Kelamin</th><td>${data.gender ?? '-'}</td></tr>
+                                        <tr><th>Status</th><td>${data.status ?? '-'}</td></tr>
+                                        ${subjectsHtml}
+                                    </table>
+                                </div>
+                            </div>
+                        `);
+                        $('#teacherDetailModal').modal('show');
+                    },
+                    error: function() {
+                        Swal.fire('Gagal', 'Tidak dapat mengambil data guru.', 'error');
+                    }
+                });
+            });
+
+            $('#teacherDetailModal').on('click', '.close', function() {
+                $('#teacherDetailModal').modal('hide');
             });
         });
 
