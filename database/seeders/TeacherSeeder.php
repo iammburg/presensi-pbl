@@ -39,13 +39,22 @@ class TeacherSeeder extends Seeder
             'urutan' => 1
         ]);
 
+        // Jadwal Pelajaran
+        $jadwalPelajaran = Menu::create([
+            'nama_menu' => 'Jadwal Pelajaran',
+            'url' => 'schedule',
+            'icon' => 'fas fa-calendar-alt',
+            'parent_id' => $mainMenu->id,
+            'urutan' => 2
+        ]);
+
         // Menu Lapor Prestasi (langsung ke form)
         $laporPrestasi = Menu::create([
             'nama_menu' => 'Lapor Prestasi',
             'url' => 'achievements',
             'icon' => 'fas fa-star',
             'parent_id' => $mainMenu->id,
-            'urutan' => 2
+            'urutan' => 3
         ]);
 
         // Menu Lapor Pelanggaran (langsung ke form)
@@ -54,13 +63,14 @@ class TeacherSeeder extends Seeder
             'url' => 'violations',
             'icon' => 'fas fa-exclamation-triangle',
             'parent_id' => $mainMenu->id,
-            'urutan' => 3
+            'urutan' => 4
         ]);
 
         // Assign semua menu ke role Guru
         $menuIds = [
             $mainMenu->id,
             $dashboardMenu->id,
+            $jadwalPelajaran->id,
             $laporPrestasi->id,
             $laporPelanggaran->id
         ];
