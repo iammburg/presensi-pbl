@@ -16,6 +16,31 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class ClassScheduleController extends Controller
 {
     /**
+     * Helper method to get hour IDs based on day
+     */
+    private function getHourIdsByDay($dayNumber)
+    {
+        // Senin-Kamis (1-4): hour_id 0-9
+        // Jumat (5): hour_id 10-17
+        if (in_array($dayNumber, [1, 2, 3, 4])) {
+            return range(0, 9);
+        } elseif ($dayNumber == 5) {
+            return range(10, 17);
+        }
+        
+        return [];
+    }
+
+    /**
+     * Helper method to validate hour_id based on day
+     */
+    private function validateHourForDay($dayNumber, $hourId)
+    {
+        $allowedHours = $this->getHourIdsByDay($dayNumber);
+        return in_array($hourId, $allowedHours);
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -47,9 +72,9 @@ class ClassScheduleController extends Controller
             ->orderByDesc('id')
             ->pluck('id');
 
-        // Final result with eager loading - UBAH DISINI: load academicYear dari schoolClass
+        // Final result with eager loading
         $schedules = ClassSchedule::with([
-                'schoolClass.academicYear', // Changed from 'assignment.academicYear'
+                'schoolClass.academicYear',
                 'subject',
                 'teacher',
                 'assignment'
@@ -73,8 +98,11 @@ class ClassScheduleController extends Controller
         // Ambil daftar mapel
         $subjects = Subject::orderBy('name')->get();
 
-        // Ambil daftar jam pelajaran/istirahat
-        $hours = Hour::orderBy('start_time')->get();
+        // Ambil daftar jam pelajaran/istirahat dengan grouping berdasarkan hari
+        $hoursData = [
+            'weekdays' => Hour::whereIn('id', range(0, 9))->orderBy('start_time')->get(), // Senin-Kamis
+            'friday' => Hour::whereIn('id', range(10, 17))->orderBy('start_time')->get()  // Jumat
+        ];
 
         // Ambil daftar pengampu (relasi guru dan mapel)
         $teachingAssignments = TeachingAssignment::with(['teacher', 'subject'])->get()
@@ -91,7 +119,7 @@ class ClassScheduleController extends Controller
         return view('class_schedule.create', compact(
             'classes',
             'subjects',
-            'hours',
+            'hoursData',
             'teachingAssignments'
         ));
     }
@@ -129,6 +157,11 @@ class ClassScheduleController extends Controller
                     $end   = (int) $entry['end_hour_id'];
                     $sessionType = $entry['session_type'];
 
+                    // Validasi jam berdasarkan hari
+                    if (!$this->validateHourForDay($dayNumber, $start) || !$this->validateHourForDay($dayNumber, $end)) {
+                        throw new \Exception("Jam yang dipilih tidak sesuai untuk hari $day. Senin-Kamis: jam 0-9, Jumat: jam 10-17.");
+                    }
+
                     // Set null jika Jam Istirahat, pastikan valid jika Jam Pelajaran
                     $assignmentId = $sessionType === 'Jam Istirahat'
                         ? null
@@ -140,6 +173,11 @@ class ClassScheduleController extends Controller
                     }
 
                     for ($hourId = $start; $hourId <= $end; $hourId++) {
+                        // Validasi setiap hour_id dalam range
+                        if (!$this->validateHourForDay($dayNumber, $hourId)) {
+                            throw new \Exception("Jam ID $hourId tidak valid untuk hari $day.");
+                        }
+
                         ClassSchedule::create([
                             'class_id'      => $classId,
                             'assignment_id' => $assignmentId,
@@ -172,9 +210,16 @@ class ClassScheduleController extends Controller
                 'assignment.subject', 
                 'assignment.teacher', 
                 'hour', 
-                'schoolClass.academicYear' // Changed from just 'schoolClass'
+                'schoolClass.academicYear'
             ])
             ->where('class_id', $manage_schedule->class_id)
+            ->whereRaw('
+                CASE 
+                    WHEN day_of_week IN (1,2,3,4) THEN hour_id BETWEEN 0 AND 9
+                    WHEN day_of_week = 5 THEN hour_id BETWEEN 10 AND 17
+                    ELSE FALSE
+                END
+            ')
             ->orderBy('day_of_week')
             ->orderBy('hour_id')
             ->get();
@@ -266,143 +311,150 @@ class ClassScheduleController extends Controller
         ]);
     }
 
-public function exportPdf(ClassSchedule $manage_schedule)
-{
-    try {
-        // Debug: Log informasi dasar
-        Log::info('Export PDF Debug', [
-            'schedule_id' => $manage_schedule->id,
-            'class_id' => $manage_schedule->class_id,
-        ]);
+    public function exportPdf(ClassSchedule $manage_schedule)
+    {
+        try {
+            // Debug: Log informasi dasar
+            Log::info('Export PDF Debug', [
+                'schedule_id' => $manage_schedule->id,
+                'class_id' => $manage_schedule->class_id,
+            ]);
 
-        // Ambil semua jadwal untuk kelas yang sama
-        $allSchedules = ClassSchedule::with([
-                'assignment.subject', 
-                'assignment.teacher', 
-                'hour', 
-                'schoolClass.academicYear'
-            ])
-            ->where('class_id', $manage_schedule->class_id)
-            ->orderBy('day_of_week')
-            ->orderBy('hour_id')
-            ->get();
+            // Ambil semua jadwal untuk kelas yang sama dengan filtering jam berdasarkan hari
+            $allSchedules = ClassSchedule::with([
+                    'assignment.subject', 
+                    'assignment.teacher', 
+                    'hour', 
+                    'schoolClass.academicYear'
+                ])
+                ->where('class_id', $manage_schedule->class_id)
+                ->whereRaw('
+                    CASE 
+                        WHEN day_of_week IN (1,2,3,4) THEN hour_id BETWEEN 0 AND 9
+                        WHEN day_of_week = 5 THEN hour_id BETWEEN 10 AND 17
+                        ELSE FALSE
+                    END
+                ')
+                ->orderBy('day_of_week')
+                ->orderBy('hour_id')
+                ->get();
 
-        // Debug: Log jumlah schedules yang ditemukan
-        Log::info('Total schedules found', [
-            'count' => $allSchedules->count(),
-        ]);
+            // Debug: Log jumlah schedules yang ditemukan
+            Log::info('Total schedules found', [
+                'count' => $allSchedules->count(),
+            ]);
 
-        $days = [
-            1 => 'Senin',
-            2 => 'Selasa', 
-            3 => 'Rabu',
-            4 => 'Kamis',
-            5 => 'Jumat'
-        ];
+            $days = [
+                1 => 'Senin',
+                2 => 'Selasa', 
+                3 => 'Rabu',
+                4 => 'Kamis',
+                5 => 'Jumat'
+            ];
 
-        // GUNAKAN LOGIKA YANG SAMA SEPERTI SHOW METHOD
-        $schedulesPerDay = [];
-        
-        foreach ($days as $dayNumber => $dayName) {
-            $daySchedules = $allSchedules->where('day_of_week', $dayNumber);
-            $groupedSchedules = [];
+            // GUNAKAN LOGIKA YANG SAMA SEPERTI SHOW METHOD
+            $schedulesPerDay = [];
             
-            if ($daySchedules->isNotEmpty()) {
-                $currentGroup = null;
+            foreach ($days as $dayNumber => $dayName) {
+                $daySchedules = $allSchedules->where('day_of_week', $dayNumber);
+                $groupedSchedules = [];
                 
-                // Urutkan berdasarkan start_time, bukan slot_number - SAMA SEPERTI SHOW
-                foreach ($daySchedules->sortBy('hour.start_time') as $schedule) {
-                    $sessionType = $schedule->assignment_id ? 'Jam Pelajaran' : 'Jam Istirahat';
-                    $assignmentId = $schedule->assignment_id;
+                if ($daySchedules->isNotEmpty()) {
+                    $currentGroup = null;
                     
-                    // KONDISI PENGGABUNGAN YANG SAMA SEPERTI SHOW METHOD
-                    if ($currentGroup && 
-                        $currentGroup['session_type'] === $sessionType && 
-                        $currentGroup['assignment_id'] === $assignmentId &&
-                        $currentGroup['end_time'] === $schedule->hour->start_time) {
+                    // Urutkan berdasarkan start_time, bukan slot_number - SAMA SEPERTI SHOW
+                    foreach ($daySchedules->sortBy('hour.start_time') as $schedule) {
+                        $sessionType = $schedule->assignment_id ? 'Jam Pelajaran' : 'Jam Istirahat';
+                        $assignmentId = $schedule->assignment_id;
                         
-                        // Gabungkan dengan group sebelumnya
-                        $currentGroup['end_hour_id'] = $schedule->hour_id;
-                        $currentGroup['end_hour_slot'] = $schedule->hour->slot_number;
-                        $currentGroup['end_time'] = $schedule->hour->end_time ?? $currentGroup['end_time'];
-                        
-                        // Tambahkan waktu individual untuk setiap jam
-                        $currentGroup['hour_times'][$schedule->hour->slot_number] = $schedule->hour->start_time;
-                        $currentGroup['hour_end_times'][$schedule->hour->slot_number] = $schedule->hour->end_time;
-                        $currentGroup['hour_schedules'][$schedule->hour->slot_number] = $schedule;
-                    } else {
-                        // Simpan group sebelumnya jika ada
-                        if ($currentGroup) {
-                            $groupedSchedules[] = $currentGroup;
+                        // KONDISI PENGGABUNGAN YANG SAMA SEPERTI SHOW METHOD
+                        if ($currentGroup && 
+                            $currentGroup['session_type'] === $sessionType && 
+                            $currentGroup['assignment_id'] === $assignmentId &&
+                            $currentGroup['end_time'] === $schedule->hour->start_time) {
+                            
+                            // Gabungkan dengan group sebelumnya
+                            $currentGroup['end_hour_id'] = $schedule->hour_id;
+                            $currentGroup['end_hour_slot'] = $schedule->hour->slot_number;
+                            $currentGroup['end_time'] = $schedule->hour->end_time ?? $currentGroup['end_time'];
+                            
+                            // Tambahkan waktu individual untuk setiap jam
+                            $currentGroup['hour_times'][$schedule->hour->slot_number] = $schedule->hour->start_time;
+                            $currentGroup['hour_end_times'][$schedule->hour->slot_number] = $schedule->hour->end_time;
+                            $currentGroup['hour_schedules'][$schedule->hour->slot_number] = $schedule;
+                        } else {
+                            // Simpan group sebelumnya jika ada
+                            if ($currentGroup) {
+                                $groupedSchedules[] = $currentGroup;
+                            }
+                            
+                            // Buat group baru - SAMA SEPERTI SHOW METHOD
+                            $currentGroup = [
+                                'session_type' => $sessionType,
+                                'start_hour_id' => $schedule->hour_id,
+                                'end_hour_id' => $schedule->hour_id,
+                                'start_hour_slot' => $schedule->hour->slot_number,
+                                'end_hour_slot' => $schedule->hour->slot_number,
+                                'assignment_id' => $assignmentId,
+                                'subject_name' => $schedule->assignment->subject->name ?? null,
+                                'teacher_name' => $schedule->assignment->teacher->name ?? null,
+                                'start_time' => $schedule->hour->start_time ?? null,
+                                'end_time' => $schedule->hour->end_time ?? null,
+                                // Tambahkan array untuk menyimpan waktu individual setiap jam
+                                'hour_times' => [
+                                    $schedule->hour->slot_number => $schedule->hour->start_time
+                                ],
+                                'hour_end_times' => [
+                                    $schedule->hour->slot_number => $schedule->hour->end_time
+                                ],
+                                'hour_schedules' => [
+                                    $schedule->hour->slot_number => $schedule
+                                ]
+                            ];
                         }
-                        
-                        // Buat group baru - SAMA SEPERTI SHOW METHOD
-                        $currentGroup = [
-                            'session_type' => $sessionType,
-                            'start_hour_id' => $schedule->hour_id,
-                            'end_hour_id' => $schedule->hour_id,
-                            'start_hour_slot' => $schedule->hour->slot_number,
-                            'end_hour_slot' => $schedule->hour->slot_number,
-                            'assignment_id' => $assignmentId,
-                            'subject_name' => $schedule->assignment->subject->name ?? null,
-                            'teacher_name' => $schedule->assignment->teacher->name ?? null,
-                            'start_time' => $schedule->hour->start_time ?? null,
-                            'end_time' => $schedule->hour->end_time ?? null,
-                            // Tambahkan array untuk menyimpan waktu individual setiap jam
-                            'hour_times' => [
-                                $schedule->hour->slot_number => $schedule->hour->start_time
-                            ],
-                            'hour_end_times' => [
-                                $schedule->hour->slot_number => $schedule->hour->end_time
-                            ],
-                            'hour_schedules' => [
-                                $schedule->hour->slot_number => $schedule
-                            ]
-                        ];
+                    }
+                    
+                    // Jangan lupa simpan group terakhir
+                    if ($currentGroup) {
+                        $groupedSchedules[] = $currentGroup;
                     }
                 }
                 
-                // Jangan lupa simpan group terakhir
-                if ($currentGroup) {
-                    $groupedSchedules[] = $currentGroup;
-                }
+                $schedulesPerDay[$dayName] = $groupedSchedules;
             }
-            
-            $schedulesPerDay[$dayName] = $groupedSchedules;
+
+            // Debug: Log final result sebelum generate PDF
+            Log::info('Final schedulesPerDay for PDF', [
+                'data' => $schedulesPerDay,
+                'has_data' => !empty(array_filter($schedulesPerDay))
+            ]);
+
+            // Pastikan ada data sebelum generate PDF
+            if (empty(array_filter($schedulesPerDay))) {
+                Log::warning('No schedule data found for PDF export');
+                return redirect()->back()->with('error', 'Tidak ada data jadwal untuk diekspor.');
+            }
+
+            $pdf = Pdf::loadView('class_schedule.pdf', [
+                'schedule' => $manage_schedule,
+                'schedulesPerDay' => $schedulesPerDay,
+                'days' => array_values($days),
+                'class' => $manage_schedule->schoolClass
+            ])->setPaper('a4', 'landscape');
+
+            return $pdf->download('jadwal_kelas_' . optional($manage_schedule->schoolClass)->name . '.pdf');
+
+        } catch (\Exception $e) {
+            Log::error('Gagal export PDF', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat export PDF: ' . $e->getMessage());
         }
-
-        // Debug: Log final result sebelum generate PDF
-        Log::info('Final schedulesPerDay for PDF', [
-            'data' => $schedulesPerDay,
-            'has_data' => !empty(array_filter($schedulesPerDay))
-        ]);
-
-        // Pastikan ada data sebelum generate PDF
-        if (empty(array_filter($schedulesPerDay))) {
-            Log::warning('No schedule data found for PDF export');
-            return redirect()->back()->with('error', 'Tidak ada data jadwal untuk diekspor.');
-        }
-
-        $pdf = Pdf::loadView('class_schedule.pdf', [
-            'schedule' => $manage_schedule,
-            'schedulesPerDay' => $schedulesPerDay,
-            'days' => array_values($days),
-            'class' => $manage_schedule->schoolClass
-        ])->setPaper('a4', 'landscape');
-
-        return $pdf->download('jadwal_kelas_' . optional($manage_schedule->schoolClass)->name . '.pdf');
-
-    } catch (\Exception $e) {
-        Log::error('Gagal export PDF', [
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return redirect()->back()->with('error', 'Terjadi kesalahan saat export PDF: ' . $e->getMessage());
     }
-}
 
     /**
      * Show the form for editing the specified resource.
@@ -413,11 +465,18 @@ public function exportPdf(ClassSchedule $manage_schedule)
     public function edit(ClassSchedule $manageSchedule)
     {
         $class_id = $manageSchedule->class_id;
-        $class = SchoolClass::with('academicYear')->findOrFail($class_id); // Load academic year
+        $class = SchoolClass::with('academicYear')->findOrFail($class_id);
 
-        // Ambil semua jadwal untuk kelas ini
+        // Ambil semua jadwal untuk kelas ini dengan filtering jam berdasarkan hari
         $existingSchedules = ClassSchedule::with(['hour', 'assignment.subject', 'assignment.teacher'])
             ->where('class_id', $class_id)
+            ->whereRaw('
+                CASE 
+                    WHEN day_of_week IN (1,2,3,4) THEN hour_id BETWEEN 0 AND 9
+                    WHEN day_of_week = 5 THEN hour_id BETWEEN 10 AND 17
+                    ELSE FALSE
+                END
+            ')
             ->get()
             ->groupBy('day_of_week');
 
@@ -460,7 +519,7 @@ public function exportPdf(ClassSchedule $manage_schedule)
                         'start_hour_id' => $schedule->hour_id,
                         'end_hour_id' => $schedule->hour_id,
                         'assignment_id' => $assignmentId,
-                        'hour_session_type' => $schedule->hour->session_type ?? $sessionType, // tambahkan ini
+                        'hour_session_type' => $schedule->hour->session_type ?? $sessionType,
                     ];
                 }
             }
@@ -472,10 +531,15 @@ public function exportPdf(ClassSchedule $manage_schedule)
             $scheduleData[$dayName] = $groupedSchedules;
         }
 
-        // Data untuk form (sama seperti create) - load academic year
+        // Data untuk form dengan filtering jam berdasarkan hari
         $classes = SchoolClass::with('academicYear')->orderBy('name')->get();
         $subjects = Subject::orderBy('name')->get();
-        $hours = Hour::orderBy('start_time')->get();
+        
+        // Filter jam berdasarkan hari
+        $hoursData = [
+            'weekdays' => Hour::whereIn('id', range(0, 9))->orderBy('start_time')->get(), // Senin-Kamis
+            'friday' => Hour::whereIn('id', range(10, 17))->orderBy('start_time')->get()  // Jumat
+        ];
         
         $teachingAssignments = TeachingAssignment::with(['teacher', 'subject'])->get()
             ->map(function ($item) {
@@ -489,10 +553,10 @@ public function exportPdf(ClassSchedule $manage_schedule)
             });
 
         // Default semester (bisa disesuaikan logic bisnis)
-        $semester = '1'; // atau ambil dari database jika ada field semester
+        $semester = '1';
 
         return view('class_schedule.edit', compact(
-            'class', 'classes', 'subjects', 'hours', 'teachingAssignments', 
+            'class', 'classes', 'subjects', 'hoursData', 'teachingAssignments', 
             'scheduleData', 'manageSchedule', 'semester'
         ));
     }
@@ -532,7 +596,7 @@ public function exportPdf(ClassSchedule $manage_schedule)
             // Hapus semua jadwal lama untuk kelas ini
             ClassSchedule::where('class_id', $class_id)->delete();
 
-            // Buat jadwal baru
+            // Buat jadwal baru dengan validasi jam berdasarkan hari
             foreach ($schedules as $day => $entries) {
                 $dayNumber = $dayMapping[$day] ?? null;
 
@@ -540,6 +604,11 @@ public function exportPdf(ClassSchedule $manage_schedule)
                     $start = (int) $entry['start_hour_id'];
                     $end   = (int) $entry['end_hour_id'];
                     $sessionType = $entry['session_type'];
+
+                    // Validasi jam berdasarkan hari
+                    if (!$this->validateHourForDay($dayNumber, $start) || !$this->validateHourForDay($dayNumber, $end)) {
+                        throw new \Exception("Jam yang dipilih tidak sesuai untuk hari $day. Senin-Kamis: jam 0-9, Jumat: jam 10-17.");
+                    }
 
                     $assignmentId = $sessionType === 'Jam Istirahat'
                         ? null
@@ -550,6 +619,11 @@ public function exportPdf(ClassSchedule $manage_schedule)
                     }
 
                     for ($hourId = $start; $hourId <= $end; $hourId++) {
+                        // Validasi setiap hour_id dalam range
+                        if (!$this->validateHourForDay($dayNumber, $hourId)) {
+                            throw new \Exception("Jam ID $hourId tidak valid untuk hari $day.");
+                        }
+
                         ClassSchedule::create([
                             'class_id'      => $class_id,
                             'assignment_id' => $assignmentId,
@@ -575,18 +649,17 @@ public function exportPdf(ClassSchedule $manage_schedule)
      * @return \Illuminate\Http\Response
      */
     public function destroy(ClassSchedule $manageSchedule)
-{
-    try {
-        $classId = $manageSchedule->class_id;
+    {
+        try {
+            $classId = $manageSchedule->class_id;
 
-        // Hapus semua jadwal yang memiliki class_id sama
-        ClassSchedule::where('class_id', $classId)->delete();
+            // Hapus semua jadwal yang memiliki class_id sama
+            ClassSchedule::where('class_id', $classId)->delete();
 
-        return redirect()->route('manage-schedules.index')
-            ->with('success', 'Semua jadwal untuk kelas ini berhasil dihapus.');
-    } catch (\Exception $e) {
-        return back()->with('error', 'Gagal menghapus jadwal: ' . $e->getMessage());
+            return redirect()->route('manage-schedules.index')
+                ->with('success', 'Semua jadwal untuk kelas ini berhasil dihapus.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menghapus jadwal: ' . $e->getMessage());
+        }
     }
-}
-
 }

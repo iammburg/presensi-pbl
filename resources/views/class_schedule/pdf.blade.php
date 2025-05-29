@@ -16,7 +16,7 @@
             text-align: center;
             margin: 10px 0;
             color: #000;
-            font-size: 21px; /* sekitar 16pt */
+            font-size: 21px; 
         }
 
         .header-info {
@@ -28,7 +28,7 @@
             margin-top: 30px;
             margin-bottom: 15px;
             font-weight: bold;
-            font-size: 18px; /* diperbesar dari 14px */
+            font-size: 18px; 
             text-align: center;
             background-color: #f8f9fa;
             padding: 12px;
@@ -49,7 +49,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 15px;
-            min-width: 600px; /* minimum width untuk mencegah terpotong */
+            min-width: 600px; 
             background-color: white;
         }
 
@@ -121,7 +121,6 @@
             font-size: 14px;
         }
 
-        /* Responsive design */
         @media screen and (max-width: 768px) {
             body {
                 margin: 10px;
@@ -171,10 +170,12 @@
     </style>
 </head>
 <body>
-    <div class="header-info">
-        <h2>JADWAL PELAJARAN</h2>
-        <h3>KELAS {{ $class->name ?? 'N/A' }}{{ isset($class->parallel_name) ? ' - ' . $class->parallel_name : '' }}</h3>
-    </div>
+    <div class="header-info" style="display: flex; justify-content: space-between; align-items: center;">
+    <h2 style="margin: 0;">JADWAL PELAJARAN</h2>
+    <h3 style="margin: 0;">
+        KELAS {{ $class->name ?? 'N/A' }}{{ isset($class->parallel_name) ? ' - ' . $class->parallel_name : '' }}
+    </h3>
+</div>
     <div class="academic-year">
         TAHUN AKADEMIK {{ $schedule->schoolClass->academicYear->start_year }} / {{ $schedule->schoolClass->academicYear->end_year }}
     </div>
