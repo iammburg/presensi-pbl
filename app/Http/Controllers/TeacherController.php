@@ -126,7 +126,41 @@ class TeacherController extends Controller
      */
     public function show(string $nip)
     {
-        $teacher = Teacher::with('user')->where('nip', $nip)->firstOrFail();
+        $teacher = Teacher::with(['user', 'teachingAssignments.subject', 'teachingAssignments.class'])->where('nip', $nip)->firstOrFail();
+
+        // Jika request AJAX, kembalikan JSON
+        if (request()->ajax()) {
+            // Ambil mata pelajaran yang diampu
+            $subjects = $teacher->teachingAssignments->map(function($assignment) {
+                return [
+                    'subject' => $assignment->subject->name,
+                    'class' => $assignment->class->name . ($assignment->class->parallel_name ? ' - ' . $assignment->class->parallel_name : '')
+                ];
+            });
+
+            // Buat status berdasarkan mata pelajaran
+            $status = 'Guru';
+            if ($teacher->user->hasRole('Guru BK')) {
+                $status = 'Guru BK';
+            } else if ($subjects->isNotEmpty()) {
+                $status = 'Guru ' . $subjects->pluck('subject')->unique()->join(', ');
+            }
+
+            return response()->json([
+                'nip' => $teacher->nip,
+                'dapodik_number' => $teacher->dapodik_number,
+                'name' => $teacher->name,
+                'email' => $teacher->user->email,
+                'phone' => $teacher->phone,
+                'address' => $teacher->address,
+                'gender' => $teacher->gender,
+                'birth_date' => $teacher->birth_date ? $teacher->birth_date->format('d/m/Y') : null,
+                'photo_url' => $teacher->photo ? asset('storage/' . $teacher->photo) : null,
+                'status' => $status,
+                // 'subjects' => $subjects
+            ]);
+        }
+
         return view('teachers.show', compact('teacher'));
     }
 

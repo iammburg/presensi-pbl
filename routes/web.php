@@ -79,6 +79,15 @@ Route::resource('achievements', AchievementController::class);
 Route::resource('violations', ViolationController::class);
 Route::resource('kelola-pelanggaran', ViolationPointController::class);
 
+// Route untuk validasi prestasi oleh Guru BK
+Route::post('achievements/{achievement}/validate', [AchievementController::class, 'validateAchievement'])->name('achievements.validate');
+Route::resource('achievement-validations', AchievementValidationController::class)->only(['index', 'show']);
+Route::post('achievement-validations/{achievement}/validate', [AchievementValidationController::class, 'validateAchievement'])->name('achievement-validations.validate');
+
+// Route untuk validasi pelanggaran oleh Guru BK
+Route::post('violations/{violation}/validate', [ViolationController::class, 'validateViolation'])->name('violations.validate');
+Route::resource('violation-validations', ViolationValidationController::class)->only(['index', 'show']);
+
 // Route buat Siswa
 Route::get('/manage-attendance-students', [StudentAttendanceController::class, 'index'])
     ->middleware(['role:Siswa']);
@@ -92,14 +101,4 @@ Route::resource('subjects', SubjectController::class);
 // Route tambahan untuk mendapatkan nama jadwal pelajaran
 Route::get('subjects/schedule-names', [SubjectController::class, 'getScheduleNames'])->name('subjects.schedule-names');
 
-// Validasi prestasi oleh Guru BK
-Route::post('achievements/{achievement}/validate', [AchievementController::class, 'validateAchievement'])->name('achievements.validate');
-
-// Route untuk validasi prestasi oleh Guru BK
-Route::resource('achievement-validations', AchievementValidationController::class)->only(['index', 'show']);
-Route::post('achievement-validations/{achievement}/validate', [AchievementValidationController::class, 'validateAchievement'])->name('achievement-validations.validate');
-
-// Route untuk validasi pelanggaran oleh Guru BK
-Route::post('violations/{violation}/validate', [ViolationController::class, 'validateViolation'])->name('violations.validate');
-Route::resource('violation-validations', ViolationValidationController::class)->only(['index', 'show']);
-Route::post('violation-validations/{violation}/validate', [ViolationValidationController::class, 'validateViolation'])->name('violation-validations.validate');
+Route::get('/autocomplete/siswa', [App\Http\Controllers\AchievementController::class, 'autocompleteSiswa'])->name('autocomplete.siswa');
