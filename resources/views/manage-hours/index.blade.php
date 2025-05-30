@@ -3,154 +3,56 @@
 @section('title', 'Manajemen Jam')
 
 @section('content')
-    <div class="container-fluid px-4">
-        <h3 class="fw-bold mb-4">Manajemen Jam</h3>
-
-        <div class="card shadow-sm rounded">
-            <div class="card-header d-flex align-items-center">
-                <h5 class="mb-0 flex-grow-1">Kelola Jam Pelajaran</h5>
-                @can('create_hours')
-                    <a href="{{ route('manage-hours.create') }}" class="btn text-white ms-auto"
-                        style="background-color: #1777e5;">Tambah Jam</a>
-                @endcan
-            </div>
-
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table id="hourTable" class="table table-bordered table-striped align-middle">
-                        <thead class="text-center text-white" style="background-color: #009cf3;">
-                            <tr>
-                                <th>No.</th>
-                                <th>Tipe Jam</th>
-                                <th>Jam ke-</th>
-                                <th>Jam Mulai</th>
-                                <th>Jam Selesai</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-center">
-
-                        </tbody>
-                    </table>
-                </div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6 text-uppercase">
+                <h4 class="m-0">Manajemen Jam</h4>
             </div>
         </div>
     </div>
+</div>
+<div class="content">
+    <div class="container-fluid pb-4"> <!-- janlup tambah padding bawah -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Kelola Data Jam</h3>
+                        <div class="card-tools">
+                            <a href="{{ route('manage-hours.create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus-circle"></i> Tambah Jam
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body bg-white"> 
+                        <div class="table-responsive">
+                            <table id="hourTable" class="table table-bordered table-striped">
+                                <thead class="bg-tertiary text-white">
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Tipe Jam</th>
+                                        <th>Jam ke-</th>
+                                        <th>Jam Mulai</th>
+                                        <th>Jam Selesai</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div> <!-- card-body -->
+                </div> <!-- card -->
+            </div> <!-- col -->
+        </div> <!-- row -->
+    </div> <!-- container-fluid -->
+</div> <!-- content -->
 @endsection
+
 @push('css')
-    <link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-        }
-
-        .table thead th,
-        .table tbody td {
-            vertical-align: middle;
-            text-align: left;
-        }
-
-        .table-sm th,
-        .table-sm td {
-            padding: 0.3rem;
-        }
-
-        .btn-primary {
-            background-color: #1777e5;
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background-color: #1266c4;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            padding: 0.2rem 0.4rem;
-            margin-left: 2px;
-            background-color: #f4f4f4;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            color: #1777e5 !important;
-            font-size: 0.75rem;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background-color: #1777e5 !important;
-            color: white !important;
-            border: 1px solid #1777e5;
-            font-size: 0.75rem;
-        }
-
-        .dataTables_wrapper .dataTables_paginate {
-            margin-top: 0.5rem;
-            display: flex;
-            justify-content: end;
-            align-items: center;
-            font-size: 0.75rem;
-        }
-
-        .dataTables_info {
-            color: #1777e5;
-            font-size: 0.90rem;
-            margin-top: 0.5rem;
-        }
-
-        .dropdown-menu {
-            min-width: 100px;
-            z-index: 1050 !important;
-        }
-
-        .dropdown-menu a {
-            font-size: 0.85rem;
-        }
-
-        .dataTables_length label {
-            font-weight: 500;
-            color: #1777e5;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .dataTables_length select {
-            min-width: 50px;
-            margin: 0 0.3rem;
-            padding: 0.3rem 0.5rem;
-            font-size: 0.85rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: #fff;
-            color: #1777e5;
-            appearance: none;
-        }
-
-        .dataTables_length select:focus {
-            outline: none;
-            border-color: #1777e5;
-            box-shadow: 0 0 0 0.1rem rgba(23, 119, 229, 0.25);
-        }
-
-        .dropdown-menu a:hover {
-            background-color: #f5faff;
-            color: #0d6efd;
-        }
-
-        .dropdown-item i {
-            width: 20px;
-            text-align: center;
-        }
-
-        #hourTable tbody tr:nth-child(odd) {
-            background-color: #f4f4f4;
-        }
-
-        #hourTable tbody tr:nth-child(even) {
-            background-color: #ffffff;
-        }
-    </style>
+<link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
 @endpush
 
 @push('js')
