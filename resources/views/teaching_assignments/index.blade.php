@@ -85,7 +85,7 @@
                                                 <span class="text-danger">Belum diatur</span>
                                             @endif
                                         </td>
-                                        <td>{{ optional($assignment->class)->name }} - {{ optional($assignment->class)->parallel_name }}</td>
+                                        <td>{{ optional($assignment->schoolClass)->name }} - {{ optional($assignment->schoolClass)->parallel_name }}</td>
                                         <td>{{ $assignment->subject->name ?? '-' }}</td>
                                         <td>{{ $assignment->teacher->name ?? '-' }}</td>
                                         <td>

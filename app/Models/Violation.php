@@ -11,7 +11,7 @@ class Violation extends Model
 
     protected $fillable = [
         'student_id',
-        'violation_points_id',
+        'violation_points_id', // Nama foreign key di database
         'violation_date',
         'academic_year_id',
         'description',
@@ -21,7 +21,7 @@ class Violation extends Model
         'status',
         // Tambahan validasi
         'validation_status',
-        'validator_id',
+        'validator_id', // Ini akan menyimpan ID dari tabel teachers
         'validation_notes',
         'validated_at',
     ];
@@ -40,21 +40,23 @@ class Violation extends Model
 
     public function violationPoint()
     {
-        return $this->belongsTo(ViolationPoint::class);
+        // Pastikan argumen kedua adalah nama foreign key di tabel 'violations'
+        return $this->belongsTo(ViolationPoint::class, 'violation_points_id');
     }
 
     public function academicYear()
     {
-        return $this->belongsTo(AcademicYear::class);
+        return $this->belongsTo(AcademicYear::class); // Asumsi FK adalah academic_year_id
     }
 
-    public function teacher()
+    public function teacher() // Relasi untuk guru yang melaporkan (reported_by berisi NIP)
     {
         return $this->belongsTo(Teacher::class, 'reported_by', 'nip');
     }
 
-    public function validator()
+    public function validator() // Relasi untuk guru yang memvalidasi (validator_id berisi ID Teacher)
     {
+        // Asumsi validator_id adalah foreign key ke primary key (id) tabel teachers
         return $this->belongsTo(Teacher::class, 'validator_id');
     }
 }

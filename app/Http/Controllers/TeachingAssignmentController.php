@@ -18,7 +18,7 @@ class TeachingAssignmentController extends Controller
     {
         $teachingAssignments = TeachingAssignment::with([
             'academicYear',
-            'class',
+            'schoolClass',
             'subject',
             'teacher'
         ])->get();

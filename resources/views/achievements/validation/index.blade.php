@@ -38,9 +38,9 @@
                                     @forelse($achievements as $achievement)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $achievement->student->name }}</td>
+                                            <td>{{ $achievement->student ? $achievement->student->name : '-' }}</td>
                                             <td>{{ $achievement->achievements_name }}</td>
-                                            <td>{{ $achievement->achievement_date->format('d/m/Y') }}</td>
+                                            <td>{{ $achievement->achievement_date ? $achievement->achievement_date->format('d/m/Y') : '-' }}</td>
                                             <td>
                                                 @if($achievement->validation_status === 'pending')
                                                     <span class="badge badge-warning">Menunggu Validasi</span>
@@ -50,7 +50,7 @@
                                                     <span class="badge badge-danger">Ditolak</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $achievement->teacher->name }}</td>
+                                            <td>{{ $achievement->teacher ? $achievement->teacher->name : '-' }}</td>
                                             <td>
                                                 <a href="{{ route('achievement-validations.show', $achievement) }}" class="btn btn-info btn-sm">Detail</a>
                                             </td>
@@ -80,6 +80,7 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
 <script>
 $(document).ready(function() {
+    $.fn.dataTable.ext.errMode = 'none';
     $('#datatable-prestasi').DataTable({
         "ordering": true,
         "responsive": true,
