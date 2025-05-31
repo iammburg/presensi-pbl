@@ -32,15 +32,19 @@
                                             <i class="fas fa-plus"></i> Tambah Data
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="tambahDataDropdown">
-                                            <a class="dropdown-item d-flex align-items-center py-2" href="{{ route('manage-teachers.create') }}">
+                                            <a class="dropdown-item d-flex align-items-center py-2"
+                                                href="{{ route('manage-teachers.create') }}">
                                                 <i class="fas fa-keyboard mr-3 text-primary"></i> <span>Isi Manual</span>
                                             </a>
-                                            <a class="dropdown-item d-flex align-items-center py-2" href="#" id="importExcel">
+                                            <a class="dropdown-item d-flex align-items-center py-2" href="#"
+                                                id="importExcel">
                                                 <i class="fas fa-file-excel mr-3 text-success"></i> <span>Import Excel</span>
                                             </a>
                                             <div class="dropdown-divider my-1"></div>
-                                            <a class="dropdown-item d-flex align-items-center py-2" href="{{ route('manage-teachers.template') }}">
-                                                <i class="fas fa-download mr-3 text-info"></i> <span>Download Template Excel</span>
+                                            <a class="dropdown-item d-flex align-items-center py-2"
+                                                href="{{ route('manage-teachers.template') }}">
+                                                <i class="fas fa-download mr-3 text-info"></i> <span>Download Template
+                                                    Excel</span>
                                             </a>
                                         </div>
                                     </div>
@@ -101,6 +105,22 @@
                         <button type="submit" class="btn btn-primary">Import</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detail Guru -->
+    <div class="modal fade" id="teacherDetailModal" tabindex="-1" role="dialog" aria-labelledby="teacherDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Guru</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="teacherDetailBody"></div>
             </div>
         </div>
     </div>
@@ -174,27 +194,34 @@
             z-index: 1050 !important;
             border-radius: 8px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            border: none; /* Remove default border */
+            border: none;
+            /* Remove default border */
         }
 
         .dropdown-menu a.dropdown-item {
             font-size: 0.95rem;
-            padding: 10px 18px; /* Tambahkan padding */
+            padding: 10px 18px;
+            /* Tambahkan padding */
         }
 
         .dropdown-menu a.dropdown-item:hover {
-            background-color: #f5faff; /* Warna latar saat hover */
-            color: #0d6efd; /* Warna teks saat hover */
+            background-color: #f5faff;
+            /* Warna latar saat hover */
+            color: #0d6efd;
+            /* Warna teks saat hover */
         }
 
         .dropdown-item i {
-            width: 20px; /* Atur lebar ikon */
+            width: 20px;
+            /* Atur lebar ikon */
             text-align: center;
-            margin-right: 0.75rem; /* Tambahkan margin kanan */
+            margin-right: 0.75rem;
+            /* Tambahkan margin kanan */
         }
 
         .dropdown-divider {
-            margin: 0.5rem 0; /* Sesuaikan margin divider */
+            margin: 0.5rem 0;
+            /* Sesuaikan margin divider */
         }
 
         /* Tambahkan gaya untuk warna ikon */
@@ -209,7 +236,6 @@
         .dropdown-item .text-info {
             color: #17a2b8 !important;
         }
-
     </style>
 @endpush
 
@@ -266,7 +292,10 @@
                     },
                     {
                         data: 'name',
-                        name: 'name'
+                        name: 'name',
+                        render: function(data, type, row) {
+                            return `<a href="#" class="teacher-detail-link" data-nip="${row.nip}">${data}</a>`;
+                        }
                     },
                     {
                         data: 'email',
@@ -292,6 +321,74 @@
             // Handle Import Excel button
             $('#importExcel').click(function() {
                 $('#importExcelModal').modal('show');
+            });
+
+            // Handler klik nama guru
+            $('#teachersTable').on('click', '.teacher-detail-link', function(e) {
+                e.preventDefault();
+                const nip = $(this).data('nip');
+                $.ajax({
+                    url: `/manage-teachers/${nip}`,
+                    method: 'GET',
+                    success: function(data) {
+                        let subjectsHtml = '';
+                        // if (data.subjects && data.subjects.length > 0) {
+                        //     subjectsHtml = '<tr><th>Mata Pelajaran</th><td><ul class="list-unstyled mb-0">';
+                        //     data.subjects.forEach(function(item) {
+                        //         subjectsHtml += `<li>${item.subject} (${item.class})</li>`;
+                        //     });
+                        //     subjectsHtml += '</ul></td></tr>';
+                        // } else {
+                        //     subjectsHtml = '<tr><th>Mata Pelajaran</th><td>Belum ada penugasan mengajar</td></tr>';
+                        // }
+
+                        $('#teacherDetailBody').html(`
+                            <div class="row">
+                                <div class="col-md-4 text-center">
+                                    ${data.photo_url
+                                        ? `<img src="${data.photo_url}" alt="Foto" class="img-thumbnail" style="max-width: 150px;">`
+                                        : `<div class="text-muted mt-4">Belum ada foto</div>`
+                                    }
+                                </div>
+                                <div class="col-md-8">
+                                    <table class="table table-sm">
+                                        <tr><th>NIP</th><td>${data.nip ?? '-'}</td></tr>
+                                        <tr><th>Nomor Dapodik</th><td>${data.dapodik_number ?? '-'}</td></tr>
+                                        <tr><th>Nama</th><td>${data.name}</td></tr>
+                                        <tr><th>Email</th><td>${data.email ?? '-'}</td></tr>
+                                        <tr><th>No. Telp</th><td>${data.phone ?? '-'}</td></tr>
+                                        <tr><th>Alamat</th><td>${data.address ?? '-'}</td></tr>
+                                        <tr><th>Jenis Kelamin</th><td>${data.gender ?? '-'}</td></tr>
+                                        <tr>
+                                            <th>Tanggal Lahir</th>
+                                            <td>
+                                                ${
+                                                    data.birth_date
+                                                        ? new Date(data.birth_date).toLocaleDateString('id-ID', {
+                                                            day: '2-digit',
+                                                            month: 'long',
+                                                            year: 'numeric'
+                                                        })
+                                                        : '-'
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr><th>Status</th><td>${data.status ?? '-'}</td></tr>
+                                        ${subjectsHtml}
+                                    </table>
+                                </div>
+                            </div>
+                        `);
+                        $('#teacherDetailModal').modal('show');
+                    },
+                    error: function() {
+                        Swal.fire('Gagal', 'Tidak dapat mengambil data guru.', 'error');
+                    }
+                });
+            });
+
+            $('#teacherDetailModal').on('click', '.close', function() {
+                $('#teacherDetailModal').modal('hide');
             });
         });
 

@@ -43,6 +43,11 @@ class Teacher extends Model
         return $this->hasMany(HomeroomAssignment::class, 'teacher_id', 'nip');
     }
 
+    public function teachingAssignments()
+    {
+        return $this->hasMany(TeachingAssignment::class, 'teacher_id', 'nip');
+    }
+
     public function setDapodikNumberAttribute($value)
     {
         $this->attributes['dapodik_number'] = $value ? substr($value, 0, 16) : null;

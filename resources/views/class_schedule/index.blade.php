@@ -57,7 +57,8 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Kelas</th>
-                                        <th>Aksi</th>
+                                        <th>Tahun Akademik</th>
+                                        <th class="text-center align-middle">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -65,27 +66,34 @@
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>
-                                            {{ $schedule->SchoolClass ? $schedule->SchoolClass->name . ' - ' . $schedule->SchoolClass->parallel_name : '-' }}
+                                            {{ $schedule->schoolClass ? $schedule->schoolClass->name . ' - ' . $schedule->schoolClass->parallel_name : '-' }}
                                         </td>
                                         <td>
-                                            <a href="{{ route('manage-schedules.show', $schedule->class_id) }}" class="btn btn-sm btn-info">
-                                                <i class="fas fa-eye"></i> Lihat Detail Jadwal
-                                            </a>
-                                            <a href="{{ route('manage-schedules.edit', $schedule->id) }}" class="btn btn-sm btn-warning">
-                                                <i class="fas fa-edit"></i> Edit
-                                            </a>
-                                            <form action="{{ route('manage-schedules.destroy', $schedule->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-trash-alt"></i> Hapus
-                                                </button>
-                                            </form>
+                                            @if($schedule->schoolClass && $schedule->schoolClass->academicYear)
+                                                {{ $schedule->schoolClass->academicYear->start_year }} / {{ $schedule->schoolClass->academicYear->end_year }}
+                                            @else
+                                                -
+                                            @endif
                                         </td>
+                                        <td class="text-center align-middle">
+                                        <a href="{{ route('manage-schedules.show', $schedule->id) }}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> Lihat Detail Jadwal
+                                        </a>
+                                        <a href="{{ route('manage-schedules.edit', $schedule->id) }}" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <form action="{{ route('manage-schedules.destroy', $schedule->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash-alt"></i> Hapus
+                                        </button>
+                                    </form>
+                                    </td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="3" class="text-center">Tidak ada data jadwal ditemukan.</td>
+                                        <td colspan="4" class="text-center">Tidak ada data jadwal ditemukan.</td>
                                     </tr>
                                     @endforelse
                                 </tbody>
