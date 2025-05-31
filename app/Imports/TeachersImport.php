@@ -195,6 +195,7 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
         return [
             'email.unique' => 'Email: input sudah terdaftar.',
             'nip.unique'   => 'NIP: input sudah terdaftar.',
+            'dapodik_number.unique' => 'Nomor Dapodik: input sudah terdaftar.',
         ];
     }
 
