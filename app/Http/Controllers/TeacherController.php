@@ -13,6 +13,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Traits\HasPermissions;
 use Yajra\DataTables\Facades\DataTables;
 use App\Exports\TeacherTemplateExport;
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class TeacherController extends Controller
 {
@@ -79,8 +80,8 @@ class TeacherController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nip' => 'required|unique:teachers,nip',
-            'dapodik_number' => 'nullable|string|max:16',
+            'nip' => 'required|unique:teachers,nip|digits:18',
+            'dapodik_number' => 'nullable|string|max:16|unique:teachers,dapodik_number,',
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'phone' => 'required',
@@ -131,7 +132,7 @@ class TeacherController extends Controller
         // Jika request AJAX, kembalikan JSON
         if (request()->ajax()) {
             // Ambil mata pelajaran yang diampu
-            $subjects = $teacher->teachingAssignments->map(function($assignment) {
+            $subjects = $teacher->teachingAssignments->map(function ($assignment) {
                 return [
                     'subject' => $assignment->subject->name,
                     'class' => $assignment->class->name . ($assignment->class->parallel_name ? ' - ' . $assignment->class->parallel_name : '')
@@ -181,8 +182,10 @@ class TeacherController extends Controller
         $teacher = Teacher::with('user')->where('nip', $nip)->firstOrFail();
 
         $request->validate([
+            'nip' => 'required|unique:teachers,nip|digits:18',
+            'dapodik_number' => 'nullable|string|max:16|unique:teachers,dapodik_number,',
             'name' => 'required',
-            'dapodik_number' => 'nullable|string|max:50',
+            'email' => 'required|email|unique:users,email',
             'phone' => 'required',
             'address' => 'required',
             'gender' => 'required|in:L,P',
@@ -249,7 +252,7 @@ class TeacherController extends Controller
 
             return redirect()->route('manage-teachers.index')
                 ->with('success', 'Data guru berhasil diimport');
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+        } catch (ValidationException $e) {
             $failures = $e->failures();
             $errors = [];
 
@@ -258,6 +261,7 @@ class TeacherController extends Controller
             }
 
             return redirect()->back()
+                ->withInput()
                 ->with('error', implode('<br>', $errors));
         } catch (\Exception $e) {
             return redirect()->back()
