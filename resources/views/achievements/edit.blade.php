@@ -33,7 +33,7 @@
             <select name="academic_year_id" id="academic_year_id" class="form-control" required>
                 <option value="">-- Pilih Tahun Akademik --</option>
                 @foreach($academicYears as $year)
-                    <option value="{{ $year->id }}" {{ old('academic_year_id', $achievement->academic_year_id) == $year->id ? 'selected' : '' }}>{{ $year->start_year }}/{{ $year->end_year }} {{ $year->semester == 0 ? 'Ganjil' : 'Genap' }}</option>
+                    <option value="{{ $year->id }}" {{ old('academic_year_id', $achievement->academic_year_id) == $year->id ? 'selected' : '' }}>{{ $year->start_year }}/{{ $year->end_year }} {{ $year->semester == 0 ? 'Genap' : 'Ganjil' }}</option>
                 @endforeach
             </select>
         </div>
