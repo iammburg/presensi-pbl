@@ -343,7 +343,20 @@
                             <tr><th>Nama Orang Tua</th><td>${data.parent_name ?? '-'}</td></tr>
                             <tr><th>Email Orang Tua</th><td>${data.parent_email ?? '-'}</td></tr>
                             <tr><th>Telepon Orang Tua</th><td>${data.parent_phone ?? '-'}</td></tr>
-                            <tr><th>Tanggal Lahir</th><td>${data.birth_date ?? '-'}</td></tr>
+                            <tr>
+                                <th>Tanggal Lahir</th>
+                                <td>
+                                    ${
+                                        data.birth_date
+                                            ? new Date(data.birth_date).toLocaleDateString('id-ID', {
+                                                day: '2-digit',
+                                                month: 'long',
+                                                year: 'numeric'
+                                            })
+                                            : '-'
+                                    }
+                                </td>
+                            </tr>
                         </table>
                     </div>
                 </div>

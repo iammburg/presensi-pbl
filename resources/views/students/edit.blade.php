@@ -25,11 +25,11 @@
                             <!-- NIS -->
                             <div class="form-group">
                                 <label for="nis" class="font-weight-bold">NIS</label>
-                                <input type="text" class="form-control @error('nis') is-invalid @enderror"
-                                    id="nis" name="nis" value="{{ old('nis', $student->nis) }}" maxlength="25" required>
+                                <input type="text" class="form-control @error('nis') is-invalid @enderror" id="nis"
+                                    name="nis" value="{{ old('nis', $student->nis) }}" maxlength="20" readonly required>
                                 @error('nis')
                                     <div class="invalid-feedback">
-                                        NIS tidak boleh lebih dari 20 karakter.
+                                        {{ $message }}
                                     </div>
                                 @enderror
 
@@ -39,7 +39,8 @@
                             <div class="form-group">
                                 <label for="nisn" class="font-weight-bold">NISN</label>
                                 <input type="text" class="form-control @error('nisn') is-invalid @enderror"
-                                    id="nisn" name="nisn" value="{{ old('nisn', $student->nisn) }}" maxlength="10" required readonly>
+                                    id="nisn" name="nisn" value="{{ old('nisn', $student->nisn) }}" maxlength="10"
+                                    required readonly>
                                 @error('nisn')
                                     <div class="invalid-feedback">
                                         {{ $message }}
@@ -80,7 +81,8 @@
                             <div class="form-group">
                                 <label for="birth_date" class="font-weight-bold">Tanggal Lahir</label>
                                 <input type="date" class="form-control @error('birth_date') is-invalid @enderror"
-                                    id="birth_date" name="birth_date" value="{{ old('birth_date', $student->birth_date) }}">
+                                    id="birth_date" name="birth_date"
+                                    value="{{ old('birth_date', $student->birth_date) }}">
                                 @error('birth_date')
                                     <div class="invalid-feedback">
                                         {{ $message }}
