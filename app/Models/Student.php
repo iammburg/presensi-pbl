@@ -54,6 +54,15 @@ class Student extends Model
     }
 
     /**
+     * Relasi langsung ke kelas aktif siswa (SchoolClass)
+     */
+    public function schoolClass()
+    {
+        // Ambil dari currentAssignment jika ada, relasi ke SchoolClass
+        return $this->currentAssignment ? $this->currentAssignment->schoolClass() : null;
+    }
+
+    /**
      * Override agar route model binding pakai 'nisn' sebagai key.
      */
     public function getRouteKeyName()

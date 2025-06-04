@@ -5,12 +5,55 @@
 @endsection
 
 @push('css')
-    {{-- DataTables CSS jika Anda menggunakannya di halaman ini --}}
-    {{-- <link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}"> --}}
-    {{-- <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}"> --}}
     <style>
-        .table th, .table td {
+        /* Tabel header dan baris sesuai desain gambar */
+        .custom-violations-table thead th {
+            background-color: #009cf3;
+            color: #fff;
+            text-align: center;
             vertical-align: middle;
+        }
+        .custom-violations-table tbody td {
+            vertical-align: middle;
+            background-color: #fff;
+        }
+        .custom-violations-table tbody tr:nth-child(odd) {
+            background-color: #f8fafd;
+        }
+        .custom-violations-table tbody tr {
+            transition: background 0.2s;
+        }
+        .custom-violations-table tbody tr:hover {
+            background-color: #e6f2fb;
+        }
+        .custom-violations-table .btn-info {
+            background: #ffc107;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            padding: 2px 16px;
+            border-radius: 6px;
+        }
+        .custom-violations-table .btn-info i {
+            margin-right: 4px;
+        }
+        /* Pagination & search style */
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            border-radius: 6px;
+            margin: 0 2px;
+            border: 1px solid #e0e0e0;
+            color: #009cf3 !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #009cf3 !important;
+            color: #fff !important;
+        }
+        .dataTables_wrapper .dataTables_length label,
+        .dataTables_wrapper .dataTables_filter label {
+            font-weight: 500;
+        }
+        .dataTables_wrapper .dataTables_length select {
+            min-width: 60px;
         }
     </style>
 @endpush
@@ -24,7 +67,7 @@
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li> {{-- Sesuaikan route home --}}
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
                     <li class="breadcrumb-item active">Validasi Pelanggaran</li>
                 </ol>
             </div>
@@ -36,15 +79,21 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="card card-purple card-outline"> {{-- Warna kartu disesuaikan untuk validasi --}}
+                <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">Data Pelanggaran Menunggu Validasi</h3>
-                        {{-- Card tools bisa ditambahkan jika ada filter atau aksi lain --}}
-                        {{-- <div class="card-tools">
-                            <a href="#" class="btn btn-tool" title="Filter Data">
-                                <i class="fas fa-filter"></i>
-                            </a>
-                        </div> --}}
+                        <h3 class="card-title">Data Laporan</h3>
+                        <div class="card-tools">
+                            <form method="GET" class="form-inline mb-2">
+                                <label class="mr-2">Tanggal</label>
+                                <input type="date" name="tanggal" class="form-control form-control-sm mr-2" value="{{ request('tanggal', now()->format('Y-m-d')) }}">
+                                <button type="submit" class="btn btn-sm btn-primary">Pilih</button>
+                            </form>
+                            <form method="GET" class="form-inline" style="gap: 6px;">
+                                <input type="hidden" name="tanggal" value="{{ request('tanggal', now()->format('Y-m-d')) }}">
+                                <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari nama, pelanggaran, kelas..." value="{{ request('search') }}">
+                                <button type="submit" class="btn btn-sm btn-secondary"><i class="fas fa-search"></i></button>
+                            </form>
+                        </div>
                     </div>
                     <div class="card-body">
                         @if(session('success'))
@@ -65,41 +114,44 @@
                         @endif
 
                         <div class="table-responsive">
-                            <table class="table table-bordered table-striped table-hover">
-                                <thead class="bg-purple text-white"> {{-- Warna header tabel disesuaikan --}}
+                            <table class="table table-bordered table-striped table-hover custom-violations-table">
+                                <thead>
                                     <tr>
-                                        <th style="width: 10px;">No</th>
-                                        <th>Nama Siswa</th>
-                                        <th>Jenis Pelanggaran</th>
-                                        <th>Poin</th>
-                                        <th>Tanggal Pelanggaran</th>
-                                        <th>Dilaporkan Oleh</th>
+                                        <th style="width: 40px;">No</th>
+                                        <th>Nama</th>
+                                        <th>Kelas</th>
+                                        <th>Pelapor</th>
+                                        <th>Nama pelanggaran</th>
+                                        <th>Jenis pelanggaran</th>
+                                        <th>Bukti</th>
                                         <th style="width: 100px;">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($violations as $index => $violation)
                                         <tr>
-                                            <td>{{ $index + $violations->firstItem() }}</td>
-                                            <td>
-                                                {{ $violation->student ? $violation->student->name : 'N/A' }}
-                                                @if($violation->student && $violation->student->nisn)
-                                                    <br><small class="text-muted">NISN: {{ $violation->student->nisn }}</small>
+                                            <td class="text-center">{{ $index + $violations->firstItem() }}</td>
+                                            <td>{{ $violation->student ? $violation->student->name : 'N/A' }}</td>
+                                            <td>{{ $violation->student && $violation->student->schoolClass ? $violation->student->schoolClass->name : '-' }}</td>
+                                            <td>{{ $violation->teacher ? $violation->teacher->name : ($violation->reported_by ?: 'N/A') }}</td>
+                                            <td>{{ $violation->violationPoint ? $violation->violationPoint->violation_type : 'N/A' }}</td>
+                                            <td>{{ $violation->violationPoint ? $violation->violationPoint->violation_level : '-' }}</td>
+                                            <td class="text-center">
+                                                @if($violation->evidence)
+                                                    <a href="{{ Storage::url($violation->evidence) }}" target="_blank" class="btn btn-outline-info btn-sm" title="Lihat Bukti"><i class="fas fa-image"></i></a>
+                                                @else
+                                                    <span class="text-muted">-</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $violation->violationPoint ? $violation->violationPoint->violation_type : 'N/A' }}</td>
-                                            <td class="text-center">{{ $violation->violationPoint ? $violation->violationPoint->points : '-' }}</td>
-                                            <td>{{ $violation->violation_date ? \Carbon\Carbon::parse($violation->violation_date)->isoFormat('DD MMM YY') : '-' }}</td>
-                                            <td>{{ $violation->teacher ? $violation->teacher->name : ($violation->reported_by ?: 'N/A') }}</td>
                                             <td class="text-center">
-                                                <a href="{{ route('violation-validations.show', $violation->id) }}" class="btn btn-info btn-sm" title="Lihat Detail & Validasi">
-                                                    <i class="fas fa-search-plus"></i> Detail
+                                                <a href="{{ route('violation-validations.show', $violation->id) }}" class="btn btn-info btn-sm" title="Tindakan">
+                                                    Tindakan
                                                 </a>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="text-center text-muted">
+                                            <td colspan="8" class="text-center text-muted">
                                                 <i class="fas fa-check-circle fa-3x my-2 text-success"></i><br>
                                                 Tidak ada laporan pelanggaran yang perlu divalidasi saat ini.
                                             </td>
@@ -108,8 +160,13 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="mt-3 d-flex justify-content-center">
-                            {{ $violations->links() }}
+                        <div class="mt-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <span>Showing {{ $violations->firstItem() }} to {{ $violations->lastItem() }} of {{ $violations->total() }} entries</span>
+                            </div>
+                            <div>
+                                {{ $violations->links() }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -120,26 +177,11 @@
 @endsection
 
 @push('js')
-    {{-- DataTables JS jika Anda menggunakannya --}}
-    {{-- <script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script> --}}
-    {{-- <script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script> --}}
-    {{-- <script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script> --}}
-    {{-- <script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script> --}}
     <script>
         $(function () {
-            // Jika Anda menggunakan DataTables, inisialisasi di sini
-            // $("#violationsValidationTable").DataTable({
-            //     "responsive": true, "lengthChange": false, "autoWidth": false,
-            //     "paging": false, // Jika paginasi Laravel yang dipakai
-            //     "searching": true,
-            //     "ordering": true,
-            //     "info": false, // Jika paginasi Laravel yang dipakai
-            // });
-
-            // Auto-dismiss alert
             setTimeout(function() {
                 $(".alert-dismissible").alert('close');
-            }, 5000); // Alert akan hilang setelah 5 detik
+            }, 5000);
         });
     </script>
 @endpush

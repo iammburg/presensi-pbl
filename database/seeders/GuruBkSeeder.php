@@ -65,7 +65,7 @@ class GuruBkSeeder extends Seeder
         ]);
         $laporanPelanggaran = Menu::create([
             'nama_menu' => 'Laporan Pelanggaran',
-            'url' => 'violation-report',
+            'url' => 'violation-validations',
             'icon' => '',
             'parent_id' => $pelanggaranMenu->id,
             'urutan' => 2

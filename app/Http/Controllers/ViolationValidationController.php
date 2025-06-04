@@ -9,12 +9,39 @@ use Illuminate\Support\Facades\Auth;
 
 class ViolationValidationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $violations = Violation::with(['student', 'violationPoint', 'teacher']) // teacher di sini adalah pelapor
-            ->where('validation_status', 'pending')
-            ->latest('violation_date') // Urutkan berdasarkan tanggal pelanggaran juga bisa jadi opsi
-            ->paginate(10);
+        $query = Violation::with(['student', 'violationPoint', 'teacher'])
+            ->where('validation_status', 'pending');
+
+        // Filter tanggal
+        if ($request->filled('tanggal')) {
+            $query->whereDate('violation_date', $request->tanggal);
+        }
+
+        // Filter search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('student', function($s) use ($search) {
+                    $s->where('name', 'like', "%$search%")
+                      ->orWhere('nisn', 'like', "%$search%")
+                      ->orWhereHas('currentAssignment.schoolClass', function($c) use ($search) {
+                          $c->where('name', 'like', "%$search%")
+                            ->orWhere('parallel_name', 'like', "%$search%") ;
+                      });
+                })
+                ->orWhereHas('violationPoint', function($v) use ($search) {
+                    $v->where('violation_type', 'like', "%$search%")
+                      ->orWhere('violation_level', 'like', "%$search%") ;
+                })
+                ->orWhereHas('teacher', function($t) use ($search) {
+                    $t->where('name', 'like', "%$search%") ;
+                });
+            });
+        }
+
+        $violations = $query->latest('violation_date')->paginate(10)->appends($request->all());
 
         return view('violations.validation.index', compact('violations')); // Pastikan view ini ada
     }

@@ -48,7 +48,7 @@
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-md-10"> {{-- Atau col-md-12 untuk lebar penuh --}}
-                <div class="card card-danger card-outline">
+                <div class="card card-primary card-outline">
                     <div class="card-header">
                         <h3 class="card-title">Informasi Laporan Pelanggaran</h3>
                         <div class="card-tools">
@@ -61,7 +61,7 @@
                         <div class="row">
                             {{-- Kolom Informasi Utama Pelanggaran --}}
                             <div class="col-md-7">
-                                <h5 class="mb-3 text-danger">Rincian Pelanggaran</h5>
+                                <h5 class="mb-3 text-primary">Rincian Pelanggaran</h5>
                                 <table class="table table-sm table-borderless">
                                     <tr>
                                         <th>Nama Siswa</th>
@@ -122,7 +122,7 @@
 
                             {{-- Kolom Informasi Status dan Validasi --}}
                             <div class="col-md-5">
-                                <h5 class="mb-3 text-danger">Status & Validasi</h5>
+                                <h5 class="mb-3 text-primary">Status & Validasi</h5>
                                 <table class="table table-sm table-borderless">
                                     <tr>
                                         <th>Status Utama Laporan</th>
