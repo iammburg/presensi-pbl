@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use App\Models\Menu;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Permission;
 
 class TeacherSeeder extends Seeder
 {
@@ -42,7 +43,7 @@ class TeacherSeeder extends Seeder
         // Jadwal Pelajaran
         $jadwalPelajaran = Menu::create([
             'nama_menu' => 'Jadwal Pelajaran',
-            'url' => 'schedule',
+            'url' => 'teacher-schedule',
             'icon' => 'fas fa-calendar-alt',
             'parent_id' => $mainMenu->id,
             'urutan' => 2
@@ -81,6 +82,13 @@ class TeacherSeeder extends Seeder
             'urutan' => 1
         ]);
 
+        $permissions = [
+            Permission::create(['name' => 'create_attendance', 'menu_id' => $presensiSiswa->id]),
+            Permission::create(['name' => 'read_attendance', 'menu_id' => $presensiSiswa->id]),
+            Permission::create(['name' => 'update_attendance', 'menu_id' => $presensiSiswa->id]),
+            Permission::create(['name' => 'delete_attendance', 'menu_id' => $presensiSiswa->id]),
+        ];
+
         $riwayatPresensi = Menu::create([
             'nama_menu' => 'Riwayat Presensi',
             'url' => 'manage-attendances-history',
@@ -105,5 +113,7 @@ class TeacherSeeder extends Seeder
                 'role_id' => $role->id
             ]);
         }
+
+        $role->givePermissionTo($permissions);
     }
 }

@@ -41,10 +41,10 @@
                                 </div>
                                 @enderror
                             </div>
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="email">Email</label>
                                 <input type="email" class="form-control" id="email" value="{{ $teacher->user->email }}" readonly>
-                            </div>
+                            </div> --}}
                             <div class="form-group">
                                 <label for="phone">No. Telepon</label>
                                 <input type="text" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone', $teacher->phone) }}">
