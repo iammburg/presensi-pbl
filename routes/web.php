@@ -63,6 +63,7 @@ Route::post('manage-teachers/{nip}/jadikan-guru-bk', [TeacherController::class, 
 Route::resource('manage-students', StudentController::class);
 Route::post('manage-students/import', [StudentController::class, 'import'])->name('manage-students.import');
 Route::get('manage-students/template/download', [StudentController::class, 'downloadTemplate'])->name('manage-students.template');
+Route::get('/teacher-search', [TeacherController::class, 'search'])->name('teachers.search');
 Route::resource('manage-teacher-subject-assignments', TeachingAssignmentController::class)
     ->parameters(['manage-teacher-subject-assignments' => 'teacherAssignment']);
 Route::resource('manage-student-class-assignments', StudentClassAssignmentController::class)
