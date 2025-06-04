@@ -81,7 +81,7 @@ class TeacherController extends Controller
     {
         $request->validate([
             'nip' => 'required|unique:teachers,nip|digits:18',
-            'dapodik_number' => 'nullable|string|max:16|unique:teachers,dapodik_number,',
+            'dapodik_number' => 'nullable|string|max:16|unique:teachers,dapodik_number',
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'phone' => 'required',
@@ -182,10 +182,10 @@ class TeacherController extends Controller
         $teacher = Teacher::with('user')->where('nip', $nip)->firstOrFail();
 
         $request->validate([
-            'nip' => 'required|unique:teachers,nip|digits:18',
-            'dapodik_number' => 'nullable|string|max:16|unique:teachers,dapodik_number,',
+            'nip' => 'required|digits:18|unique:teachers,nip,' . $nip . ',nip',
+            'dapodik_number' => 'nullable|string|max:16|unique:teachers,dapodik_number,' . $nip . ',nip',
             'name' => 'required',
-            'email' => 'required|email|unique:users,email',
+            // 'email' => 'required|email|unique:users,email',
             'phone' => 'required',
             'address' => 'required',
             'gender' => 'required|in:L,P',

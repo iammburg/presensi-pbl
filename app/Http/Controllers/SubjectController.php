@@ -64,7 +64,7 @@ class SubjectController extends Controller
 
         Subject::create($validatedData);
 
-        return redirect()->route('subjects.index')->with('success', 'Mata pelajaran berhasil ditambahkan.');
+        return redirect()->route('manage-subjects.index')->with('success', 'Mata pelajaran berhasil ditambahkan.');
     }
 
     /**
@@ -88,7 +88,7 @@ class SubjectController extends Controller
 
         $subject->update($validatedData);
 
-        return redirect()->route('subjects.index')->with('success', 'Mata pelajaran berhasil diperbarui.');
+        return redirect()->route('manage-subjects.index')->with('success', 'Mata pelajaran berhasil diperbarui.');
     }
 
     /**
@@ -99,6 +99,6 @@ class SubjectController extends Controller
         $subject = Subject::findOrFail($id);
         $subject->delete();
 
-        return redirect()->route('subjects.index')->with('success', 'Mata pelajaran berhasil dihapus.');
+        return redirect()->route('manage-subjects.index')->with('success', 'Mata pelajaran berhasil dihapus.');
     }
 }

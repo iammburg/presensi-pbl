@@ -34,11 +34,42 @@
                                             <i class="far fa-calendar-alt fa-3x mr-3 text-primary"></i>
                                             <div>
                                                 <div class="font-weight-bold text-primary" style="font-size: 1rem;">
-                                                    {{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd') }},
+                                                    @switch($schedule->day_of_week)
+                                                        @case(1)
+                                                            Senin
+                                                        @break
+
+                                                        @case(2)
+                                                            Selasa
+                                                        @break
+
+                                                        @case(3)
+                                                            Rabu
+                                                        @break
+
+                                                        @case(4)
+                                                            Kamis
+                                                        @break
+
+                                                        @case(5)
+                                                            Jumat
+                                                        @break
+
+                                                        @case(6)
+                                                            Sabtu
+                                                        @break
+
+                                                        @case(7)
+                                                            Minggu
+                                                        @break
+
+                                                        @default
+                                                            Tidak diketahui
+                                                    @endswitch
                                                 </div>
-                                                <div class="font-weight-bold text-primary" style="font-size: 1rem;">
+                                                {{-- <div class="font-weight-bold text-primary" style="font-size: 1rem;">
                                                     {{ \Carbon\Carbon::now()->format('d F Y') }}
-                                                </div>
+                                                </div> --}}
                                             </div>
                                         </div>
                                         {{-- Info Kelas --}}
@@ -75,14 +106,14 @@
                                     </div>
                                 </div>
                             </div>
-                        @empty
-                            <div class="col-12">
-                                <div class="alert alert-info">Tidak ada sesi presensi hari ini.</div>
-                            </div>
-                        @endforelse
+                            @empty
+                                <div class="col-12">
+                                    <div class="alert alert-info">Tidak ada sesi presensi hari ini.</div>
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-@endsection
+    @endsection

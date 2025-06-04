@@ -43,7 +43,7 @@
                                     <tr>
                                         <th>Tahun Ajaran</th>
                                         <td>
-                                            {{ $achievement->academicYear ? $achievement->academicYear->start_year . '/' . $achievement->academicYear->end_year . ' ' . ($achievement->academicYear->semester == 0 ? 'Ganjil' : 'Genap') : '-' }}
+                                            {{ $achievement->academicYear ? $achievement->academicYear->start_year . '/' . $achievement->academicYear->end_year . ' ' . ($achievement->academicYear->semester == 0 ? 'Genap' : 'Ganjil') : '-' }}
                                         </td>
                                     </tr>
                                     <tr>

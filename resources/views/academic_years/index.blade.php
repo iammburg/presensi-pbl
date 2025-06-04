@@ -11,11 +11,31 @@
     <link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
-        .dropdown-menu { min-width: 100px; z-index: 1050 !important; }
-        .dropdown-menu a, .dropdown-menu button.dropdown-item { font-size: 0.95rem; padding: 10px 18px; }
-        .dropdown-menu .dropdown-item.text-danger { color: #e74c3c !important; font-weight: 500; }
-        .dropdown-menu .dropdown-item.text-danger:hover { background: #ffeaea; color: #c0392b !important; }
-        .dropdown-menu { border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+        .dropdown-menu {
+            min-width: 100px;
+            z-index: 1050 !important;
+        }
+
+        .dropdown-menu a,
+        .dropdown-menu button.dropdown-item {
+            font-size: 0.95rem;
+            padding: 10px 18px;
+        }
+
+        .dropdown-menu .dropdown-item.text-danger {
+            color: #e74c3c !important;
+            font-weight: 500;
+        }
+
+        .dropdown-menu .dropdown-item.text-danger:hover {
+            background: #ffeaea;
+            color: #c0392b !important;
+        }
+
+        .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
     </style>
 @endpush
 
@@ -67,7 +87,7 @@
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $academicYear->start_year }}</td>
                                                 <td>{{ $academicYear->end_year }}</td>
-                                                <td>{{ $academicYear->semester == 0 ? 'Ganjil' : 'Genap' }}</td>
+                                                <td>{{ $academicYear->semester == 0 ? 'Genap' : 'Ganjil' }}</td>
                                                 <td>
                                                     @if ($academicYear->is_active)
                                                         <span class="badge badge-success">Aktif</span>
@@ -78,8 +98,9 @@
                                                 <td>
                                                     <div class="btn-group">
                                                         <button type="button"
-                                                                class="btn btn-sm btn-outline-info dropdown-toggle"
-                                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            class="btn btn-sm btn-outline-info dropdown-toggle"
+                                                            data-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false">
                                                             <i class="fas fa-cog"></i>
                                                         </button>
                                                         <div class="dropdown-menu">
@@ -88,13 +109,13 @@
                                                                 <i class="fas fa-edit mr-2"></i>Edit
                                                             </a>
                                                             <form id="delete-form-{{ $academicYear->id }}"
-                                                                  action="{{ route('manage-academic-years.destroy', $academicYear->id) }}"
-                                                                  method="POST" style="display: none;">
+                                                                action="{{ route('manage-academic-years.destroy', $academicYear->id) }}"
+                                                                method="POST" style="display: none;">
                                                                 @csrf
                                                                 @method('DELETE')
                                                             </form>
                                                             <button type="button" class="dropdown-item text-danger"
-                                                                    onclick="confirmDelete('{{ $academicYear->id }}', '{{ $academicYear->start_year }}/{{ $academicYear->end_year }} - {{ $academicYear->semester == 0 ? 'Ganjil' : 'Genap' }}')">
+                                                                onclick="confirmDelete('{{ $academicYear->id }}', '{{ $academicYear->start_year }}/{{ $academicYear->end_year }} - {{ $academicYear->semester == 0 ? 'Genap' : 'Ganjil' }}')">
                                                                 <i class="fas fa-trash mr-2"></i>Hapus
                                                             </button>
                                                         </div>
@@ -128,7 +149,7 @@
         console.log('DataTable script loaded at: ' + new Date().toISOString());
 
         // Initialize DataTable on page load or Turbolinks load
-        document.addEventListener('turbolinks:load', function () {
+        document.addEventListener('turbolinks:load', function() {
             console.log('Turbolinks load event triggered');
 
             // Destroy existing DataTable instance if it exists
@@ -145,8 +166,10 @@
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
                 },
-                columnDefs: [
-                    { "orderable": false, "targets": 5 } // Disable ordering for 'Aksi' column
+                columnDefs: [{
+                        "orderable": false,
+                        "targets": 5
+                    } // Disable ordering for 'Aksi' column
                 ]
             });
 
@@ -171,7 +194,8 @@
         function confirmDelete(academicYearId, academicYearName) {
             Swal.fire({
                 title: 'Yakin ingin menghapus?',
-                html: "Anda akan menghapus tahun akademik: <br><strong>" + academicYearName + "</strong><br>Data yang dihapus tidak bisa dikembalikan!",
+                html: "Anda akan menghapus tahun akademik: <br><strong>" + academicYearName +
+                    "</strong><br>Data yang dihapus tidak bisa dikembalikan!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
