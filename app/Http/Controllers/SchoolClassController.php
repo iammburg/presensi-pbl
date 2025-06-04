@@ -24,7 +24,7 @@ class SchoolClassController extends Controller
                 ->addIndexColumn()
                 ->addColumn('academic_year', function ($class) {
                     if ($class->academicYear) {
-                        $semesterText = $class->academicYear->semester == 0 ? 'Ganjil' : 'Genap';
+                        $semesterText = $class->academicYear->semester == 0 ? 'Genap' : 'Ganjil';
                         return $class->academicYear->start_year . ' - ' . $class->academicYear->end_year . ' ' . $semesterText;
                     }
                     return '-';

@@ -16,8 +16,17 @@
                         <div class="card-body">
                             <div class="form-group">
                                 <label for="nip">NIP</label>
-                                <input type="text" class="form-control @error('nip') is-invalid @enderror" id="nip" name="nip" value="{{ $teacher->nip }}" readonly>
+                                <input type="text" maxlength="18" class="form-control @error('nip') is-invalid @enderror" id="nip" name="nip" value="{{ $teacher->nip }}" readonly>
                                 @error('nip')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                            <div class="form-group">
+                                <label for="dapodik_number">Nomor Dapodik</label>
+                                <input type="text" maxlength="16" class="form-control @error('dapodik_number') is-invalid @enderror" id="dapodik_number" name="dapodik_number" value="{{ old('dapodik_number', $teacher->dapodik_number) }}">
+                                @error('dapodik_number')
                                 <div class="invalid-feedback">
                                     {{ $message }}
                                 </div>
@@ -32,10 +41,10 @@
                                 </div>
                                 @enderror
                             </div>
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="email">Email</label>
                                 <input type="email" class="form-control" id="email" value="{{ $teacher->user->email }}" readonly>
-                            </div>
+                            </div> --}}
                             <div class="form-group">
                                 <label for="phone">No. Telepon</label>
                                 <input type="text" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone', $teacher->phone) }}">

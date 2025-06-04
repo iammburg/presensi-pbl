@@ -28,6 +28,7 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
         // Mapping berbagai kemungkinan nama kolom
         $this->headerMap = [
             'nip' => ['nip', 'nomor_induk', 'nomor_induk_pegawai', 'no_induk', 'nip_guru'],
+            'dapodik_number' => ['dapodik_number', 'nomor_dapodik', 'no_dapodik', 'dapodik'],
             'nama' => ['nama', 'name', 'nama_lengkap', 'nama_guru'],
             'email' => ['email', 'surel', 'alamat_email', 'email_guru'],
             'telepon' => ['telepon', 'telp', 'hp', 'no_hp', 'nomor_telepon', 'no_telepon', 'handphone', 'phone'],
@@ -56,10 +57,10 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
     }
 
     /**
-    * @param array $row
-    *
-    * @return \Illuminate\Database\Eloquent\Model|null
-    */
+     * @param array $row
+     *
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
     public function model(array $row)
     {
         try {
@@ -74,10 +75,13 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             $alamatKey = $this->findHeaderKey($row, 'alamat');
             $jenisKelaminKey = $this->findHeaderKey($row, 'jenis_kelamin');
             $tanggalLahirKey = $this->findHeaderKey($row, 'tanggal_lahir');
+            $dapodikKey = $this->findHeaderKey($row, 'dapodik_number');
 
             // Validasi semua field required ada
-            if (!$nipKey || !$namaKey || !$emailKey || !$teleponKey ||
-                !$alamatKey || !$jenisKelaminKey || !$tanggalLahirKey) {
+            if (
+                !$nipKey || !$namaKey || !$emailKey || !$teleponKey ||
+                !$alamatKey || !$jenisKelaminKey || !$tanggalLahirKey
+            ) {
                 throw new \Exception('Ada kolom wajib yang tidak ditemukan di file Excel');
             }
 
@@ -99,12 +103,12 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             $nip = $this->formatNIP($row[$nipKey]);
 
             // Mulai transaksi database
-            return DB::transaction(function() use ($row, $nip, $namaKey, $emailKey, $teleponKey, $alamatKey, $gender, $birthDate) {
+            return DB::transaction(function () use ($row, $nip, $namaKey, $emailKey, $teleponKey, $alamatKey, $gender, $birthDate, $dapodikKey) {
                 // Buat user account
                 $user = User::create([
                     'name' => $row[$namaKey],
                     'email' => $row[$emailKey],
-                    'password' => Hash::make('password123')
+                    'password' => Hash::make($nip . date('dmY', strtotime($birthDate))) // Password berisi NIP(1234567890) dan tanggal lahir(1990-01-01): 1234567890010111990
                 ]);
 
                 try {
@@ -117,6 +121,7 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
                 // Buat data guru
                 $teacher = new Teacher([
                     'nip' => $nip,
+                    'dapodik_number' => $dapodikKey ? substr($row[$dapodikKey], 0, 16) : null,
                     'name' => $row[$namaKey],
                     'phone' => $row[$teleponKey],
                     'address' => $row[$alamatKey],
@@ -128,7 +133,6 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
                 $teacher->save();
                 return $teacher;
             });
-
         } catch (\Exception $e) {
             Log::error('Error in row:', [
                 'row' => $row,
@@ -179,12 +183,20 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
 
     public function rules(): array
     {
-        return [];  // Validasi dilakukan secara manual di model()
+        return [
+            '*.email' => 'required|email|unique:users,email',
+            '*.nip'   => 'required|digits:18|unique:teachers,nip',
+            '*.dapodik_number' => 'nullable|string|max:16|unique:teachers,dapodik_number',
+        ];
     }
 
     public function customValidationMessages()
     {
-        return [];
+        return [
+            'email.unique' => 'Email: input sudah terdaftar.',
+            'nip.unique'   => 'NIP: input sudah terdaftar.',
+            'dapodik_number.unique' => 'Nomor Dapodik: input sudah terdaftar.',
+        ];
     }
 
     public function batchSize(): int

@@ -121,10 +121,7 @@
                                     <option value="">-- Pilih Tahun Akademik --</option>
                                     @if(isset($academicYears) && $academicYears->count() > 0)
                                         @foreach($academicYears as $year)
-                                            <option value="{{ $year->id }}" {{ old('academic_year_id', $violation->academic_year_id) == $year->id ? 'selected' : '' }}>
-                                                {{ $year->start_year }}/{{ $year->end_year }}
-                                                {{-- @if(isset($year->semester)) (Semester: {{ $year->semester == 1 ? 'Ganjil' : 'Genap' }}) @endif --}}
-                                            </option>
+                                            <option value="{{ $year->id }}" {{ old('academic_year_id') == $year->id ? 'selected' : '' }}>{{ $year->start_year }}/{{ $year->end_year }} {{ $year->semester == 0 ? 'Genap' : 'Ganjil' }}</option>
                                         @endforeach
                                     @else
                                         <option value="" disabled>Tidak ada data tahun akademik</option>

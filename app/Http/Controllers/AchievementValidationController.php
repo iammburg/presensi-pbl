@@ -11,9 +11,8 @@ class AchievementValidationController extends Controller
     public function index()
     {
         $achievements = Achievement::with(['student', 'achievementPoint', 'teacher'])
-            ->where('validation_status', 'pending')
-            ->latest()
-            ->paginate(10);
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('achievements.validation.index', compact('achievements'));
     }

@@ -8,12 +8,8 @@
         @method('PUT')
         <div class="form-group">
             <label for="student_id">Siswa</label>
-            <select name="student_id" id="student_id" class="form-control" required>
-                <option value="">-- Pilih Siswa --</option>
-                @foreach($students as $student)
-                    <option value="{{ $student->nisn }}" {{ old('student_id', $achievement->student_id) == $student->nisn ? 'selected' : '' }}>{{ $student->name }}</option>
-                @endforeach
-            </select>
+            <input type="text" id="student_autocomplete" class="form-control" placeholder="Ketik nama siswa..." autocomplete="off" required value="{{ old('student_name', $achievement->student ? $achievement->student->name : '') }}">
+            <input type="hidden" name="student_id" id="student_id" value="{{ old('student_id', $achievement->student_id) }}">
         </div>
         <div class="form-group">
             <label for="achievements_name">Nama Prestasi</label>
@@ -37,7 +33,7 @@
             <select name="academic_year_id" id="academic_year_id" class="form-control" required>
                 <option value="">-- Pilih Tahun Akademik --</option>
                 @foreach($academicYears as $year)
-                    <option value="{{ $year->id }}" {{ old('academic_year_id', $achievement->academic_year_id) == $year->id ? 'selected' : '' }}>{{ $year->start_year }}/{{ $year->end_year }} {{ $year->semester == 0 ? 'Ganjil' : 'Genap' }}</option>
+                    <option value="{{ $year->id }}" {{ old('academic_year_id', $achievement->academic_year_id) == $year->id ? 'selected' : '' }}>{{ $year->start_year }}/{{ $year->end_year }} {{ $year->semester == 0 ? 'Genap' : 'Ganjil' }}</option>
                 @endforeach
             </select>
         </div>
@@ -58,3 +54,19 @@
     </form>
 </div>
 @endsection
+
+@push('js')
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script>
+$(function() {
+    $("#student_autocomplete").autocomplete({
+        source: "{{ route('autocomplete.siswa') }}",
+        minLength: 2,
+        select: function(event, ui) {
+            $('#student_id').val(ui.item.id);
+        }
+    });
+});
+</script>
+@endpush

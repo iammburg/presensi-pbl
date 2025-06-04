@@ -6,6 +6,7 @@
 
 @push('css')
 {{-- Tambahan CSS jika diperlukan --}}
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 <style>
     .form-group label {
         font-weight: 500;
@@ -67,19 +68,8 @@
                             <div class="form-group mb-3">
                                 {{-- Tanda * tetap text-danger untuk menandakan wajib --}}
                                 <label for="student_id">Siswa <span class="text-danger">*</span></label>
-                                <select name="student_id" id="student_id" class="form-control @error('student_id') is-invalid @enderror" required>
-                                    <option value="">-- Pilih Siswa --</option>
-                                    @if(isset($students) && $students->count() > 0)
-                                        @foreach($students as $student)
-                                            {{-- Pastikan $student->nisn ada dan unik --}}
-                                            <option value="{{ $student->nisn }}" {{ old('student_id') == $student->nisn ? 'selected' : '' }}>
-                                                {{ $student->name }} (NISN: {{ $student->nisn }})
-                                            </option>
-                                        @endforeach
-                                    @else
-                                        <option value="" disabled>Tidak ada data siswa</option>
-                                    @endif
-                                </select>
+                                <input type="text" id="student_autocomplete" class="form-control" placeholder="Ketik nama siswa..." autocomplete="off" required>
+                                <input type="hidden" name="student_id" id="student_id" value="{{ old('student_id') }}">
                                 @error('student_id')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -89,11 +79,11 @@
 
                             <div class="form-group mb-3">
                                 <label for="violation_point_id">Jenis Pelanggaran <span class="text-danger">*</span></label>
-                                <select name="violation_point_id" id="violation_point_id" class="form-control @error('violation_point_id') is-invalid @enderror" required>
+                                <select name="violation_points_id" id="violation_point_id" class="form-control @error('violation_points_id') is-invalid @enderror" required>
                                     <option value="">-- Pilih Jenis Pelanggaran --</option>
                                      @if(isset($violationPoints) && $violationPoints->count() > 0)
                                         @foreach($violationPoints as $point)
-                                            <option value="{{ $point->id }}" {{ old('violation_point_id') == $point->id ? 'selected' : '' }}>
+                                            <option value="{{ $point->id }}" {{ old('violation_points_id') == $point->id ? 'selected' : '' }}>
                                                 {{ $point->violation_type }} (Poin: {{ $point->points }})
                                             </option>
                                         @endforeach
@@ -101,7 +91,7 @@
                                         <option value="" disabled>Tidak ada data jenis pelanggaran</option>
                                     @endif
                                 </select>
-                                @error('violation_point_id')
+                                @error('violation_points_id')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
@@ -115,11 +105,7 @@
                                     <option value="">-- Pilih Tahun Akademik --</option>
                                     @if(isset($academicYears) && $academicYears->count() > 0)
                                         @foreach($academicYears as $year)
-                                            {{-- Sesuaikan $year->semester_display jika ada atau format lainnya --}}
-                                            <option value="{{ $year->id }}" {{ old('academic_year_id') == $year->id ? 'selected' : '' }}>
-                                                {{ $year->start_year }}/{{ $year->end_year }} {{-- Asumsi field start_year dan end_year --}}
-                                                {{-- @if(isset($year->semester)) (Semester: {{ $year->semester == 1 ? 'Ganjil' : 'Genap' }}) @endif --}}
-                                            </option>
+                                            <option value="{{ $year->id }}" {{ old('academic_year_id') == $year->id ? 'selected' : '' }}>{{ $year->start_year }}/{{ $year->end_year }} {{ $year->semester == 0 ? 'Genap' : 'Ganjil' }}</option>
                                         @endforeach
                                     @else
                                         <option value="" disabled>Tidak ada data tahun akademik</option>
@@ -176,6 +162,7 @@
                                     </span>
                                 @enderror
                             </div>
+                            <input type="hidden" name="status" value="pending"> {{-- Pastikan input hidden status ada --}}
                         </div>
                         <div class="card-footer">
                             <div class="d-flex justify-content-between">
@@ -199,6 +186,7 @@
 
 {{-- Skrip untuk bs-custom-file-input jika belum di-include global oleh AdminLTE --}}
 {{-- Contoh: <script src="{{ asset('plugins/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script> --}}
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <script>
     $(document).ready(function () {
         // Inisialisasi bsCustomFileInput jika tersedia
@@ -242,6 +230,16 @@
         setTimeout(function() {
             $(".alert-dismissible").alert('close');
         }, 7000); // Alert akan hilang setelah 7 detik
+    });
+
+    $(function() {
+        $("#student_autocomplete").autocomplete({
+            source: "{{ route('autocomplete.siswa') }}",
+            minLength: 2,
+            select: function(event, ui) {
+                $('#student_id').val(ui.item.id);
+            }
+        });
     });
 </script>
 @endpush

@@ -53,9 +53,9 @@
                                             <th>No</th>
                                             <th>Nama Siswa</th>
                                             <th>Jenis Pelanggaran</th>
-                                            <th>Poin</th>
                                             <th>Tanggal Pelanggaran</th>
                                             <th>Status Validasi</th>
+                                            <th>Divalidasi Oleh</th>
                                             <th>Aksi</th>
                                         </tr>
                                     </thead>
@@ -65,7 +65,6 @@
                                                 <td>{{ $index + $violations->firstItem() }}</td>
                                                 <td>{{ $violation->student ? $violation->student->name : 'Siswa tidak ditemukan' }}</td>
                                                 <td>{{ $violation->violationPoint ? $violation->violationPoint->violation_type : 'Jenis tidak ditemukan' }}</td>
-                                                <td>{{ $violation->violationPoint ? $violation->violationPoint->points : '-' }}</td>
                                                 <td>{{ $violation->violation_date ? \Carbon\Carbon::parse($violation->violation_date)->format('d/m/Y') : '-' }}</td>
                                                 <td>
                                                     @if($violation->validation_status === 'pending')
@@ -78,6 +77,7 @@
                                                         <span class="badge badge-secondary">{{ $violation->validation_status ?? 'N/A' }}</span>
                                                     @endif
                                                 </td>
+                                                <td>{{ $violation->validator ? $violation->validator->name : '-' }}</td>
                                                 <td>
                                                     <div class="btn-group">
                                                         <button type="button"
@@ -159,7 +159,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="7" class="text-center text-muted">
+                                                <td colspan="6" class="text-center text-muted">
                                                     Belum ada laporan pelanggaran yang dibuat.
                                                 </td>
                                             </tr>
