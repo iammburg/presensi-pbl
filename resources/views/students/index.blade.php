@@ -11,10 +11,6 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0" style="font-weight: 600; color: #183C70;">Kelola Data Siswa</h5>
                     @can('create_student')
-                        <!-- Tombol Pindah ke Halaman Baru -->
-                        <a href="{{ route('manage-student-class-assignments.create') }}" class="btn btn-info btn-sm mr-2">
-                            <i class="fas fa-external-link-alt"></i> Plotting Siswa Ke Kelas
-                        </a>
                         <div class="dropdown">
                             <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="tambahDataDropdown"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
