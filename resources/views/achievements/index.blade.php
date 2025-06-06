@@ -33,7 +33,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-striped">
+                            <table id="datatable-achievements" class="table table-bordered table-striped">
                                 <thead class="bg-tertiary text-white">
                                     <tr>
                                         <th>No</th>
@@ -51,7 +51,7 @@
                                             <td>{{ ($achievements instanceof \Illuminate\Pagination\LengthAwarePaginator ? ($achievements->currentPage() - 1) * $achievements->perPage() : 0) + $loop->iteration }}</td>
                                             <td>{{ $achievement->student ? $achievement->student->name : '-' }}</td>
                                             <td>{{ $achievement->achievements_name }}</td>
-                                            <td>{{ $achievement->achievement_date->format('d/m/Y') }}</td>
+                                            <td>{{ $achievement->achievement_date ? $achievement->achievement_date->format('d/m/Y') : '-' }}</td>
                                             <td>
                                                 @if($achievement->validation_status === 'pending')
                                                     <span class="badge badge-warning">Menunggu Validasi</span>
@@ -113,7 +113,8 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
 <script>
 $(document).ready(function() {
-    $('.table').DataTable({
+    $.fn.dataTable.ext.errMode = 'none';
+    $('#datatable-achievements').DataTable({
         "ordering": true,
         "responsive": true,
         "autoWidth": false,

@@ -38,6 +38,9 @@ class ViolationController extends Controller
         return view('violations.index', compact('violations'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
         $teacher = Auth::user()->teacher;
@@ -143,6 +146,9 @@ class ViolationController extends Controller
         return view('violations.show', compact('violation'));
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function edit(Violation $violation)
     {
         $teacher = Auth::user()->teacher;

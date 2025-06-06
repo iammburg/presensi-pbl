@@ -57,10 +57,10 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
     }
 
     /**
-    * @param array $row
-    *
-    * @return \Illuminate\Database\Eloquent\Model|null
-    */
+     * @param array $row
+     *
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
     public function model(array $row)
     {
         try {
@@ -78,8 +78,10 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             $dapodikKey = $this->findHeaderKey($row, 'dapodik_number');
 
             // Validasi semua field required ada
-            if (!$nipKey || !$namaKey || !$emailKey || !$teleponKey ||
-                !$alamatKey || !$jenisKelaminKey || !$tanggalLahirKey) {
+            if (
+                !$nipKey || !$namaKey || !$emailKey || !$teleponKey ||
+                !$alamatKey || !$jenisKelaminKey || !$tanggalLahirKey
+            ) {
                 throw new \Exception('Ada kolom wajib yang tidak ditemukan di file Excel');
             }
 
@@ -101,12 +103,12 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             $nip = $this->formatNIP($row[$nipKey]);
 
             // Mulai transaksi database
-            return DB::transaction(function() use ($row, $nip, $namaKey, $emailKey, $teleponKey, $alamatKey, $gender, $birthDate, $dapodikKey) {
+            return DB::transaction(function () use ($row, $nip, $namaKey, $emailKey, $teleponKey, $alamatKey, $gender, $birthDate, $dapodikKey) {
                 // Buat user account
                 $user = User::create([
                     'name' => $row[$namaKey],
                     'email' => $row[$emailKey],
-                    'password' => Hash::make($nip . date('dmY', strtotime($birthDate))) // Password berisi NIP(1234567890) dan tanggal lahir(1990-01-01): 123456789001011190
+                    'password' => Hash::make($nip . date('dmY', strtotime($birthDate))) // Password berisi NIP(1234567890) dan tanggal lahir(1990-01-01): 1234567890010111990
                 ]);
 
                 try {
@@ -131,7 +133,6 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
                 $teacher->save();
                 return $teacher;
             });
-
         } catch (\Exception $e) {
             Log::error('Error in row:', [
                 'row' => $row,
@@ -182,12 +183,20 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
 
     public function rules(): array
     {
-        return [];  // Validasi dilakukan secara manual di model()
+        return [
+            '*.email' => 'required|email|unique:users,email',
+            '*.nip'   => 'required|digits:18|unique:teachers,nip',
+            '*.dapodik_number' => 'nullable|string|max:16|unique:teachers,dapodik_number',
+        ];
     }
 
     public function customValidationMessages()
     {
-        return [];
+        return [
+            'email.unique' => 'Email: input sudah terdaftar.',
+            'nip.unique'   => 'NIP: input sudah terdaftar.',
+            'dapodik_number.unique' => 'Nomor Dapodik: input sudah terdaftar.',
+        ];
     }
 
     public function batchSize(): int

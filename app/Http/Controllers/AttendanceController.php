@@ -5,17 +5,33 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use Illuminate\Http\Request;
 use App\Models\ClassSchedule;
+use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:create_attendance')->only(['create', 'store']);
+        $this->middleware('permission:read_attendance')->only(['index', 'show']);
+        $this->middleware('permission:update_attendance')->only(['edit', 'update']);
+        $this->middleware('permission:delete_attendance')->only(['destroy']);
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $classSchedules = ClassSchedule::get();
-        $attendances = Attendance::with(['student', 'academicYear', 'schoolClass'])->get();
-        return view('attendances.index', compact('classSchedules', 'attendances'));
+        if (Auth::user()->hasRole('Guru')) {
+            $classSchedules = ClassSchedule::with(['assignment'])
+                ->whereHas('assignment', function ($query) {
+                    $query->where('teacher_id', Auth::user()->teacher->nip);
+                })
+                ->get();
+            return view('attendances.index', compact('classSchedules'));
+        } else {
+            return view('attendances.index');
+        }
     }
 
     /**

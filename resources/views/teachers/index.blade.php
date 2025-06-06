@@ -32,15 +32,19 @@
                                             <i class="fas fa-plus"></i> Tambah Data
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="tambahDataDropdown">
-                                            <a class="dropdown-item d-flex align-items-center py-2" href="{{ route('manage-teachers.create') }}">
+                                            <a class="dropdown-item d-flex align-items-center py-2"
+                                                href="{{ route('manage-teachers.create') }}">
                                                 <i class="fas fa-keyboard mr-3 text-primary"></i> <span>Isi Manual</span>
                                             </a>
-                                            <a class="dropdown-item d-flex align-items-center py-2" href="#" id="importExcel">
+                                            <a class="dropdown-item d-flex align-items-center py-2" href="#"
+                                                id="importExcel">
                                                 <i class="fas fa-file-excel mr-3 text-success"></i> <span>Import Excel</span>
                                             </a>
                                             <div class="dropdown-divider my-1"></div>
-                                            <a class="dropdown-item d-flex align-items-center py-2" href="{{ route('manage-teachers.template') }}">
-                                                <i class="fas fa-download mr-3 text-info"></i> <span>Download Template Excel</span>
+                                            <a class="dropdown-item d-flex align-items-center py-2"
+                                                href="{{ route('manage-teachers.template') }}">
+                                                <i class="fas fa-download mr-3 text-info"></i> <span>Download Template
+                                                    Excel</span>
                                             </a>
                                         </div>
                                     </div>
@@ -106,7 +110,8 @@
     </div>
 
     <!-- Modal Detail Guru -->
-    <div class="modal fade" id="teacherDetailModal" tabindex="-1" role="dialog" aria-labelledby="teacherDetailModalLabel" aria-hidden="true">
+    <div class="modal fade" id="teacherDetailModal" tabindex="-1" role="dialog" aria-labelledby="teacherDetailModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -189,27 +194,34 @@
             z-index: 1050 !important;
             border-radius: 8px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            border: none; /* Remove default border */
+            border: none;
+            /* Remove default border */
         }
 
         .dropdown-menu a.dropdown-item {
             font-size: 0.95rem;
-            padding: 10px 18px; /* Tambahkan padding */
+            padding: 10px 18px;
+            /* Tambahkan padding */
         }
 
         .dropdown-menu a.dropdown-item:hover {
-            background-color: #f5faff; /* Warna latar saat hover */
-            color: #0d6efd; /* Warna teks saat hover */
+            background-color: #f5faff;
+            /* Warna latar saat hover */
+            color: #0d6efd;
+            /* Warna teks saat hover */
         }
 
         .dropdown-item i {
-            width: 20px; /* Atur lebar ikon */
+            width: 20px;
+            /* Atur lebar ikon */
             text-align: center;
-            margin-right: 0.75rem; /* Tambahkan margin kanan */
+            margin-right: 0.75rem;
+            /* Tambahkan margin kanan */
         }
 
         .dropdown-divider {
-            margin: 0.5rem 0; /* Sesuaikan margin divider */
+            margin: 0.5rem 0;
+            /* Sesuaikan margin divider */
         }
 
         /* Tambahkan gaya untuk warna ikon */
@@ -224,7 +236,6 @@
         .dropdown-item .text-info {
             color: #17a2b8 !important;
         }
-
     </style>
 @endpush
 
@@ -265,8 +276,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('manage-teachers.index') }}',
-                columns: [
-                    {
+                columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
@@ -349,6 +359,20 @@
                                         <tr><th>No. Telp</th><td>${data.phone ?? '-'}</td></tr>
                                         <tr><th>Alamat</th><td>${data.address ?? '-'}</td></tr>
                                         <tr><th>Jenis Kelamin</th><td>${data.gender ?? '-'}</td></tr>
+                                        <tr>
+                                            <th>Tanggal Lahir</th>
+                                            <td>
+                                                ${
+                                                    data.birth_date
+                                                        ? new Date(data.birth_date).toLocaleDateString('id-ID', {
+                                                            day: '2-digit',
+                                                            month: 'long',
+                                                            year: 'numeric'
+                                                        })
+                                                        : '-'
+                                                }
+                                            </td>
+                                        </tr>
                                         <tr><th>Status</th><td>${data.status ?? '-'}</td></tr>
                                         ${subjectsHtml}
                                     </table>

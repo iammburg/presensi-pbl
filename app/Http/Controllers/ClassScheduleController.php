@@ -15,6 +15,15 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ClassScheduleController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('permission:read_schedules', ['only' => ['index', 'show']]);
+        $this->middleware('permission:create_schedules', ['only' => ['create', 'store']]);
+        $this->middleware('permission:update_schedules', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:delete_schedules', ['only' => ['destroy']]);
+    }
+
     /**
      * Helper method to get hour IDs based on day
      */
@@ -27,7 +36,7 @@ class ClassScheduleController extends Controller
         } elseif ($dayNumber == 5) {
             return range(10, 17);
         }
-        
+
         return [];
     }
 
@@ -57,8 +66,8 @@ class ClassScheduleController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->whereHas('schoolClass', fn($q) => $q->where('name', 'like', "%{$search}%"))
-                  ->orWhereHas('subject', fn($q) => $q->where('name', 'like', "%{$search}%"))
-                  ->orWhereHas('teacher', fn($q) => $q->where('name', 'like', "%{$search}%"));
+                    ->orWhereHas('subject', fn($q) => $q->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('teacher', fn($q) => $q->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -74,11 +83,11 @@ class ClassScheduleController extends Controller
 
         // Final result with eager loading
         $schedules = ClassSchedule::with([
-                'schoolClass.academicYear',
-                'subject',
-                'teacher',
-                'assignment'
-            ])
+            'schoolClass.academicYear',
+            'subject',
+            'teacher',
+            'assignment'
+        ])
             ->whereIn('id', $scheduleIds)
             ->paginate($perPage);
 
@@ -100,8 +109,24 @@ class ClassScheduleController extends Controller
 
         // Ambil daftar jam pelajaran/istirahat dengan grouping berdasarkan hari
         $hoursData = [
-            'weekdays' => Hour::whereIn('id', range(0, 9))->orderBy('start_time')->get(), // Senin-Kamis
-            'friday' => Hour::whereIn('id', range(10, 17))->orderBy('start_time')->get()  // Jumat
+            'weekdays' => Hour::whereIn('id', range(0, 9))->orderBy('start_time')->get()->map(function ($hour) {
+                return [
+                    'id' => $hour->id,
+                    'session_type' => $hour->session_type,
+                    'start_time' => substr($hour->start_time, 0, 5), // Format menjadi HH:mm
+                    'end_time' => substr($hour->end_time, 0, 5),     // Format menjadi HH:mm
+                    'slot_number' => $hour->slot_number,
+                ];
+            }),
+            'friday' => Hour::whereIn('id', range(10, 17))->orderBy('start_time')->get()->map(function ($hour) {
+                return [
+                    'id' => $hour->id,
+                    'session_type' => $hour->session_type,
+                    'start_time' => substr($hour->start_time, 0, 5), // Format menjadi HH:mm
+                    'end_time' => substr($hour->end_time, 0, 5),     // Format menjadi HH:mm
+                    'slot_number' => $hour->slot_number,
+                ];
+            }),
         ];
 
         // Ambil daftar pengampu (relasi guru dan mapel)
@@ -127,7 +152,6 @@ class ClassScheduleController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'semester' => 'required|string',
             'class_id' => 'required|exists:classes,id',
             'schedules' => 'required|array',
             'schedules.*.*.session_type' => 'required|string|in:Jam Pelajaran,Jam Istirahat',
@@ -207,14 +231,14 @@ class ClassScheduleController extends Controller
     {
         // Ambil semua jadwal untuk kelas yang sama dengan academic year dari class
         $allSchedules = ClassSchedule::with([
-                'assignment.subject', 
-                'assignment.teacher', 
-                'hour', 
-                'schoolClass.academicYear'
-            ])
+            'assignment.subject',
+            'assignment.teacher',
+            'hour',
+            'schoolClass.academicYear'
+        ])
             ->where('class_id', $manage_schedule->class_id)
             ->whereRaw('
-                CASE 
+                CASE
                     WHEN day_of_week IN (1,2,3,4) THEN hour_id BETWEEN 0 AND 9
                     WHEN day_of_week = 5 THEN hour_id BETWEEN 10 AND 17
                     ELSE FALSE
@@ -226,7 +250,7 @@ class ClassScheduleController extends Controller
 
         $days = [
             1 => 'Senin',
-            2 => 'Selasa', 
+            2 => 'Selasa',
             3 => 'Rabu',
             4 => 'Kamis',
             5 => 'Jumat'
@@ -234,30 +258,32 @@ class ClassScheduleController extends Controller
 
         // Group schedules by day and merge consecutive hours
         $schedulesPerDay = [];
-        
+
         foreach ($days as $dayNumber => $dayName) {
             $daySchedules = $allSchedules->where('day_of_week', $dayNumber);
             $groupedSchedules = [];
-            
+
             if ($daySchedules->isNotEmpty()) {
                 $currentGroup = null;
-                
+
                 // Urutkan berdasarkan start_time, bukan slot_number
                 foreach ($daySchedules->sortBy('hour.start_time') as $schedule) {
                     $sessionType = $schedule->assignment_id ? 'Jam Pelajaran' : 'Jam Istirahat';
                     $assignmentId = $schedule->assignment_id;
-                    
+
                     // Cek apakah bisa digabung dengan group sebelumnya
-                    if ($currentGroup && 
-                        $currentGroup['session_type'] === $sessionType && 
+                    if (
+                        $currentGroup &&
+                        $currentGroup['session_type'] === $sessionType &&
                         $currentGroup['assignment_id'] === $assignmentId &&
-                        $currentGroup['end_time'] === $schedule->hour->start_time) {
-                        
+                        $currentGroup['end_time'] === $schedule->hour->start_time
+                    ) {
+
                         // Gabungkan dengan group sebelumnya
                         $currentGroup['end_hour_id'] = $schedule->hour_id;
                         $currentGroup['end_hour_slot'] = $schedule->hour->slot_number;
                         $currentGroup['end_time'] = $schedule->hour->end_time ?? $currentGroup['end_time'];
-                        
+
                         // Tambahkan waktu individual untuk setiap jam
                         $currentGroup['hour_times'][$schedule->hour->slot_number] = $schedule->hour->start_time;
                         $currentGroup['hour_end_times'][$schedule->hour->slot_number] = $schedule->hour->end_time;
@@ -267,7 +293,7 @@ class ClassScheduleController extends Controller
                         if ($currentGroup) {
                             $groupedSchedules[] = $currentGroup;
                         }
-                        
+
                         // Buat group baru
                         $currentGroup = [
                             'session_type' => $sessionType,
@@ -293,13 +319,13 @@ class ClassScheduleController extends Controller
                         ];
                     }
                 }
-                
+
                 // Jangan lupa simpan group terakhir
                 if ($currentGroup) {
                     $groupedSchedules[] = $currentGroup;
                 }
             }
-            
+
             $schedulesPerDay[$dayName] = $groupedSchedules;
         }
 
@@ -322,14 +348,14 @@ class ClassScheduleController extends Controller
 
             // Ambil semua jadwal untuk kelas yang sama dengan filtering jam berdasarkan hari
             $allSchedules = ClassSchedule::with([
-                    'assignment.subject', 
-                    'assignment.teacher', 
-                    'hour', 
-                    'schoolClass.academicYear'
-                ])
+                'assignment.subject',
+                'assignment.teacher',
+                'hour',
+                'schoolClass.academicYear'
+            ])
                 ->where('class_id', $manage_schedule->class_id)
                 ->whereRaw('
-                    CASE 
+                    CASE
                         WHEN day_of_week IN (1,2,3,4) THEN hour_id BETWEEN 0 AND 9
                         WHEN day_of_week = 5 THEN hour_id BETWEEN 10 AND 17
                         ELSE FALSE
@@ -346,7 +372,7 @@ class ClassScheduleController extends Controller
 
             $days = [
                 1 => 'Senin',
-                2 => 'Selasa', 
+                2 => 'Selasa',
                 3 => 'Rabu',
                 4 => 'Kamis',
                 5 => 'Jumat'
@@ -354,30 +380,32 @@ class ClassScheduleController extends Controller
 
             // GUNAKAN LOGIKA YANG SAMA SEPERTI SHOW METHOD
             $schedulesPerDay = [];
-            
+
             foreach ($days as $dayNumber => $dayName) {
                 $daySchedules = $allSchedules->where('day_of_week', $dayNumber);
                 $groupedSchedules = [];
-                
+
                 if ($daySchedules->isNotEmpty()) {
                     $currentGroup = null;
-                    
+
                     // Urutkan berdasarkan start_time, bukan slot_number - SAMA SEPERTI SHOW
                     foreach ($daySchedules->sortBy('hour.start_time') as $schedule) {
                         $sessionType = $schedule->assignment_id ? 'Jam Pelajaran' : 'Jam Istirahat';
                         $assignmentId = $schedule->assignment_id;
-                        
+
                         // KONDISI PENGGABUNGAN YANG SAMA SEPERTI SHOW METHOD
-                        if ($currentGroup && 
-                            $currentGroup['session_type'] === $sessionType && 
+                        if (
+                            $currentGroup &&
+                            $currentGroup['session_type'] === $sessionType &&
                             $currentGroup['assignment_id'] === $assignmentId &&
-                            $currentGroup['end_time'] === $schedule->hour->start_time) {
-                            
+                            $currentGroup['end_time'] === $schedule->hour->start_time
+                        ) {
+
                             // Gabungkan dengan group sebelumnya
                             $currentGroup['end_hour_id'] = $schedule->hour_id;
                             $currentGroup['end_hour_slot'] = $schedule->hour->slot_number;
                             $currentGroup['end_time'] = $schedule->hour->end_time ?? $currentGroup['end_time'];
-                            
+
                             // Tambahkan waktu individual untuk setiap jam
                             $currentGroup['hour_times'][$schedule->hour->slot_number] = $schedule->hour->start_time;
                             $currentGroup['hour_end_times'][$schedule->hour->slot_number] = $schedule->hour->end_time;
@@ -387,7 +415,7 @@ class ClassScheduleController extends Controller
                             if ($currentGroup) {
                                 $groupedSchedules[] = $currentGroup;
                             }
-                            
+
                             // Buat group baru - SAMA SEPERTI SHOW METHOD
                             $currentGroup = [
                                 'session_type' => $sessionType,
@@ -413,13 +441,13 @@ class ClassScheduleController extends Controller
                             ];
                         }
                     }
-                    
+
                     // Jangan lupa simpan group terakhir
                     if ($currentGroup) {
                         $groupedSchedules[] = $currentGroup;
                     }
                 }
-                
+
                 $schedulesPerDay[$dayName] = $groupedSchedules;
             }
 
@@ -443,7 +471,6 @@ class ClassScheduleController extends Controller
             ])->setPaper('a4', 'landscape');
 
             return $pdf->download('jadwal_kelas_' . optional($manage_schedule->schoolClass)->name . '.pdf');
-
         } catch (\Exception $e) {
             Log::error('Gagal export PDF', [
                 'message' => $e->getMessage(),
@@ -471,7 +498,7 @@ class ClassScheduleController extends Controller
         $existingSchedules = ClassSchedule::with(['hour', 'assignment.subject', 'assignment.teacher'])
             ->where('class_id', $class_id)
             ->whereRaw('
-                CASE 
+                CASE
                     WHEN day_of_week IN (1,2,3,4) THEN hour_id BETWEEN 0 AND 9
                     WHEN day_of_week = 5 THEN hour_id BETWEEN 10 AND 17
                     ELSE FALSE
@@ -483,7 +510,7 @@ class ClassScheduleController extends Controller
         // Konversi jadwal yang ada ke format yang sesuai dengan form
         $dayMap = [
             1 => 'Senin',
-            2 => 'Selasa', 
+            2 => 'Selasa',
             3 => 'Rabu',
             4 => 'Kamis',
             5 => 'Jumat',
@@ -494,19 +521,21 @@ class ClassScheduleController extends Controller
         foreach ($existingSchedules as $dayNumber => $daySchedules) {
             $dayName = $dayMap[$dayNumber];
             $scheduleData[$dayName] = [];
-            
+
             // Group consecutive hours with same assignment
             $groupedSchedules = [];
             $currentGroup = null;
-            
+
             foreach ($daySchedules->sortBy('hour.slot_number') as $schedule) {
                 $sessionType = $schedule->assignment_id ? 'Jam Pelajaran' : 'Jam Istirahat';
                 $assignmentId = $schedule->assignment_id;
-                
-                if ($currentGroup && 
-                    $currentGroup['session_type'] === $sessionType && 
+
+                if (
+                    $currentGroup &&
+                    $currentGroup['session_type'] === $sessionType &&
                     $currentGroup['assignment_id'] === $assignmentId &&
-                    $currentGroup['end_hour_id'] + 1 === $schedule->hour_id) {
+                    $currentGroup['end_hour_id'] + 1 === $schedule->hour_id
+                ) {
                     // Extend current group
                     $currentGroup['end_hour_id'] = $schedule->hour_id;
                 } else {
@@ -523,24 +552,24 @@ class ClassScheduleController extends Controller
                     ];
                 }
             }
-            
+
             if ($currentGroup) {
                 $groupedSchedules[] = $currentGroup;
             }
-            
+
             $scheduleData[$dayName] = $groupedSchedules;
         }
 
         // Data untuk form dengan filtering jam berdasarkan hari
         $classes = SchoolClass::with('academicYear')->orderBy('name')->get();
         $subjects = Subject::orderBy('name')->get();
-        
+
         // Filter jam berdasarkan hari
         $hoursData = [
             'weekdays' => Hour::whereIn('id', range(0, 9))->orderBy('start_time')->get(), // Senin-Kamis
             'friday' => Hour::whereIn('id', range(10, 17))->orderBy('start_time')->get()  // Jumat
         ];
-        
+
         $teachingAssignments = TeachingAssignment::with(['teacher', 'subject'])->get()
             ->map(function ($item) {
                 return [
@@ -552,12 +581,14 @@ class ClassScheduleController extends Controller
                 ];
             });
 
-        // Default semester (bisa disesuaikan logic bisnis)
-        $semester = '1';
-
         return view('class_schedule.edit', compact(
-            'class', 'classes', 'subjects', 'hoursData', 'teachingAssignments', 
-            'scheduleData', 'manageSchedule', 'semester'
+            'class',
+            'classes',
+            'subjects',
+            'hoursData',
+            'teachingAssignments',
+            'scheduleData',
+            'manageSchedule',
         ));
     }
 
@@ -570,10 +601,7 @@ class ClassScheduleController extends Controller
      */
     public function update(Request $request, ClassSchedule $manageSchedule)
     {
-        $class_id = $manageSchedule->class_id;
-
         $validated = $request->validate([
-            'semester' => 'required|string',
             'class_id' => 'required|exists:classes,id',
             'schedules' => 'required|array',
             'schedules.*.*.session_type' => 'required|string|in:Jam Pelajaran,Jam Istirahat',
@@ -582,7 +610,8 @@ class ClassScheduleController extends Controller
             'schedules.*.*.assignment_id' => 'nullable|exists:teaching_assignments,id',
         ]);
 
-        $schedules = $request->input('schedules', []);
+        $class_id = $validated['class_id'];
+        $schedules = $validated['schedules'];
         $dayMapping = [
             'Senin'  => 1,
             'Selasa' => 2,

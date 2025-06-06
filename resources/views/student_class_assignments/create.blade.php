@@ -370,7 +370,7 @@
                             <option value="">-- Pilih Tahun --</option>
                             @foreach ($academicYears as $ay)
                                 <option value="{{ $ay->id }}">{{ $ay->start_year }}/{{ $ay->end_year }} - Semester
-                                    {{ $ay->semester }}</option>
+                                    {{ $ay->semester == 0 ? 'Genap' : 'Ganjil' }}</option>
                             @endforeach
                         </select>
                     </div>

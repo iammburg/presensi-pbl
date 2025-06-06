@@ -80,9 +80,17 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             $tahunMasukKey = $this->findHeaderKey($row, 'tahun_masuk');
 
             $requiredKeys = [
-                $nisKey, $nisnKey, $namaKey, $alamatKey, $teleponKey,
-                $namaOrangTuaKey, $teleponOrangTuaKey, $emailOrangTuaKey,
-                $jenisKelaminKey, $tanggalLahirKey, $tahunMasukKey
+                $nisKey,
+                $nisnKey,
+                $namaKey,
+                $alamatKey,
+                $teleponKey,
+                $namaOrangTuaKey,
+                $teleponOrangTuaKey,
+                $emailOrangTuaKey,
+                $jenisKelaminKey,
+                $tanggalLahirKey,
+                $tahunMasukKey
             ];
 
             if (in_array(null, $requiredKeys)) {
@@ -117,17 +125,25 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             }
 
             return DB::transaction(function () use (
-                $row, $nisKey, $nisnKey, $namaKey, $alamatKey, $teleponKey,
-                $namaOrangTuaKey, $teleponOrangTuaKey, $emailOrangTuaKey,
-                $jenisKelaminKey, $birthDate, $tahunMasukKey
+                $row,
+                $nisKey,
+                $nisnKey,
+                $namaKey,
+                $alamatKey,
+                $teleponKey,
+                $namaOrangTuaKey,
+                $teleponOrangTuaKey,
+                $emailOrangTuaKey,
+                $jenisKelaminKey,
+                $birthDate,
+                $tahunMasukKey,
+                $nisnValue
             ) {
-                $user = User::firstOrCreate(
-                    ['email' => strtolower($row[$emailOrangTuaKey])],
-                    [
-                        'name' => $row[$namaKey],
-                        'password' => Hash::make($row[$nisnKey]),
-                    ]
-                );
+                $user = User::create([
+                    'name' => $row[$namaKey],
+                    'email' => $row[$emailOrangTuaKey],
+                    'password' => Hash::make($nisnValue . date('dmY', strtotime($birthDate)))
+                ]);
 
                 $user->assignRole('Siswa');
 
@@ -146,7 +162,6 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
                     'user_id' => $user->id,
                 ]);
             });
-
         } catch (\Exception $e) {
             Log::error('Error in row:', [
                 'row' => $row,
@@ -181,12 +196,23 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
 
     public function rules(): array
     {
-        return [];
+        return [
+            '*.email_orang_tua' => 'required|email|unique:users,email',
+            '*.nisn' => 'required|string|size:10|unique:students,nisn',
+            '*.nis' => 'required|string|max:20|unique:students,nis',
+        ];
     }
 
     public function customValidationMessages()
     {
-        return [];
+        return [
+            'email_orang_tua.required' => 'Kolom Email Orang Tua wajib diisi.',
+            'email_orang_tua.email'    => 'Format Email Orang Tua tidak valid.',
+            'email_orang_tua.unique'   => 'Email Orang Tua :input sudah terdaftar.',
+
+            'nisn.unique' => 'NISN :input sudah terdaftar.',
+            'nis.unique'  => 'NIS :input sudah terdaftar.',
+        ];
     }
 
     public function batchSize(): int
