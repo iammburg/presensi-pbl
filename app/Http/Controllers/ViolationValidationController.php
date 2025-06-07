@@ -9,10 +9,26 @@ use Illuminate\Support\Facades\Auth;
 
 class ViolationValidationController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('role:Guru BK');
+    }
+
     public function index(Request $request)
     {
-        $query = Violation::with(['student', 'violationPoint', 'teacher'])
-            ->where('validation_status', 'pending');
+        $query = Violation::with(['student', 'violationPoint', 'teacher']);
+
+        // Filter status: tampilkan semua, atau filter jika ada request status
+        if ($request->filled('status')) {
+            if ($request->status === 'pending') {
+                $query->where('validation_status', 'pending');
+            } elseif ($request->status === 'approved') {
+                $query->where('validation_status', 'approved');
+            } elseif ($request->status === 'rejected') {
+                $query->where('validation_status', 'rejected');
+            }
+        }
+        // Jika tidak ada filter status, tampilkan SEMUA laporan (pending, approved, rejected)
 
         // Filter tanggal
         if ($request->filled('tanggal')) {
@@ -41,7 +57,7 @@ class ViolationValidationController extends Controller
             });
         }
 
-        $violations = $query->latest('violation_date')->paginate(10)->appends($request->all());
+        $violations = $query->orderByDesc('created_at')->paginate(10)->appends($request->all());
 
         return view('violations.validation.index', compact('violations')); // Pastikan view ini ada
     }
@@ -51,12 +67,20 @@ class ViolationValidationController extends Controller
         // $violation = Violation::with(['student', 'violationPoint', 'teacher'])->findOrFail($id);
         // Dengan Route Model Binding:
         $violation = Violation::with(['student', 'violationPoint', 'teacher', 'validator'])->findOrFail($id);
+        // Jika status masih pending dan belum pernah dilihat, set viewed_at sekarang
+        if ($violation->validation_status === 'pending' && is_null($violation->viewed_at)) {
+            $violation->viewed_at = now();
+            $violation->save();
+        }
         return view('violations.validation.show', compact('violation')); // Pastikan view ini ada
     }
 
     // Ganti parameter $id dengan Route Model Binding jika memungkinkan di route Anda
     public function validateViolation(Request $request, Violation $violation)
     {
+        if (!Auth::user()->hasRole('Guru BK')) {
+            abort(403, 'Hanya Guru BK yang dapat memvalidasi pelanggaran.');
+        }
         $request->validate([
             'validation_status' => 'required|in:approved,rejected',
             'validation_notes' => 'required_if:validation_status,rejected|nullable|string|max:1000' // Max length
@@ -64,23 +88,17 @@ class ViolationValidationController extends Controller
 
         $validatorTeacherId = null;
         if (Auth::check()) {
-            $user = Auth::user(); // Ini adalah model User Laravel
-            // Anda perlu cara untuk mendapatkan instance Teacher yang terkait dengan User yang login
-            // Contoh: jika User punya relasi one-to-one ke Teacher bernama 'teacherProfile'
-            if ($user->teacherProfile && $user->teacherProfile instanceof Teacher) {
-                $validatorTeacherId = $user->teacherProfile->id; // Ambil ID dari model Teacher
+            $user = Auth::user();
+            // Relasi ke Teacher (user->teacher) => NIP
+            if ($user->teacher) {
+                $validatorTeacherId = $user->teacher->nip;
             }
-            // Jika User yang login adalah Teacher itu sendiri (misal, tabel users adalah tabel teachers)
-            // elseif ($user instanceof Teacher) {
-            //     $validatorTeacherId = $user->id;
-            // }
-            // Sesuaikan logika ini dengan bagaimana Anda mengelola User dan Teacher
         }
 
         $updateData = [
             'validation_status' => $request->validation_status,
             'validation_notes' => $request->validation_notes,
-            'validator_id' => $validatorTeacherId, // Simpan ID Guru sebagai validator
+            'validator_id' => $validatorTeacherId, // Simpan NIP Guru sebagai validator
             'validated_at' => now(),
         ];
 
@@ -95,5 +113,45 @@ class ViolationValidationController extends Controller
 
         return redirect()->route('violation-validations.index') // Pastikan nama route ini benar
             ->with('success', 'Pelanggaran berhasil divalidasi');
+    }
+
+    /**
+     * Show the form for editing the validation decision (only for the validator Guru BK).
+     */
+    public function editValidation(Violation $violation)
+    {
+        $user = Auth::user();
+        if (!$user->hasRole('Guru BK')) {
+            abort(403, 'Hanya Guru BK yang dapat mengedit validasi.');
+        }
+        // Hanya Guru BK yang memvalidasi laporan ini yang boleh edit
+        if ($violation->validator_id !== $user->teacher->nip) {
+            abort(403, 'Anda hanya dapat mengedit validasi yang Anda lakukan.');
+        }
+        return view('violations.validation.edit', compact('violation'));
+    }
+
+    /**
+     * Update the validation decision (only for the validator Guru BK).
+     */
+    public function updateValidation(Request $request, Violation $violation)
+    {
+        $user = Auth::user();
+        if (!$user->hasRole('Guru BK')) {
+            abort(403, 'Hanya Guru BK yang dapat mengedit validasi.');
+        }
+        if ($violation->validator_id !== $user->teacher->nip) {
+            abort(403, 'Anda hanya dapat mengedit validasi yang Anda lakukan.');
+        }
+        $request->validate([
+            'validation_status' => 'required|in:approved,rejected',
+            'validation_notes' => 'nullable|string|max:1000',
+        ]);
+        $violation->validation_status = $request->validation_status;
+        $violation->validation_notes = $request->validation_notes;
+        $violation->validated_at = now();
+        $violation->save();
+        return redirect()->route('violation-validations.show', $violation->id)
+            ->with('success', 'Keputusan validasi berhasil diubah.');
     }
 }

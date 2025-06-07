@@ -47,7 +47,7 @@
                     <div class="card-header">
                         <h3 class="card-title">Formulir Laporan Pelanggaran</h3>
                     </div>
-                    <form action="{{ route('violations.store') }}" method="POST" enctype="multipart/form-data">
+                    <form id="form-lapor-pelanggaran" action="{{ route('violations.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="card-body">
                             @if ($errors->any())
@@ -168,7 +168,7 @@
                             <div class="d-flex justify-content-between">
                                 <a href="{{ route('violations.index') }}" class="btn btn-secondary"><i class="fas fa-times mr-1"></i> Batal</a>
                                 {{-- Mengubah btn-danger menjadi btn-primary --}}
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane mr-1"></i> Laporkan Pelanggaran</button>
+                                <button type="button" id="btn-lapor-pelanggaran" class="btn btn-primary"><i class="fas fa-paper-plane mr-1"></i> Laporkan Pelanggaran</button>
                             </div>
                         </div>
                     </form>
@@ -187,6 +187,7 @@
 {{-- Skrip untuk bs-custom-file-input jika belum di-include global oleh AdminLTE --}}
 {{-- Contoh: <script src="{{ asset('plugins/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script> --}}
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function () {
         // Inisialisasi bsCustomFileInput jika tersedia
@@ -230,6 +231,28 @@
         setTimeout(function() {
             $(".alert-dismissible").alert('close');
         }, 7000); // Alert akan hilang setelah 7 detik
+
+        $('#btn-lapor-pelanggaran').on('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Konfirmasi Laporan',
+                text: 'Anda yakin ingin melaporkan pelanggaran ini?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Laporkan',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'swal2-confirm btn btn-primary mx-2',
+                    cancelButton: 'swal2-cancel btn btn-secondary mx-2'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#form-lapor-pelanggaran').submit();
+                }
+            });
+        });
     });
 
     $(function() {

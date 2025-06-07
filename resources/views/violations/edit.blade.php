@@ -94,13 +94,11 @@
 
                             <div class="form-group mb-3">
                                 <label for="violation_point_id">Jenis Pelanggaran <span class="text-danger">*</span></label>
-                                <select name="violation_point_id" id="violation_point_id" class="form-control @error('violation_point_id') is-invalid @enderror" required>
+                                <select name="violation_points_id" id="violation_point_id" class="form-control @error('violation_points_id') is-invalid @enderror" required>
                                     <option value="">-- Pilih Jenis Pelanggaran --</option>
                                      @if(isset($violationPoints) && $violationPoints->count() > 0)
                                         @foreach($violationPoints as $point)
-                                            {{-- Perhatikan bahwa di controller store, $violation->violation_points_id diisi dari 'violation_point_id' --}}
-                                            {{-- Jadi, untuk edit, kita bandingkan old('violation_point_id') dengan $violation->violation_points_id --}}
-                                            <option value="{{ $point->id }}" {{ old('violation_point_id', $violation->violation_points_id) == $point->id ? 'selected' : '' }}>
+                                            <option value="{{ $point->id }}" {{ old('violation_points_id', $violation->violation_points_id) == $point->id ? 'selected' : '' }}>
                                                 {{ $point->violation_type }} (Poin: {{ $point->points }})
                                             </option>
                                         @endforeach
@@ -108,7 +106,7 @@
                                         <option value="" disabled>Tidak ada data jenis pelanggaran</option>
                                     @endif
                                 </select>
-                                @error('violation_point_id')
+                                @error('violation_points_id')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
@@ -186,6 +184,8 @@
                                     </span>
                                 @enderror
                             </div>
+
+                            <input type="hidden" name="status" value="{{ old('status', $violation->status ?? 'pending') }}">
                         </div>
                         <div class="card-footer">
                             <div class="d-flex justify-content-between">

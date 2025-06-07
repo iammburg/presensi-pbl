@@ -85,8 +85,12 @@ Route::resource('achievement-validations', AchievementValidationController::clas
 Route::post('achievement-validations/{achievement}/validate', [AchievementValidationController::class, 'validateAchievement'])->name('achievement-validations.validate');
 
 // Route untuk validasi pelanggaran oleh Guru BK
-Route::post('violations/{violation}/validate', [ViolationController::class, 'validateViolation'])->name('violations.validate');
+Route::post('violations/{violation}/validate', [\App\Http\Controllers\ViolationValidationController::class, 'validateViolation'])->name('violations.validate');
 Route::resource('violation-validations', ViolationValidationController::class)->only(['index', 'show']);
+
+// Edit & update keputusan validasi oleh Guru BK yang memvalidasi
+Route::get('violation-validations/{violation}/edit-validation', [ViolationValidationController::class, 'editValidation'])->name('violation-validations.editValidation');
+Route::put('violation-validations/{violation}/update-validation', [ViolationValidationController::class, 'updateValidation'])->name('violation-validations.updateValidation');
 
 // Route buat Siswa
 Route::get('/manage-attendance-students', [StudentAttendanceController::class, 'index'])

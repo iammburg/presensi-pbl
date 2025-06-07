@@ -5,65 +5,17 @@
 @endsection
 
 @push('css')
-    <style>
-        /* Tabel header dan baris sesuai desain gambar */
-        .custom-violations-table thead th {
-            background-color: #009cf3;
-            color: #fff;
-            text-align: center;
-            vertical-align: middle;
-        }
-        .custom-violations-table tbody td {
-            vertical-align: middle;
-            background-color: #fff;
-        }
-        .custom-violations-table tbody tr:nth-child(odd) {
-            background-color: #f8fafd;
-        }
-        .custom-violations-table tbody tr {
-            transition: background 0.2s;
-        }
-        .custom-violations-table tbody tr:hover {
-            background-color: #e6f2fb;
-        }
-        .custom-violations-table .btn-info {
-            background: #ffc107;
-            border: none;
-            color: #fff;
-            font-weight: 600;
-            padding: 2px 16px;
-            border-radius: 6px;
-        }
-        .custom-violations-table .btn-info i {
-            margin-right: 4px;
-        }
-        /* Pagination & search style */
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            border-radius: 6px;
-            margin: 0 2px;
-            border: 1px solid #e0e0e0;
-            color: #009cf3 !important;
-        }
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: #009cf3 !important;
-            color: #fff !important;
-        }
-        .dataTables_wrapper .dataTables_length label,
-        .dataTables_wrapper .dataTables_filter label {
-            font-weight: 500;
-        }
-        .dataTables_wrapper .dataTables_length select {
-            min-width: 60px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
 @endpush
 
 @section('content')
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0 text-uppercase">Validasi Laporan Pelanggaran</h1>
+            <div class="col-sm-6 text-uppercase">
+                <h4 class="m-0">Validasi Laporan Pelanggaran</h4>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
@@ -82,40 +34,24 @@
                 <div class="card card-primary card-outline">
                     <div class="card-header">
                         <h3 class="card-title">Data Laporan</h3>
-                        <div class="card-tools">
-                            <form method="GET" class="form-inline mb-2">
-                                <label class="mr-2">Tanggal</label>
-                                <input type="date" name="tanggal" class="form-control form-control-sm mr-2" value="{{ request('tanggal', now()->format('Y-m-d')) }}">
-                                <button type="submit" class="btn btn-sm btn-primary">Pilih</button>
-                            </form>
+                        <div class="w-100 mt-3 d-flex align-items-center justify-content-end flex-wrap">
                             <form method="GET" class="form-inline" style="gap: 6px;">
-                                <input type="hidden" name="tanggal" value="{{ request('tanggal', now()->format('Y-m-d')) }}">
-                                <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari nama, pelanggaran, kelas..." value="{{ request('search') }}">
-                                <button type="submit" class="btn btn-sm btn-secondary"><i class="fas fa-search"></i></button>
+                                <input type="date" name="tanggal" class="form-control form-control-sm mr-2" value="{{ request('tanggal') }}">
+                                <select name="status" class="form-control form-control-sm mr-2">
+                                    <option value="">Semua Status</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu Validasi</option>
+                                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
+                                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
+                                </select>
+                                <input type="hidden" name="search" value="{{ request('search') }}">
+                                <button type="submit" class="btn btn-sm btn-primary">Filter</button>
                             </form>
                         </div>
                     </div>
                     <div class="card-body">
-                        @if(session('success'))
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                {{ session('success') }}
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        @endif
-                        @if(session('error'))
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                {{ session('error') }}
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        @endif
-
                         <div class="table-responsive">
-                            <table class="table table-bordered table-striped table-hover custom-violations-table">
-                                <thead>
+                            <table id="datatable-main" class="table table-bordered table-striped">
+                                <thead class="bg-tertiary text-white">
                                     <tr>
                                         <th style="width: 40px;">No</th>
                                         <th>Nama</th>
@@ -132,7 +68,7 @@
                                         <tr>
                                             <td class="text-center">{{ $index + $violations->firstItem() }}</td>
                                             <td>{{ $violation->student ? $violation->student->name : 'N/A' }}</td>
-                                            <td>{{ $violation->student && $violation->student->schoolClass ? $violation->student->schoolClass->name : '-' }}</td>
+                                            <td>{{ $violation->student && $violation->student->schoolClass ? $violation->student->schoolClass->parallel_name : '-' }}</td>
                                             <td>{{ $violation->teacher ? $violation->teacher->name : ($violation->reported_by ?: 'N/A') }}</td>
                                             <td>{{ $violation->violationPoint ? $violation->violationPoint->violation_type : 'N/A' }}</td>
                                             <td>{{ $violation->violationPoint ? $violation->violationPoint->violation_level : '-' }}</td>
@@ -144,9 +80,19 @@
                                                 @endif
                                             </td>
                                             <td class="text-center">
-                                                <a href="{{ route('violation-validations.show', $violation->id) }}" class="btn btn-info btn-sm" title="Tindakan">
-                                                    Tindakan
-                                                </a>
+                                                @role('Guru BK')
+                                                    <a href="{{ route('violation-validations.show', $violation->id) }}" class="btn btn-info btn-sm" title="Detail">
+                                                        @if($violation->validation_status === 'pending')
+                                                            <span class="badge badge-warning">Menunggu Validasi</span>
+                                                        @elseif($violation->validation_status === 'approved')
+                                                            <span class="badge badge-success">Disetujui</span>
+                                                        @elseif($violation->validation_status === 'rejected')
+                                                            <span class="badge badge-danger">Ditolak</span>
+                                                        @else
+                                                            <span class="badge badge-secondary">-</span>
+                                                        @endif
+                                                    </a>
+                                                @endrole
                                             </td>
                                         </tr>
                                     @empty
@@ -160,14 +106,6 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="mt-3 d-flex justify-content-between align-items-center">
-                            <div>
-                                <span>Showing {{ $violations->firstItem() }} to {{ $violations->lastItem() }} of {{ $violations->total() }} entries</span>
-                            </div>
-                            <div>
-                                {{ $violations->links() }}
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -177,11 +115,24 @@
 @endsection
 
 @push('js')
+    <!-- DataTables Scripts -->
+    <script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
     <script>
         $(function () {
-            setTimeout(function() {
-                $(".alert-dismissible").alert('close');
-            }, 5000);
+            $('#datatable-violations-validation').DataTable({
+                "responsive": true,
+                "lengthChange": false,
+                "autoWidth": false,
+                "paging": false, // Laravel paginasi
+                "searching": false, // Search manual di atas
+                "ordering": true,
+                "info": false
+            });
         });
     </script>
 @endpush
