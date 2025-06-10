@@ -25,6 +25,7 @@ use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AchievementValidationController;
 use App\Http\Controllers\ViolationValidationController;
+use App\Http\Controllers\AttendanceHistoryController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -71,6 +72,7 @@ Route::resource('manage-hours', HourController::class);
 Route::resource('manage-schedules', ClassScheduleController::class);
 Route::get('manage-schedules/{manage_schedule}/export-pdf', [ClassScheduleController::class, 'exportPdf'])->name('manage-schedules.export-pdf');
 Route::resource('manage-attendances', AttendanceController::class);
+Route::resource('manage-attendances-history', AttendanceHistoryController::class)->only(['index', 'show']);
 
 // Route buat Guru BK
 Route::resource('violation-management', ViolationPointController::class);
