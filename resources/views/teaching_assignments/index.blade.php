@@ -79,7 +79,7 @@
                                             @if($assignment->academicYear)
                                                 {{ $assignment->academicYear->start_year }}/{{ $assignment->academicYear->end_year }}
                                                 {{ isset($assignment->academicYear->semester)
-                                                    ? ($assignment->academicYear->semester == 1 ? 'Ganjil' : 'Genap')
+                                                    ? ($assignment->academicYear->semester == 0 ? 'Genap' : 'Ganjil')
                                                     : '' }}
                                             @else
                                                 <span class="text-danger">Belum diatur</span>

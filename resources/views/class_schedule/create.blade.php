@@ -16,7 +16,7 @@
 
     <div class="content">
         <div class="container-fluid">
-            @if(session('error'))
+            @if (session('error'))
                 <div class="alert alert-danger">{{ session('error') }}</div>
             @endif
 
@@ -35,20 +35,14 @@
                         @csrf
 
                         <div class="row mb-3">
-                            <div class="col-auto me-3">
-                                <label for="semester" class="form-label">Kurikulum</label>
-                                <select name="semester" id="semester" class="form-select form-select-sm" required style="min-width: 150px;">
-                                    <option value="">Pilih</option>
-                                    <option value="1" {{ old('semester') == 1 ? 'selected' : '' }}>2013</option>
-                                    <option value="2" {{ old('semester') == 2 ? 'selected' : '' }}>Merdeka</option>
-                                </select>
-                            </div>
                             <div class="col-auto">
                                 <label for="class_id" class="form-label">Kelas</label>
-                                <select name="class_id" id="class_id" class="form-select form-select-sm" required style="min-width: 200px;">
+                                <select name="class_id" id="class_id" class="form-select form-select-sm" required
+                                    style="min-width: 200px;">
                                     <option value="">Pilih</option>
-                                    @foreach($classes as $class)
-                                        <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>
+                                    @foreach ($classes as $class)
+                                        <option value="{{ $class->id }}"
+                                            {{ old('class_id') == $class->id ? 'selected' : '' }}>
                                             {{ $class->name }} - {{ $class->parallel_name }}
                                         </option>
                                     @endforeach
@@ -58,12 +52,14 @@
 
                         @php $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']; @endphp
 
-                        @foreach($days as $day)
+                        @foreach ($days as $day)
                             <div class="card mb-3 border-light border">
-                                <div class="card-header fw-semibold py-2 px-3 text-white" style="background-color: #1D3F72">{{ $day }}</div>
+                                <div class="card-header fw-semibold py-2 px-3 text-white" style="background-color: #1D3F72">
+                                    {{ $day }}</div>
                                 <div class="card-body p-3" id="schedule-{{ $day }}"></div>
                                 <div class="card-footer bg-white text-end py-2 px-3">
-                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="addScheduleRow('{{ $day }}')">+ Tambah</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm"
+                                        onclick="addScheduleRow('{{ $day }}')">+ Tambah</button>
                                 </div>
                             </div>
                         @endforeach
@@ -117,12 +113,13 @@
         }
 
         /* Pastikan tidak ada overflow */
-        .row.g-2 > * {
+        .row.g-2>* {
             flex: 0 0 auto;
         }
 
         /* Responsive adjustments */
         @media (max-width: 768px) {
+
             .row.g-2.mb-3.align-items-end .col-md-2,
             .row.g-2.mb-3.align-items-end .col-md-4 {
                 margin-bottom: 0.5rem;
@@ -149,8 +146,8 @@
             row.innerHTML = `
                 <div class="col-md-2">
                     <label class="form-label fw-semibold small mb-1">Tipe Sesi</label>
-                    <select name="schedules[${day}][${index}][session_type]" 
-                            class="form-select form-select-sm session-type" 
+                    <select name="schedules[${day}][${index}][session_type]"
+                            class="form-select form-select-sm session-type"
                             onchange="filterHours(this, '${day}')" required>
                         <option value="">-- Pilih --</option>
                         <option value="Jam Pelajaran">Jam Pelajaran</option>
@@ -160,8 +157,8 @@
 
                 <div class="col-md-2">
                     <label class="form-label fw-semibold small mb-1">Jam Mulai</label>
-                    <select name="schedules[${day}][${index}][start_hour_id]" 
-                            class="form-select form-select-sm hour-select-start" 
+                    <select name="schedules[${day}][${index}][start_hour_id]"
+                            class="form-select form-select-sm hour-select-start"
                             onchange="updateEndHours(this); toggleSubjectTeacher(this)" required>
                         <option value="">Jam ke-</option>
                     </select>
@@ -169,7 +166,7 @@
 
                 <div class="col-md-2">
                     <label class="form-label fw-semibold small mb-1">Jam Selesai</label>
-                    <select name="schedules[${day}][${index}][end_hour_id]" 
+                    <select name="schedules[${day}][${index}][end_hour_id]"
                             class="form-select form-select-sm hour-select-end" required>
                         <option value="">Jam ke-</option>
                     </select>
@@ -177,18 +174,18 @@
 
                 <div class="col-md-4 assignment-container">
                     <label class="form-label fw-semibold small mb-1 assignment-label">Mata Pelajaran & Guru</label>
-                    <select name="schedules[${day}][${index}][assignment_id]" 
+                    <select name="schedules[${day}][${index}][assignment_id]"
                             class="form-select form-select-sm assignment-select">
                         <option value="">Pilih</option>
                         ${teachingAssignments.map(a => `
-                            <option value="${a.id}">${a.subject_name} - ${a.teacher_name}</option>
-                        `).join('')}
+                                            <option value="${a.id}">${a.subject_name} - ${a.teacher_name}</option>
+                                        `).join('')}
                     </select>
                 </div>
 
                 <div class="col-md-2 d-flex align-items-end">
-                    <button type="button" 
-                            class="btn btn-outline-danger btn-sm" 
+                    <button type="button"
+                            class="btn btn-outline-danger btn-sm"
                             style="padding: 0.2rem 0.4rem; font-size: 0.7rem; line-height: 1;"
                             onclick="this.closest('.row').remove()">
                         Hapus
@@ -240,7 +237,7 @@
             const row = startSelect.closest('.row');
             const endSelect = row.querySelector('.hour-select-end');
             const sessionTypeSelect = row.querySelector('.session-type');
-            
+
             if (!startSelect.value || !sessionTypeSelect.value) {
                 endSelect.innerHTML = '<option value="">Jam ke-</option>';
                 return;
@@ -248,14 +245,14 @@
 
             const startHourId = parseInt(startSelect.value);
             const sessionType = sessionTypeSelect.value;
-            
+
             // Get the day from the container id
             const container = startSelect.closest('[id^="schedule-"]');
             const day = container.id.replace('schedule-', '');
-            
+
             const dayHours = getHoursForDay(day);
-            const availableHours = dayHours.filter(h => 
-                h.session_type === sessionType && 
+            const availableHours = dayHours.filter(h =>
+                h.session_type === sessionType &&
                 parseInt(h.id) >= startHourId
             );
 
@@ -264,7 +261,7 @@
                     Jam ke-${h.slot_number} (${h.start_time} - ${h.end_time})
                 </option>`
             ).join('');
-            
+
             endSelect.innerHTML = `<option value="">Jam ke-</option>` + options;
         }
 

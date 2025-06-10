@@ -81,7 +81,7 @@ class TeacherController extends Controller
     {
         $request->validate([
             'nip' => 'required|unique:teachers,nip|digits:18',
-            'dapodik_number' => 'nullable|string|max:16|unique:teachers,dapodik_number,',
+            'dapodik_number' => 'nullable|string|max:16|unique:teachers,dapodik_number',
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'phone' => 'required',
