@@ -25,7 +25,7 @@ use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AchievementValidationController;
 use App\Http\Controllers\ViolationValidationController;
-use App\Http\Controllers\AttendanceHistoryController;
+use App\Http\Controllers\TeacherScheduleController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -72,7 +72,6 @@ Route::resource('manage-hours', HourController::class);
 Route::resource('manage-schedules', ClassScheduleController::class);
 Route::get('manage-schedules/{manage_schedule}/export-pdf', [ClassScheduleController::class, 'exportPdf'])->name('manage-schedules.export-pdf');
 Route::resource('manage-attendances', AttendanceController::class);
-Route::resource('manage-attendances-history', AttendanceHistoryController::class)->only(['index', 'show']);
 
 // Route buat Guru BK
 Route::resource('violation-management', ViolationPointController::class);
@@ -104,3 +103,5 @@ Route::resource('subjects', SubjectController::class);
 Route::get('subjects/schedule-names', [SubjectController::class, 'getScheduleNames'])->name('subjects.schedule-names');
 
 Route::get('/autocomplete/siswa', [App\Http\Controllers\AchievementController::class, 'autocompleteSiswa'])->name('autocomplete.siswa');
+// Route untuk jadwal pelajaran guru (menggunakan HourController dan folder hours)
+Route::get('teacher-schedule', [HourController::class, 'teacherSchedule'])->name('teacher-schedule.index');
