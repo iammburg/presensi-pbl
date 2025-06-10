@@ -74,25 +74,33 @@
     </div>
 </div>
 @endsection
-@push('js')
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap4.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
+
+@push('styles')
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap4.min.css">
+@endpush
+
+@push('scripts')
 <script>
 $(document).ready(function() {
-    $.fn.dataTable.ext.errMode = 'none';
     $('#datatable-prestasi').DataTable({
-        "ordering": true,
-        "responsive": true,
-        "autoWidth": false,
-        "language": {
-            "search": "Cari:",
-            "lengthMenu": "Tampilkan _MENU_ data",
-            "zeroRecords": "Tidak ada data ditemukan",
-            "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            "infoEmpty": "Tidak ada data",
-            "infoFiltered": "(disaring dari _MAX_ total data)"
-        }
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ],
+        language: {
+            search: "Cari:",
+            lengthMenu: "Tampilkan _MENU_ data",
+            zeroRecords: "Tidak ada data ditemukan",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Tidak ada data",
+            infoFiltered: "(disaring dari _MAX_ total data)"
+        },
+        responsive: true,
+        lengthMenu: [
+            [10, 25, 50, -1],
+            [10, 25, 50, "Semua"]
+        ],
+        pageLength: 10
     });
 });
 </script>
