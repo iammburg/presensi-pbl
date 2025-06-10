@@ -82,19 +82,24 @@ class TeacherSeeder extends Seeder
             'urutan' => 1
         ]);
 
-        $permissions = [
-            Permission::create(['name' => 'create_attendance', 'menu_id' => $presensiSiswa->id]),
-            Permission::create(['name' => 'read_attendance', 'menu_id' => $presensiSiswa->id]),
-            Permission::create(['name' => 'update_attendance', 'menu_id' => $presensiSiswa->id]),
-            Permission::create(['name' => 'delete_attendance', 'menu_id' => $presensiSiswa->id]),
-        ];
-
         $riwayatPresensi = Menu::create([
             'nama_menu' => 'Riwayat Presensi',
             'url' => 'manage-attendances-history',
             'parent_id' => $menuPresensi->id,
             'urutan' => 2
         ]);
+
+        $permissions = [
+            Permission::create(['name' => 'create_attendance', 'menu_id' => $presensiSiswa->id]),
+            Permission::create(['name' => 'read_attendance', 'menu_id' => $presensiSiswa->id]),
+            Permission::create(['name' => 'update_attendance', 'menu_id' => $presensiSiswa->id]),
+            Permission::create(['name' => 'delete_attendance', 'menu_id' => $presensiSiswa->id]),
+            Permission::create(['name' => 'create_attendance_history', 'menu_id' => $riwayatPresensi->id]),
+            Permission::create(['name' => 'read_attendance_history', 'menu_id' => $riwayatPresensi->id]),
+            Permission::create(['name' => 'update_attendance_history', 'menu_id' => $riwayatPresensi->id]),
+            Permission::create(['name' => 'delete_attendance_history', 'menu_id' => $riwayatPresensi->id]),
+        ];
+
 
         // Assign semua menu ke role Guru
         $menuIds = [
