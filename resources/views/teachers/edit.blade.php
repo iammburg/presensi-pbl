@@ -41,7 +41,7 @@
                                 </div>
                                 @enderror
                             </div>
-                            {{-- <div class="form-group">
+                            <div class="form-group">
                                 <label for="email">Email</label>
                                 <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ $teacher->user->email }}">
                                 @error('email')
@@ -120,7 +120,6 @@
 
 @push('scripts')
 <script>
-    // Menampilkan nama file yang dipilih
     $('.custom-file-input').on('change', function() {
         let fileName = $(this).val().split('\\').pop();
         $(this).next('.custom-file-label').addClass("selected").html(fileName);
