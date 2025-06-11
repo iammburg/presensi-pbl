@@ -159,7 +159,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="6" class="text-center text-muted">
+                                                <td colspan="8" class="text-center text-muted">
                                                     Belum ada laporan pelanggaran yang dibuat.
                                                 </td>
                                             </tr>

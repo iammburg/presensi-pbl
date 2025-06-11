@@ -16,7 +16,8 @@ class SubjectController extends Controller
 
     public function create()
     {
-        return view('subjects.create');
+        $curriculums = Curriculum::all();
+        return view('subjects.create', compact('curriculums'));
     }
 
     public function store(Request $request)
@@ -41,7 +42,8 @@ class SubjectController extends Controller
     public function edit($id)
     {
         $subject = Subject::findOrFail($id);
-        return view('subjects.edit', compact('subject'));
+        $curriculums = Curriculum::all();
+        return view('subjects.edit', compact('subject', 'curriculums'));
     }
 
     public function update(Request $request, $id)

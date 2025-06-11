@@ -487,14 +487,11 @@
                         }
                     },
                     {
-                        data: 'nisn',
+                        data: null,
                         orderable: false,
                         searchable: false,
-                        className: 'text-center',
-                        width: '80px',
                         render: function(data, type, row) {
-                            return '<input type="checkbox" class="row-select form-check-input" value="' +
-                                data + '">';
+                            return '<div class="d-flex justify-content-center align-items-center" style="height: 100%;"><input type="checkbox" name="selected_students[]" value="' + row.nisn + '" class="row-select"></div>';
                         }
                     }
                 ],

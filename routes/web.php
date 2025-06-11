@@ -87,6 +87,7 @@ Route::resource('achievement-validations', AchievementValidationController::clas
 Route::post('achievement-validations/{achievement}/validate', [AchievementValidationController::class, 'validateAchievement'])->name('achievement-validations.validate');
 
 // Route untuk validasi pelanggaran oleh Guru BK
+Route::post('violation-validations/{violation}/validate', [ViolationValidationController::class, 'validateViolation'])->name('violation-validations.validate');
 Route::post('violations/{violation}/validate', [ViolationController::class, 'validateViolation'])->name('violations.validate');
 Route::resource('violation-validations', ViolationValidationController::class)->only(['index', 'show']);
 

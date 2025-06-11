@@ -12,8 +12,8 @@ class ViolationValidationController extends Controller
     public function index()
     {
         $violations = Violation::with(['student', 'violationPoint', 'teacher']) // teacher di sini adalah pelapor
-            ->where('validation_status', 'pending')
-            ->latest('violation_date') // Urutkan berdasarkan tanggal pelanggaran juga bisa jadi opsi
+            ->orderByRaw("FIELD(validation_status, 'pending', 'approved', 'rejected')")
+            ->orderByDesc('violation_date')
             ->paginate(10);
 
         return view('violations.validation.index', compact('violations')); // Pastikan view ini ada
@@ -37,17 +37,11 @@ class ViolationValidationController extends Controller
 
         $validatorTeacherId = null;
         if (Auth::check()) {
-            $user = Auth::user(); // Ini adalah model User Laravel
-            // Anda perlu cara untuk mendapatkan instance Teacher yang terkait dengan User yang login
-            // Contoh: jika User punya relasi one-to-one ke Teacher bernama 'teacherProfile'
-            if ($user->teacherProfile && $user->teacherProfile instanceof Teacher) {
-                $validatorTeacherId = $user->teacherProfile->id; // Ambil ID dari model Teacher
+            $user = Auth::user();
+            // Ambil NIP guru dari relasi teacher (BUKAN teacherProfile)
+            if ($user->teacher && $user->teacher instanceof \App\Models\Teacher) {
+                $validatorTeacherId = $user->teacher->nip;
             }
-            // Jika User yang login adalah Teacher itu sendiri (misal, tabel users adalah tabel teachers)
-            // elseif ($user instanceof Teacher) {
-            //     $validatorTeacherId = $user->id;
-            // }
-            // Sesuaikan logika ini dengan bagaimana Anda mengelola User dan Teacher
         }
 
         $updateData = [
@@ -58,10 +52,8 @@ class ViolationValidationController extends Controller
         ];
 
         // Logika untuk memperbarui 'status' utama berdasarkan 'validation_status'
-        if ($request->validation_status === 'approved') {
-            $updateData['status'] = 'processed'; // Atau 'pending' jika masih ada langkah lain
-        } elseif ($request->validation_status === 'rejected') {
-            // $updateData['status'] = 'pending'; // Atau status lain yang sesuai
+        if ($request->validation_status === 'approved' || $request->validation_status === 'rejected') {
+            $updateData['status'] = 'completed'; // Ubah ke 'completed' baik disetujui maupun ditolak
         }
 
         $violation->update($updateData);

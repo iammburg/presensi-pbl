@@ -62,20 +62,10 @@
                                     <label>Nama Kurikulum</label>
                                     <select name="curriculum_name" class="form-control @error('curriculum_name') is-invalid @enderror">
                                         <option value="">-- Pilih Kurikulum --</option>
-                                        @php
-                                            $kurikulums = [
-                                                'Kurikulum 2004 (KBK-Kurikulum Berbasis Kompetensi)',
-                                                'Kurikulum 2006 (KTSP-Kurikulum Tingkat Satuan Pendidikan)',
-                                                'Kurikulum 2013 (K-13)',
-                                                'Kurikulum Darurat 2020',
-                                                'Kurikulum Merdeka 2022',
-                                                'Kurikulum Merdeka 2024'
-                                            ];
-                                        @endphp
-                                        @foreach ($kurikulums as $item)
-                                            <option value="{{ $item }}"
-                                                {{ old('curriculum_name', isset($subject) ? $subject->curriculum_name : '') == $item ? 'selected' : '' }}>
-                                                {{ $item }}
+                                        @foreach ($curriculums as $item)
+                                            <option value="{{ $item->curriculum_name }}"
+                                                {{ old('curriculum_name', isset($subject) ? $subject->curriculum_name : '') == $item->curriculum_name ? 'selected' : '' }}>
+                                                {{ $item->curriculum_name }}
                                             </option>
                                         @endforeach
                                      </select>
