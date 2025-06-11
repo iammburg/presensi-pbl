@@ -48,9 +48,8 @@ class Student extends Model
      */
     public function currentAssignment()
     {
-        return $this->hasOne(StudentClassAssignment::class, 'student_id')
-                    ->latestOfMany()
-                    ->with('schoolClass');
+         return $this->hasOne(StudentClassAssignment::class, 'student_id', 'nisn') // Ganti 'nisn' dengan primary key siswa jika berbeda
+                    ->latestOfMany('updated_at'); 
     }
 
     /**
