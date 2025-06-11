@@ -68,6 +68,9 @@ Route::resource('manage-teacher-subject-assignments', TeachingAssignmentControll
     ->parameters(['manage-teacher-subject-assignments' => 'teacherAssignment']);
 Route::resource('manage-student-class-assignments', StudentClassAssignmentController::class)
     ->parameters(['manage-student-class-assignments' => 'studentAssignment']);
+Route::get('/manage-student-class-assignments/create/for-class/{class_id}', [StudentClassAssignmentController::class, 'createForClass'])
+    ->name('manage-student-class-assignments.create-for-class')
+    ->middleware(['auth']); 
 Route::resource('manage-hours', HourController::class);
 Route::resource('manage-schedules', ClassScheduleController::class);
 Route::get('manage-schedules/{manage_schedule}/export-pdf', [ClassScheduleController::class, 'exportPdf'])->name('manage-schedules.export-pdf');
