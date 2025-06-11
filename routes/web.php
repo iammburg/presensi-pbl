@@ -90,6 +90,7 @@ Route::resource('achievement-validations', AchievementValidationController::clas
 Route::post('achievement-validations/{achievement}/validate', [AchievementValidationController::class, 'validateAchievement'])->name('achievement-validations.validate');
 
 // Route untuk validasi pelanggaran oleh Guru BK
+Route::post('violation-validations/{violation}/validate', [ViolationValidationController::class, 'validateViolation'])->name('violation-validations.validate');
 Route::post('violations/{violation}/validate', [ViolationController::class, 'validateViolation'])->name('violations.validate');
 Route::resource('violation-validations', ViolationValidationController::class)->only(['index', 'show']);
 
@@ -100,8 +101,11 @@ Route::get('/student/attendance', [StudentAttendanceController::class, 'index'])
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
 
-// Route tambahan untuk subjects
-Route::resource('subjects', SubjectController::class);
+// Route utama untuk subject, dengan prefix dan nama route 'manage-subject'
+Route::resource('manage-subject', SubjectController::class);
+
+// Route tambahan untuk mendapatkan nama jadwal pelajaran
+Route::get('manage-subject/schedule-names', [SubjectController::class, 'getScheduleNames'])->name('manage-subject.schedule-names');
 
 // Route tambahan untuk mendapatkan nama jadwal pelajaran
 Route::get('subjects/schedule-names', [SubjectController::class, 'getScheduleNames'])->name('subjects.schedule-names');

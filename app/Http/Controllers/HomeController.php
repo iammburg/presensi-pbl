@@ -62,6 +62,54 @@ class HomeController extends Controller
 
 
             return view('home', compact('activeStudents', 'present', 'absent', 'excused', 'chart'));
+        } else if (Auth::user()->hasRole('Guru BK')) {
+            // Top 3 siswa dengan poin prestasi tertinggi
+            $topAchievementStudents = \App\Models\Student::select('students.nisn', 'students.name')
+                ->leftJoin('student_class_assignments as sca', 'sca.student_id', '=', 'students.nisn')
+                ->leftJoin('classes as sc', 'sca.class_id', '=', 'sc.id')
+                ->leftJoin('achievements', function($join) {
+                    $join->on('achievements.student_id', '=', 'students.nisn')
+                        ->where('achievements.validation_status', 'approved');
+                })
+                ->leftJoin('achievement_points as ap', 'achievements.achievement_points_id', '=', 'ap.id')
+                ->groupBy('students.nisn', 'students.name', 'sc.name', 'sc.parallel_name')
+                ->selectRaw('COALESCE(SUM(ap.points),0) as total_point, sc.name as class_name, sc.parallel_name')
+                ->orderByDesc('total_point')
+                ->limit(3)
+                ->get()
+                ->map(function($item) {
+                    $kelas = $item->class_name ? ($item->class_name . ($item->parallel_name ? ' - ' . $item->parallel_name : '')) : '-';
+                    return (object)[
+                        'name' => $item->name,
+                        'class_name' => $kelas,
+                        'total_point' => $item->total_point
+                    ];
+                });
+
+            // Top 3 siswa dengan poin pelanggaran tertinggi
+            $topViolationStudents = \App\Models\Student::select('students.nisn', 'students.name')
+                ->leftJoin('student_class_assignments as sca', 'sca.student_id', '=', 'students.nisn')
+                ->leftJoin('classes as sc', 'sca.class_id', '=', 'sc.id')
+                ->leftJoin('violations', function($join) {
+                    $join->on('violations.student_id', '=', 'students.nisn')
+                        ->where('violations.validation_status', 'approved');
+                })
+                ->leftJoin('violation_points as vp', 'violations.violation_points_id', '=', 'vp.id')
+                ->groupBy('students.nisn', 'students.name', 'sc.name', 'sc.parallel_name')
+                ->selectRaw('COALESCE(SUM(vp.points),0) as total_point, sc.name as class_name, sc.parallel_name')
+                ->orderByDesc('total_point')
+                ->limit(3)
+                ->get()
+                ->map(function($item) {
+                    $kelas = $item->class_name ? ($item->class_name . ($item->parallel_name ? ' - ' . $item->parallel_name : '')) : '-';
+                    return (object)[
+                        'name' => $item->name,
+                        'class_name' => $kelas,
+                        'total_point' => $item->total_point
+                    ];
+                });
+
+            return view('home', compact('topAchievementStudents', 'topViolationStudents'));
         } else {
             return view('home');
         }

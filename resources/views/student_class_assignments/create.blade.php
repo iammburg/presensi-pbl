@@ -683,6 +683,16 @@
                                 return '<input type="checkbox" class="row-select form-check-input" value="' +
                                     data + '">';
                             }
+                            // Untuk sorting dan filtering: return raw value
+                            return data || '';
+                        }
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            return '<div class="d-flex justify-content-center align-items-center" style="height: 100%;"><input type="checkbox" name="selected_students[]" value="' + row.nisn + '" class="row-select"></div>';
                         }
                     ],
                     order: [

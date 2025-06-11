@@ -185,7 +185,7 @@ class TeacherController extends Controller
             'nip' => 'required|digits:18|unique:teachers,nip,' . $nip . ',nip',
             'dapodik_number' => 'nullable|string|max:16|unique:teachers,dapodik_number,' . $nip . ',nip',
             'name' => 'required',
-            // 'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|unique:users,email,' . $teacher->user->id,
             'phone' => 'required',
             'address' => 'required',
             'gender' => 'required|in:L,P',
@@ -203,7 +203,9 @@ class TeacherController extends Controller
             $teacher->photo = $photoPath;
         }
 
+        // Update teacher data
         $teacher->update([
+            'nip' => $request->nip,
             'name' => $request->name,
             'dapodik_number' => $request->dapodik_number ? substr($request->dapodik_number, 0, 16) : null,
             'phone' => $request->phone,
@@ -212,8 +214,11 @@ class TeacherController extends Controller
             'birth_date' => $request->birth_date,
         ]);
 
-        // Update user name
-        $teacher->user->update(['name' => $request->name]);
+        // Update user data
+        $teacher->user->update([
+            'name' => $request->name,
+            'email' => $request->email
+        ]);
 
         return redirect()->route('manage-teachers.index')
             ->with('success', 'Data guru berhasil diperbarui');
