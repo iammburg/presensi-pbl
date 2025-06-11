@@ -538,6 +538,17 @@
                                 <span class="text-muted">N/A</span>
                             @endif
                         </p>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6">
+                    <div class="control-group">
+                        <label class="control-label">Tahun Akademik:</label>
+                        <select id="targetYear" name="academic_year_id" class="form-select" required>
+                            <option value="">-- Pilih Tahun --</option>
+                            @foreach ($academicYears as $ay)
+                                <option value="{{ $ay->id }}">{{ $ay->start_year }}/{{ $ay->end_year }} - Semester
+                                    {{ $ay->semester == 0 ? 'Genap' : 'Ganjil' }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 

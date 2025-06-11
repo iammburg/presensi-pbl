@@ -16,3 +16,17 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+.venv/
+venv/
+
+# Docker
+docker-compose.override.yml
+*.log
+
+# Flask
+flask-classifier/__pycache__/
+flask-classifier/*.py[cod]
+flask-classifier/*env*/
+flask-classifier/*.h5
+flask-classifier/*.pt
+flask-classifier/logs/

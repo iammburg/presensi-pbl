@@ -24,8 +24,7 @@ class SchoolClassController extends Controller
                 ->addIndexColumn()
                 ->addColumn('academic_year', function ($class) {
                     if ($class->academicYear) {
-                        // Perbaikan: Asumsi semester 1 adalah Ganjil, 2 adalah Genap. Kode Anda menggunakan 0 untuk Ganjil.
-                        $semesterText = ($class->academicYear->semester == 1 || $class->academicYear->semester == 0) ? 'Ganjil' : 'Genap'; // Sesuaikan jika 0 adalah Ganjil, 1 adalah Genap
+                        $semesterText = $class->academicYear->semester == 0 ? 'Genap' : 'Ganjil';
                         return $class->academicYear->start_year . ' - ' . $class->academicYear->end_year . ' ' . $semesterText;
                     }
                     return '-';

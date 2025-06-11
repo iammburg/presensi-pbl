@@ -16,7 +16,7 @@ class TeachingAssignment extends Model
         'class_id',
     ];
 
- public function teacher()
+    public function teacher()
     {
         return $this->belongsTo(Teacher::class, 'teacher_id', 'nip');
     }
@@ -44,5 +44,4 @@ class TeachingAssignment extends Model
     {
         return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
-    
 }
