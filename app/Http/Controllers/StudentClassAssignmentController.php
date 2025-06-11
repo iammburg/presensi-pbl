@@ -47,40 +47,106 @@ public function create(Request $request)
         'academicYears' => AcademicYear::all(),
     ]);
 }
+ public function createForClass(Request $request, $class_id)
+{
+    $selectedClass = SchoolClass::with('academicYear')->find($class_id); // Eager load academicYear
 
+    if (!$selectedClass) {
+        return redirect()->route('manage-classes.index')->with('error', 'Kelas tidak ditemukan.');
+    }
+
+    if ($request->ajax()) {
+        // Logika DataTables untuk siswa
+        $students = Student::with('currentAssignment.schoolClass'); //
+
+        return DataTables::of($students)
+            ->addIndexColumn()
+            ->addColumn('nisn',       fn($s) => $s->nisn) //
+            ->addColumn('nis',        fn($s) => $s->nis) //
+            ->addColumn('name',       fn($s) => $s->name) //
+            ->addColumn('gender',     fn($s) => $s->gender === 'L' ? 'Laki-laki' : 'Perempuan') //
+            ->addColumn('enter_year', fn($s) => $s->enter_year) //
+            ->addColumn('class_name', function($s) { //
+                if ($s->currentAssignment && $s->currentAssignment->schoolClass) { //
+                    $c = $s->currentAssignment->schoolClass; //
+                    return "{$c->name} {$c->parallel_name}"; //
+                }
+                return '-'; //
+            })
+            ->make(true); //
+    }
+
+    // Menggunakan view 'student_class_assignments.create'
+    // Jika nama file blade Anda adalah manage-student-class-assignments/create.blade.php,
+    // maka path view-nya adalah 'manage-student-class-assignments.create'
+    return view('student_class_assignments.create', [ // Pastikan path view ini benar
+        'academicYears'   => AcademicYear::orderBy('start_year', 'desc')->orderBy('semester', 'desc')->get(), //
+        'selectedClassId' => $class_id, //
+        'selectedClass'   => $selectedClass, //
+    ]);
+}
 
 
 
     public function store(Request $request)
-    {
-        $nisns = $request->input('nisns', []);
-        $classId = $request->input('class_id');
-        $yearId = $request->input('academic_year_id');
+{
+    // Tambahkan validasi di awal
+    $validatedData = $request->validate([
+        'nisns'             => 'required|array|min:1',
+        'nisns.*'           => 'required|string', // Asumsi NISN adalah string, sesuaikan jika integer
+        'class_id'          => 'required|exists:classes,id', // Pastikan class_id valid dan ada di tabel school_classes
+        'academic_year_id'  => 'required|exists:academic_years,id', // Pastikan academic_year_id valid
+    ]);
 
-        $counter = 0;
-        foreach ($nisns as $nisn) {
-            // Cari ID siswa berdasarkan NISN
-            $student = Student::where('nisn', $nisn)->first();
+    $nisns = $validatedData['nisns'];
+    $classId = $validatedData['class_id'];
+    $yearId = $validatedData['academic_year_id'];
+    $assignedBy = Auth::id();
 
-            if ($student) {
-                StudentClassAssignment::updateOrCreate(
-                    [
-                        'student_id'       => $nisn,
-                        'academic_year_id' => $yearId,
-                    ],
-                    [
-                        'class_id'    => $classId,
-                        'assigned_by' => Auth::id(),
-                    ]
-                );
-                $counter++;
-            }
-        }
-
-        return response()->json([
-            'message' => $counter . ' siswa berhasil dipindahkan.'
-        ]);
+    // Tambahan: Pastikan user yang melakukan aksi ini memiliki otorisasi (jika diperlukan)
+    if (!$assignedBy) {
+        return response()->json(['message' => 'Aksi tidak diizinkan. Silakan login terlebih dahulu.'], 403);
     }
+
+    $counter = 0;
+    $failedStudentsInfo = []; // Untuk menyimpan info siswa yang gagal diproses
+
+    foreach ($nisns as $nisn) {
+        $student = Student::where('nisn', $nisn)->first();
+
+        if ($student) {
+            // Logika updateOrCreate Anda sudah baik.
+            // Pastikan student_id di tabel student_class_assignments memang menyimpan NISN.
+            // Jika student_id seharusnya merujuk ke kolom 'id' di tabel 'students', maka gunakan $student->id.
+            StudentClassAssignment::updateOrCreate(
+                [
+                    'student_id'       => $nisn, // Atau $student->id jika kolom ini adalah foreign key ke students.id
+                    'academic_year_id' => $yearId,
+                ],
+                [
+                    'class_id'    => $classId,
+                    'assigned_by' => $assignedBy,
+                ]
+            );
+            $counter++;
+        } else {
+            // Kumpulkan info siswa yang tidak ditemukan
+            $failedStudentsInfo[] = $nisn;
+        }
+    }
+
+    if (count($failedStudentsInfo) > 0) {
+        $errorMessage = $counter . ' siswa berhasil dipindahkan. Namun, ' . count($failedStudentsInfo) .
+                        ' siswa dengan NISN berikut tidak ditemukan: ' . implode(', ', $failedStudentsInfo) . '.';
+        // Anda bisa memutuskan status code yang sesuai, misal 207 (Multi-Status) jika sebagian berhasil
+        return response()->json(['message' => $errorMessage, 'status' => 'partial_success'], 207);
+    }
+
+    return response()->json([
+        'message' => $counter . ' siswa berhasil dipindahkan.',
+        'status' => 'success' // Tambahkan status untuk kemudahan di front-end jika perlu
+    ]);
+}
 
     public function getClassesByYear(Request $request)
     {
