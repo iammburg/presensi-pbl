@@ -86,7 +86,7 @@
                                             @endif
                                         </td>
                                         <td>{{ optional($assignment->schoolClass)->name }} - {{ optional($assignment->schoolClass)->parallel_name }}</td>
-                                        <td>{{ $assignment->subject->name ?? '-' }}</td>
+                                        <td>{{ $assignment->subject->subject_name ?? '-' }}</td>
                                         <td>{{ $assignment->teacher->name ?? '-' }}</td>
                                         <td>
                                             <div class="btn-group">

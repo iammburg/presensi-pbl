@@ -16,7 +16,7 @@
                         <div class="card-body">
                             <div class="form-group">
                                 <label for="nip">NIP</label>
-                                <input type="text" maxlength="18" class="form-control @error('nip') is-invalid @enderror" id="nip" name="nip" value="{{ $teacher->nip }}" readonly>
+                                <input type="text" maxlength="18" class="form-control @error('nip') is-invalid @enderror" id="nip" name="nip" value="{{ $teacher->nip }}">
                                 @error('nip')
                                 <div class="invalid-feedback">
                                     {{ $message }}
@@ -41,10 +41,15 @@
                                 </div>
                                 @enderror
                             </div>
-                            {{-- <div class="form-group">
+                            <div class="form-group">
                                 <label for="email">Email</label>
-                                <input type="email" class="form-control" id="email" value="{{ $teacher->user->email }}" readonly>
-                            </div> --}}
+                                <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ $teacher->user->email }}">
+                                @error('email')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
                             <div class="form-group">
                                 <label for="phone">No. Telepon</label>
                                 <input type="text" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone', $teacher->phone) }}">
@@ -115,7 +120,6 @@
 
 @push('scripts')
 <script>
-    // Menampilkan nama file yang dipilih
     $('.custom-file-input').on('change', function() {
         let fileName = $(this).val().split('\\').pop();
         $(this).next('.custom-file-label').addClass("selected").html(fileName);

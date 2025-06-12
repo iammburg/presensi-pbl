@@ -13,14 +13,14 @@ use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('permission:create_attendance')->only(['create', 'store']);
-        $this->middleware('permission:read_attendance')->only(['index', 'show']);
-        $this->middleware('permission:update_attendance')->only(['edit', 'update']);
-        $this->middleware('permission:delete_attendance')->only(['destroy']);
-    }
-
+    // public function __construct()
+    // {
+    //     $this->middleware('permission:create_attendance')->only(['create', 'store']);
+    //     $this->middleware('permission:read_attendance')->only(['index', 'show']);
+    //     $this->middleware('permission:update_attendance')->only(['edit', 'update']);
+    //     $this->middleware('permission:delete_attendance')->only(['destroy']);
+    // }
+    
     /**
      * Display a listing of the resource.
      */

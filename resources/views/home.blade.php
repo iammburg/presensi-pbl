@@ -227,6 +227,90 @@
                 </div>
             </div>
         @endif
+
+        @if (Auth::user()->hasRole('Guru BK'))
+            <style>
+                .dashboard-title {
+                    font-size: 24px;
+                    font-weight: bold;
+                    margin-bottom: 20px;
+                }
+                .dashboard-section-title {
+                    font-size: 20px;
+                    font-weight: 600;
+                    margin-bottom: 18px;
+                    margin-top: 32px;
+                }
+                .dashboard-table-box {
+                    background: #fff8e1;
+                    border-radius: 16px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                    padding: 24px 32px 12px 32px;
+                    margin-bottom: 24px;
+                }
+                .dashboard-table-header, .dashboard-table-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 16px;
+                }
+                .dashboard-table-header {
+                    font-weight: bold;
+                    color: #222;
+                    margin-bottom: 8px;
+                }
+                .dashboard-table-row {
+                    margin-bottom: 4px;
+                }
+                .dashboard-table-row span {
+                    min-width: 120px;
+                }
+                .see-detail-link {
+                    color: #bfa14a;
+                    font-weight: 600;
+                    text-decoration: underline;
+                    cursor: pointer;
+                    font-size: 15px;
+                }
+            </style>
+            <div class="container-fluid py-4 px-5">
+                <h4 class="dashboard-title">Dashboard Guru BK</h4>
+                <div class="dashboard-section-title">Siswa dengan Poin Prestasi Tertinggi</div>
+                <div class="dashboard-table-box">
+                    <div class="dashboard-table-header">
+                        <span>Nama Siswa</span>
+                        <span>Kelas</span>
+                        <span>Total Poin</span>
+                        <span><a href="{{ route('achievements.index') }}" class="see-detail-link">Lihat detail &gt;&gt;</a></span>
+                    </div>
+                    @foreach($topAchievementStudents as $item)
+                        <div class="dashboard-table-row">
+                            <span>{{ $item->name }}</span>
+                            <span>{{ $item->class_name }}</span>
+                            <span>{{ $item->total_point }}</span>
+                            <span></span>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="dashboard-section-title">Siswa dengan Poin Pelanggaran Tertinggi</div>
+                <div class="dashboard-table-box">
+                    <div class="dashboard-table-header">
+                        <span>Nama Siswa</span>
+                        <span>Kelas</span>
+                        <span>Total Poin</span>
+                        <span><a href="{{ route('violations.index') }}" class="see-detail-link">Lihat detail &gt;&gt;</a></span>
+                    </div>
+                    @foreach($topViolationStudents as $item)
+                        <div class="dashboard-table-row">
+                            <span>{{ $item->name }}</span>
+                            <span>{{ $item->class_name }}</span>
+                            <span>{{ $item->total_point }}</span>
+                            <span></span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     @endif
 
 

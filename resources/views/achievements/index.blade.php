@@ -113,18 +113,25 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
 <script>
 $(document).ready(function() {
-    $.fn.dataTable.ext.errMode = 'none';
-    $('#datatable-achievements').DataTable({
-        "ordering": true,
-        "responsive": true,
-        "autoWidth": false,
-        "language": {
-            "search": "Cari:",
-            "lengthMenu": "Tampilkan _MENU_ data",
-            "zeroRecords": "Tidak ada data ditemukan",
-            "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            "infoEmpty": "Tidak ada data",
-            "infoFiltered": "(disaring dari _MAX_ total data)"
+    $(function () {
+        $.fn.dataTable.ext.errMode = 'none';
+        $('#datatable-achievements').DataTable({
+            responsive: true,
+            autoWidth: false,
+            lengthChange: true,
+            pageLength: 10,
+            language: {
+            lengthMenu: "Showing _MENU_ entries",
+                zeroRecords: "Data tidak ditemukan",
+                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                infoEmpty: "Tidak ada entri yang ditampilkan",
+                infoFiltered: "(Filtered from _MAX_ total entries)",
+                search: "Search:",
+                paginate: {
+                    previous: "Previous",
+                    next: "Next"
+                }
+            }
         }
     });
 });

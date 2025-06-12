@@ -73,18 +73,8 @@
 
                             <div class="form-group mb-3">
                                 <label for="student_id">Siswa <span class="text-danger">*</span></label>
-                                <select name="student_id" id="student_id" class="form-control @error('student_id') is-invalid @enderror" required>
-                                    <option value="">-- Pilih Siswa --</option>
-                                    @if(isset($students) && $students->count() > 0)
-                                        @foreach($students as $student)
-                                            <option value="{{ $student->nisn }}" {{ old('student_id', $violation->student_id) == $student->nisn ? 'selected' : '' }}>
-                                                {{ $student->name }} (NISN: {{ $student->nisn }})
-                                            </option>
-                                        @endforeach
-                                    @else
-                                        <option value="" disabled>Tidak ada data siswa</option>
-                                    @endif
-                                </select>
+                                <input type="text" id="student_autocomplete" class="form-control" placeholder="Ketik nama siswa..." autocomplete="off" required>
+                                <input type="hidden" name="student_id" id="student_id" value="{{ old('student_id', $violation->student_id) }}">
                                 @error('student_id')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -202,6 +192,14 @@
 @endsection
 
 @push('js')
+{{-- Pastikan jQuery sudah termuat sebelum skrip ini --}}
+{{-- Jika Anda menggunakan AdminLTE, jQuery biasanya sudah ada --}}
+{{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
+
+{{-- Skrip untuk bs-custom-file-input jika belum di-include global oleh AdminLTE --}}
+{{-- Contoh: <script src="{{ asset('plugins/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script> --}}
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <script>
     $(document).ready(function () {
         // Inisialisasi bsCustomFileInput jika tersedia
@@ -214,6 +212,33 @@
                 $(this).next('.custom-file-label').addClass("selected").html(fileName || "Pilih file baru...");
             });
         }
+
+        $("#student_autocomplete").autocomplete({
+            source: "{{ route('autocomplete.siswa') }}",
+            minLength: 2,
+            select: function(event, ui) {
+                $('#student_id').val(ui.item.id);
+                $('#student_autocomplete').val(ui.item.value); // Update visible input
+            }
+        });
+
+        // Set initial value for autocomplete input on page load
+        @if ($violation->student && $violation->student->currentAssignment && $violation->student->currentAssignment->schoolClass)
+            var studentName = "{{ $violation->student->name }}";
+            var className = "{{ optional(optional($violation->student->currentAssignment)->schoolClass)->name }}";
+            var parallelName = "{{ optional(optional($violation->student->currentAssignment)->schoolClass)->parallel_name }}";
+            var classInfo = '';
+
+            if (className && parallelName) {
+                classInfo = ' - ' + className + ' ' + parallelName;
+            } else if (className) {
+                classInfo = ' - ' + className;
+            }
+            $('#student_autocomplete').val(studentName + classInfo);
+        @else
+            // Fallback if student or class assignment info is not available
+            $('#student_autocomplete').val("{{ old('student_id', $violation->student->name ?? '') }}");
+        @endif
 
         // Validasi ukuran file di sisi client (opsional)
         $('#evidence').on('change', function() {
