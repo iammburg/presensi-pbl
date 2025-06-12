@@ -1,444 +1,197 @@
-{{-- resources/views/manage-student-class-assignments/create.blade.php --}}
+{{-- Hapus semua isi file lama Anda dan ganti dengan kode ini --}}
 @extends('layouts.app')
 
-@section('title', 'Plotting Siswa Ke Kelas')
+@section('title', isset($selectedClass) ? 'Plotting Siswa Ke Kelas ' . $selectedClass->name . ' ' . $selectedClass->parallel_name : 'Plotting Siswa Ke Kelas')
 
 @push('css')
+    {{-- CSS Library --}}
     <link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    {{-- CSS Kustom untuk Halaman Ini (Digabung Jadi Satu) --}}
     <style>
-        .class-info-badge {
-            font-size: 1rem !important;
-            /* Samakan dengan badge selectedCount */
-            padding: 0.45em 0.75em;
-            /* Sesuaikan padding agar mirip select */
-            background-color: #e9ecef;
-            color: #003366;
-            /* Warna teks biru tua */
-            border: 1px solid #ced4da;
-            border-radius: 0.3rem;
-            /* Samakan dengan select */
-            font-weight: 500;
-            display: block;
-            /* Pastikan block agar lebar penuh */
-            text-align: center;
-            /* Teks di tengah */
-            line-height: 1.5;
-            /* Sesuaikan agar tinggi mirip select */
-        }
-
-        .control-group .form-control-plaintext.class-info-badge {
-            min-width: 100%;
-            /* Agar lebar konsisten */
-            text-align: left;
-            /* Align teks ke kiri */
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-        }
-
-        .table thead th,
-        .table tbody td {
-            vertical-align: middle;
-            text-align: center;
-        }
-
-        .table thead th:nth-child(4),
-        .table tbody td:nth-child(4) {
-            text-align: left;
-        }
-
-        .table-sm th,
-        .table-sm td {
-            padding: 0.3rem;
-        }
-
-        .btn-primary {
-            background-color: #1777e5;
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background-color: #1266c4;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            padding: 0.2rem 0.4rem;
-            margin-left: 2px;
-            background-color: #f4f4f4;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            color: #1777e5 !important;
-            font-size: 0.75rem;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background-color: #1777e5 !important;
-            color: white !important;
-            border: 1px solid #1777e5;
-            font-size: 0.75rem;
-        }
-
-        .dataTables_wrapper .dataTables_paginate {
-            margin-top: 0.5rem;
-            display: flex;
-            justify-content: end;
-            align-items: center;
-            font-size: 0.75rem;
-        }
-
-        .dataTables_info {
-            color: #1777e5;
-            font-size: 0.90rem;
-            margin-top: 0.5rem;
-        }
-
-        .dataTables_length label {
-            font-weight: 500;
-            color: #1777e5;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .dataTables_length select {
-            min-width: 50px;
-            margin: 0 0.3rem;
-            padding: 0.3rem 0.5rem;
-            font-size: 0.85rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: #fff;
-            color: #1777e5;
-            appearance: none;
-        }
-
-        .dataTables_length select:focus {
-            outline: none;
-            border-color: #1777e5;
-            box-shadow: 0 0 0 0.1rem rgba(23, 119, 229, 0.25);
-        }
-
-        #studentsTable tbody tr:nth-child(odd) {
-            background-color: #f4f4f4;
-        }
-
-        #studentsTable tbody tr:nth-child(even) {
-            background-color: #ffffff;
-        }
-
+        /* Font Dasar & Tabel */
         #studentsTable,
         #studentsTable thead th,
         #studentsTable tbody td {
             font-size: 14px;
-            /* Atau 0.9rem, atau nilai lain yang Anda rasa pas */
         }
-
         #studentsTable thead th,
         #studentsTable tbody td {
-            padding: 8px 10px;
-            /* Atas/Bawah: 8px, Kiri/Kanan: 10px. Sesuaikan. */
-            vertical-align: middle;
-            /* Tetap pertahankan ini */
-            line-height: 1.4;
-            /* Sedikit spasi antar baris jika perlu */
-        }
-
-        /* Targetkan sel <td> di kolom 'Pilih'.
-       Kita akan menggunakan kelas 'dt-center-flex' yang akan ditambahkan via DataTables. */
-        /* Tetap gunakan CSS Flexbox untuk td */
-        #studentsTable>tbody>tr>td.dt-center-flex {
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            padding: 0.3rem;
-            height: 38px;
-            /* Anda bisa coba hapus padding ini sementara untuk melihat efeknya */
-        }
-
-
-        /* Pastikan checkbox direset total marginnya dan tidak ada style aneh */
-        #studentsTable td.dt-center-flex .form-check-input.row-select {
-            margin: 0 !important;
-            /* Hapus semua margin */
-            padding: 0 !important;
-            /* Hapus semua padding jika ada */
-            line-height: normal !important;
-            /* Reset line-height */
-            height: auto;
-            /* Biarkan tingginya natural atau sesuaikan jika perlu */
-            /* vertical-align: middle; */
-            /* Ini seharusnya tidak lagi diperlukan dengan flex align-items:center */
-        }
-
-        /* CSS untuk header tetap sama */
-        #studentsTable>thead>tr>th.dt-center-flex-header {
-            text-align: center !important;
-            vertical-align: middle !important;
-        }
-
-        .badge-no-class {
-            background-color: #dc3545;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-
-        .badge-has-class {
-            background-color: #28a745;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-
-        .row-select {
-            transform: scale(1.2);
-            cursor: pointer;
-        }
-
-        .select-all-container {
-            background: #f8f9fa;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #e9ecef;
-        }
-
-        .select-all-container label {
-            margin: 0;
-            font-weight: 500;
-            color: #495057;
-            cursor: pointer;
-        }
-
-        .select-all-container input[type="checkbox"] {
-            margin-right: 8px;
-            transform: scale(1.1);
-        }
-
-        .confirmation-card {
-            background: #f8f9fa;
-            /* Warna latar yang sedikit berbeda dari default card */
-            border: 1px solid #dee2e6;
-            border-radius: 0.75rem;
-            /* Rounded corner lebih besar */
-            padding: 25px 30px;
-            /* Padding lebih lega */
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.075);
-            margin-top: 25px;
-        }
-
-        .confirmation-card h5 {
-            color: #003366;
-            /* Warna biru tua untuk judul panel */
-            font-weight: 600;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: 10px;
-            height: 100%;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-
-        .control-label {
-            font-weight: 500;
-            /* Sedikit lebih tipis dari bold agar tidak terlalu ramai */
-            color: #003366;
-            /* Warna biru tua */
-            font-size: 0.875rem;
-            /* Ukuran font label */
-            margin-bottom: 0.5rem !important;
-            /* Pastikan margin bawah diterapkan */
-            text-align: inherit;
-            /* Label rata kiri */
-        }
-
-        .control-group .form-select {
-            min-width: 100%;
             padding: 8px 12px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 14px;
-            background-color: white;
-            color: #495057;
-            transition: all 0.3s ease;
+            vertical-align: middle;
+            line-height: 1.4;
         }
-
-        .form-select-md {
-            /* Jika Anda menggunakan Bootstrap 5 */
-            padding: 0.45rem 0.9rem;
-            font-size: 0.95rem;
-            border-radius: 0.3rem;
-        }
-
-        .control-group .form-select:focus {
-            border-color: #183C70;
-            box-shadow: 0 0 0 0.2rem rgba(24, 60, 112, 0.25);
-            outline: 0;
-        }
-
-        .control-group .badge {
-            font-size: 14px;
-            padding: 10px 16px;
-            font-weight: 600;
-            border-radius: 8px;
-        }
-
-        .btn-confirm {
-            background: #009cf3;
-            border: none;
-            padding: 12px 20px;
-            font-weight: 500;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            color: white;
-            width: 100%;
-            font-size: 14px;
-        }
-
-        .btn-confirm:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(24, 60, 112, 0.3);
-            color: white;
-        }
-
-        .btn-confirm:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        #selectedCount.badge {
-            min-height: calc(1.5em + 0.75rem + 2px);
-            /* Samakan tinggi minimum */
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-
-        }
-
-        #selectedCount.bg-success {
-            /* Jika ada kondisi bg-success */
-            background-color: #198754 !important;
-        }
-
-        .info-text {
-            font-size: 0.95rem;
-            /* Ukuran font untuk info Tahun Akademik & Kelas Tujuan */
-            font-weight: 500;
-            color: #333;
-            /* Warna teks yang jelas */
-            padding: 0.375rem 0.75rem;
-            /* Padding mirip input field tapi tanpa border */
-            background-color: #e9ecef;
-            /* Background senada dengan contoh */
-            border-radius: 0.3rem;
-            display: block;
-            /* Agar memenuhi lebar jika diperlukan */
-            line-height: 1.5;
-            min-height: calc(1.5em + 0.75rem + 2px);
-            /* Samakan tinggi dengan input/badge */
+        .table thead th {
             text-align: center;
-            /* Tengahkan teks di dalam info-text */
         }
-
-
-        /* Responsive adjustments */
-        @media (max-width: 767.98px) {
-            .control-group {
-                text-align: center;
-                /* Semua grup kontrol teksnya ke tengah di mobile */
-            }
-
-            .control-label {
-                text-align: center;
-                /* Label juga ke tengah di mobile */
-            }
-
-            .confirmation-card .col-md-2.text-md-start {
-                /* Tombol konfirmasi */
-                text-align: center !important;
-            }
-
-            .confirmation-card .col-md-2.text-md-start .control-group {
-                margin-top: 1rem;
-                /* Beri jarak atas untuk tombol di mobile */
-            }
+        .table thead th:nth-child(4), /* Kolom Nama */
+        .table tbody td:nth-child(4) {
+            text-align: left;
         }
+/* 1. Seragamkan properti semua sel di dalam tbody */
+#studentsTable tbody tr {
+    height: 42px !important; /* Contoh: 42px. Sesuaikan nilainya jika perlu. */
+}
 
-        /* DataTables sorting arrows */
-        .table th.sorting:before,
-        .table th.sorting:after,
-        .table th.sorting_asc:before,
-        .table th.sorting_asc:after,
-        .table th.sorting_desc:before,
-        .table th.sorting_desc:after {
-            color: white !important;
-            opacity: 0.8;
-        }
-    </style>
-    <style>
-        /* Sky Blue Button Style */
-        /* Sky Blue Button Style - Versi Lengkap */
-        .btn-confirm {
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            border: none;
-            color: white !important;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
-        }
+/* 2. Pastikan semua sel <td> memiliki properti yang seragam */
+#studentsTable tbody td {
+    padding: 8px 12px !important;
+    vertical-align: middle !important;
+    border: none !important; /* Hapus semua border individual sel */
+}
 
-        .btn-confirm:hover:not(:disabled) {
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
-            color: white !important;
-        }
+/* 3. Tambahkan kembali hanya border bawah pada baris untuk pemisah */
+#studentsTable tbody tr {
+    border-bottom: 1px solid #e9ecef;
+}
 
-        .btn-confirm:active,
-        .btn-confirm:focus,
-        .btn-confirm:visited {
-            color: white !important;
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-        }
+/* 4. Atur warna latar belakang secara terpisah (ini tidak mempengaruhi tinggi) */
+#studentsTable tbody tr:nth-child(odd) {
+    background-color: #f8f9fa;
+}
+#studentsTable tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
 
-        .btn-confirm:disabled {
-            background: #e2e8f0 !important;
-            color: #94a3b8 !important;
-            cursor: not-allowed;
-            transform: none !important;
-            box-shadow: none !important;
-        }
-    </style>
-    <style>
-        /* Sky Blue Button Style */
-        /* Sky Blue Button Style - Versi Lengkap */
-        .select-all-container {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 1rem;
-            /* optional spacing */
-        }
+/* 5. Metode positioning absolut untuk checkbox tetap kita gunakan */
+#studentsTable > tbody > tr > td.checkbox-cell {
+    position: relative;
+    padding: 0 !important; /* Kolom checkbox tidak perlu padding */
+}
+.checkbox-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.checkbox-container .form-check-input {
+    margin: 0;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+        /* Panel Kontrol */
+        /* Hapus style lama untuk .confirmation-card dan .control-group, ganti dengan ini */
+
+.confirmation-card {
+    background-color: #ffffff; /* Latar belakang putih bersih */
+    border: 1px solid #e9ecef;
+    border-radius: 12px; /* Sudut lebih melengkung */
+    padding: 2rem;
+    box-shadow: 0 8px 30px rgba(0, 86, 179, 0.07); /* Shadow lebih lembut */
+}
+
+/* Style untuk setiap kotak info di dalam panel */
+.control-item {
+    /* ... style .control-item Anda yang sudah ada ... */
+    display: flex; align-items: center; background-color: #fff;
+    border: 2px solid #e9ecef; /* Buat border sedikit lebih tebal untuk efek aktif */
+    border-radius: 8px; padding: 1rem; height: 100%;
+    transition: all 0.2s ease-in-out;
+}
+.control-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Style BARU untuk state "aktif" ketika siswa dipilih */
+.control-item.is-active {
+    border-color: #0d6efd; /* Ganti warna border menjadi biru */
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.1); /* Tambahkan efek glow biru */
+}
+.control-item.is-active .control-item__value {
+    color: #0d6efd; /* Ganti warna teks value menjadi biru */
+}
+.control-item.is-active .control-item__icon {
+    transform: scale(1.1); /* Sedikit perbesar ikon saat aktif */
+}
+
+/* Style lain untuk control-item tetap sama */
+.control-item__icon {
+    flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-right: 1rem; font-size: 1.2rem; transition: transform 0.2s ease-in-out;
+}
+.icon-blue { background-color: rgba(13, 110, 253, 0.1); color: #0d6efd; }
+.icon-green { background-color: rgba(25, 135, 84, 0.1); color: #198754; }
+.icon-purple { background-color: rgba(111, 66, 193, 0.1); color: #6f42c1; }
+
+.control-item__content { flex-grow: 1; }
+.control-item__label { font-size: 0.8rem; color: #6c757d; margin-bottom: 0.1rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.control-item__value { font-size: 1.1rem; font-weight: 600; color: #212529; transition: color 0.2s ease-in-out; }
+.control-item__sub-label { font-size: 0.8rem; color: #6c757d; margin-top: -2px; 
+/* Tombol konfirmasi agar lebih serasi */
+}
+
+/* Dropdown minimalis jika T.A. perlu dipilih */
+.form-select-minimal {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #212529;
+    cursor: pointer;
+}
+.form-select-minimal:focus {
+    box-shadow: none;
+}
+
+/* Penyesuaian untuk layar lebih kecil */
+@media (max-width: 991.98px) {
+    .control-item {
+        margin-bottom: 1rem;
+    }
+}
+@media (max-width: 767.98px) {
+    .control-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    .control-item__icon {
+        margin-right: 0;
+        margin-bottom: 0.75rem;
+    }
+    #confirmBtn {
+        margin-top: 1rem;
+    }
+}
+
+        /* Tombol Konfirmasi */
+       #confirmBtn {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    padding: 1rem;
+    border-radius: 8px; /* Samakan dengan radius kotak info */
+    border: none;
+    transition: all 0.3s ease;
+    background: linear-gradient(45deg, #0d6efd, #0dcaf0); /* Gradient biru yang modern */
+    color: white;
+    box-shadow: 0 4px 20px rgba(13, 110, 253, 0.25);
+}
+#confirmBtn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 25px rgba(13, 110, 253, 0.35);
+}
+#confirmBtn:disabled {
+    background: #e9ecef !important; /* Latar abu-abu netral saat disabled */
+    color: #adb5bd !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+        /* Style Lain-lain */
+        .badge-no-class { background-color: #dc3545; color: white; padding: 5px 8px; border-radius: 4px; font-size: 13px; }
+        .badge-has-class { background-color: #28a745; color: white; padding: 5px 8px; border-radius: 4px; font-size: 13px; }
+        .select-all-container { display: flex; justify-content: flex-end; margin-bottom: 1rem; }
     </style>
 @endpush
 
 @section('content')
-    <div class="container-fluid px-4" style="font-family: 'Roboto', sans-serif">
+    <div class="container-fluid px-4">
         <h1 class="mt-4" style="font-weight: bold; font-size: 2rem; color: #183C70;">
             Plotting Siswa
             @if (isset($selectedClass))
@@ -447,29 +200,26 @@
         </h1>
 
         <div class="card shadow-sm mt-4">
-            {{-- ... (Bagian tabel siswa tidak banyak berubah) ... --}}
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0" style="font-weight: 600; color: #183C70;">Kelola Data Siswa</h5>
-                    @can('create_student')
-                        {{-- Pastikan permission ini sesuai --}}
-                        <a href="{{ route('manage-classes.index') }}" class="btn btn-info btn-sm">
-                            <i class="fas fa-users"></i> Data Seluruh Kelas
+                    <h5 class="mb-0" style="font-weight: 600; color: #183C70;">Pilih Siswa</h5>
+                    @can('create_student') {{-- Sesuaikan dengan permission Anda --}}
+                        <a href="{{ route('manage-classes.index') }}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> Kembali ke Data Kelas
                         </a>
                     @endcan
                 </div>
 
                 <div class="select-all-container">
-                    <label>
-                        <input type="checkbox" id="selectAll">
+                    <label class="form-check-label">
+                        <input type="checkbox" id="selectAll" class="form-check-input">
                         Pilih Semua Siswa
                     </label>
                 </div>
 
-                <div class="table-responsive rounded">
-                    <table id="studentsTable" class="table table-bordered table-sm"
-                        style="border-radius: 5px; overflow: hidden; font-size: 0.85rem;">
-                        <thead style="background-color: #009cf3; color: white">
+                <div class="table-responsive">
+                    <table id="studentsTable" class="table table-bordered table-hover" style="width:100%;">
+                        <thead style="background-color: #009cf3; color: white;">
                             <tr>
                                 <th>No.</th>
                                 <th>NISN</th>
@@ -477,444 +227,292 @@
                                 <th>Nama</th>
                                 <th>Jenis Kelamin</th>
                                 <th>Tahun Masuk</th>
-                                <th>Kelas Saat Ini</th> {{-- Label kolom diubah dari 'Kelas' --}}
+                                <th>Kelas Saat Ini</th>
                                 <th>Pilih</th>
                             </tr>
                         </thead>
+                        <tbody>
+                            {{-- Data akan diisi oleh DataTables dari server --}}
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        {{-- ... bagian atas file create.blade.php ... --}}
-
-        {{-- Panel Kontrol di bawah --}}
         <div class="confirmation-card mt-4">
-            <div class="text-center mb-4">
-                <h5 style="font-weight: 600; color: #183C70;">
-                    <i class="fas fa-cogs me-2"></i>Panel Kontrol Penempatan Siswa
-                </h5>
+    <div class="text-center mb-4 pt-2">
+        <h5 style="font-weight: 600; color: #003366;">
+            <i class="fas fa-cogs me-2"></i>Panel Kontrol Penempatan Siswa
+        </h5>
+    </div>
+
+    {{-- Input hidden yang penting untuk menyimpan ID --}}
+    @if (isset($selectedClassId))
+        <input type="hidden" id="targetClassIdHidden" value="{{ $selectedClassId }}">
+    @endif
+    @if (isset($selectedClass) && $selectedClass->academic_year_id)
+        <input type="hidden" id="targetAcademicYearIdHidden" value="{{ $selectedClass->academic_year_id }}">
+    @endif
+
+    {{-- Struktur Grid Baru yang Rapi dan Informatif --}}
+    <div class="row g-3 justify-content-center">
+
+        <div class="col-lg-3 col-md-6">
+            <div class="control-item">
+                <div class="control-item__icon icon-blue">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="control-item__content">
+                    <div class="control-item__label">Siswa Dipilih</div>
+                    <div id="selectedCount" class="control-item__value">0 Siswa</div>
+                </div>
             </div>
+        </div>
 
-            {{-- Hidden inputs for IDs remain crucial --}}
-            @if (isset($selectedClassId))
-                <input type="hidden" id="targetClassIdHidden" value="{{ $selectedClassId }}">
-            @endif
-            @if (isset($selectedClass) && $selectedClass->academic_year_id)
-                <input type="hidden" id="targetAcademicYearIdHidden" value="{{ $selectedClass->academic_year_id }}">
-            @endif
-
-            <div class="row g-3 align-items-center justify-content-center">
-
-                {{-- Kolom Siswa Dipilih --}}
-                <div class="col-md-3 col-6">
-                    <div class="control-group text-center">
-                        <label class="control-label d-block mb-2">Siswa Dipilih:</label>
-                        <span id="selectedCount" class="badge bg-primary fs-6 px-3 py-2"
-                            style="font-size: 1rem !important; background-color: #0056b3 !important;">0 Siswa</span>
-                    </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="control-item">
+                <div class="control-item__icon icon-green">
+                    <i class="fas fa-calendar-alt"></i>
                 </div>
-
-                {{-- Kolom Informasi Tahun Akademik & Kelas Tujuan (Gabung atau Tata Ulang) --}}
-                <div class="col-md-5 col-6">
-                    <div class="control-group text-md-start text-center">
-                        <label class="control-label d-block mb-1">Tahun Akademik:</label>
-                        <p class="info-text mb-2">
-                            @if (isset($selectedClass) && $selectedClass->academicYear)
-                                {{ $selectedClass->academicYear->start_year }}/{{ $selectedClass->academicYear->end_year }}
-                                - Semester
-                                {{ $selectedClass->academicYear->semester == 1 ? 'Ganjil' : ($selectedClass->academicYear->semester == 0 ? 'Ganjil' : 'Genap') }}
-                            @else
-                                <span class="text-muted">N/A</span>
-                            @endif
-                        </p>
+                <div class="control-item__content">
+                    <div class="control-item__label">Tahun Akademik</div>
+                    <div class="control-item__value">
+                        @if (isset($selectedClass) && $selectedClass->academicYear)
+                            {{ $selectedClass->academicYear->start_year }}/{{ $selectedClass->academicYear->end_year }}
+                        @else
+                            {{-- Jika T.A. perlu dipilih manual, akan muncul di sini --}}
+                            <select id="targetYear" name="academic_year_id" class="form-select-minimal" required>
+                                <option value="">-- Pilih Tahun --</option>
+                                @if(isset($academicYears))
+                                    @foreach ($academicYears as $ay)
+                                        <option value="{{ $ay->id }}">{{ $ay->start_year }}/{{ $ay->end_year }} - {{ $ay->semester == 1 ? 'Ganjil' : ($ay->semester == 0 ? 'Ganjil' : 'Genap') }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        @endif
                     </div>
-                    <div class="control-group text-md-start text-center mt-md-0">
-                        <label class="control-label d-block mb-1">Kelas Tujuan:</label>
-                        <p class="info-text mb-0">
-                            @if (isset($selectedClass))
-                                {{ $selectedClass->name }} {{ $selectedClass->parallel_name }}
-                            @else
-                                <span class="text-muted">N/A</span>
-                            @endif
-                        </p>
+                    @if(isset($selectedClass) && $selectedClass->academicYear)
+                         <small class="control-item__sub-label">Semester {{ $selectedClass->academicYear->semester == 1 ? 'Ganjil' : ($selectedClass->academicYear->semester == 0 ? 'Ganjil' : 'Genap') }}</small>
+                    @endif
                 </div>
-                <div class="col-lg-2 col-md-4 col-sm-6">
-                    <div class="control-group">
-                        <label class="control-label">Tahun Akademik:</label>
-                        <select id="targetYear" name="academic_year_id" class="form-select" required>
-                            <option value="">-- Pilih Tahun --</option>
-                            @foreach ($academicYears as $ay)
-                                <option value="{{ $ay->id }}">{{ $ay->start_year }}/{{ $ay->end_year }} - Semester
-                                    {{ $ay->semester == 0 ? 'Genap' : 'Ganjil' }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
+            </div>
+        </div>
 
-                {{-- Kolom Tombol Konfirmasi --}}
-                <div class="col-md-3 col-12 mt-3 mt-md-0 d-flex align-items-end"> {{-- Flex align-items-end untuk tombol --}}
-                    <div class="control-group w-100 text-center">
-                        {{-- Spacer label opsional jika ingin alignment sempurna di mobile, atau hapus jika tidak perlu --}}
-                        {{-- <label class="control-label d-block mb-2 d-md-none">&nbsp;</label>  --}}
-                        <button id="confirmBtn" class="btn btn-confirm btn-md w-100" disabled>
-                            <i class="fas fa-check-circle me-2"></i>Konfirmasi
-                        </button>
+        <div class="col-lg-3 col-md-6">
+            <div class="control-item">
+                <div class="control-item__icon icon-purple">
+                    <i class="fas fa-school"></i>
+                </div>
+                <div class="control-item__content">
+                    <div class="control-item__label">Kelas Tujuan</div>
+                    <div class="control-item__value">
+                        @if (isset($selectedClass))
+                            {{ $selectedClass->name }} {{ $selectedClass->parallel_name }}
+                        @else
+                            <span class="text-muted">N/A</span>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
-    @endsection
 
-    @push('js')
-        {{-- ... (JS library Anda yang sudah ada) ... --}}
-        <script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
-        <script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
-        <script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
-        <script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            $(function() {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                });
+        <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
+            <button id="confirmBtn" class="btn btn-confirm w-100 h-100" disabled>
+                <i class="fas fa-check-circle me-2"></i>Konfirmasi Penempatan
+            </button>
+        </div>
+    </div>
+</div>
+@endsection
 
-                let selectedStudents = new Set();
+@push('js')
+    {{-- JS Library --}}
+    <script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-                // Ambil ID kelas tujuan & tahun akademik jika sudah ditentukan dari server (via hidden input)
-                const PRE_SELECTED_CLASS_ID = $('#targetClassIdHidden').val() || null;
-                const PRE_SELECTED_CLASS_NAME = PRE_SELECTED_CLASS_ID ?
-                    "{{ isset($selectedClass) ? htmlspecialchars($selectedClass->name . ' ' . $selectedClass->parallel_name, ENT_QUOTES) : '' }}" :
-                    "";
-                // Jika kelas yang dipilih sudah memiliki tahun akademik, gunakan itu.
-                let PRE_SELECTED_ACADEMIC_YEAR_ID = $('#targetAcademicYearIdHidden').val() || null;
+    {{-- JS Kustom untuk Halaman Ini --}}
+    <script>
+        $(function() {
+            // Setup CSRF Token untuk semua request AJAX
+            $.ajaxSetup({
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+            });
 
+            let selectedStudents = new Set();
 
-                // Jika kelas yang dipilih sudah menentukan tahun akademik,
-                // pastikan dropdown tahun akademik terpilih dan di-disable.
-                if (PRE_SELECTED_ACADEMIC_YEAR_ID) {
-                    $('#targetYear').val(PRE_SELECTED_ACADEMIC_YEAR_ID).prop('disabled', true);
-                }
+            // Ambil ID kelas & T.A. jika sudah ditentukan dari server
+            const PRE_SELECTED_CLASS_ID = $('#targetClassIdHidden').val() || null;
+            const PRE_SELECTED_CLASS_NAME = PRE_SELECTED_CLASS_ID ? "{{ isset($selectedClass) ? htmlspecialchars($selectedClass->name . ' ' . $selectedClass->parallel_name, ENT_QUOTES) : '' }}" : "";
+            let PRE_SELECTED_ACADEMIC_YEAR_ID = $('#targetAcademicYearIdHidden').val() || null;
 
-                // URL AJAX DataTables tidak perlu diubah, karena method `create` dan `createForClass`
-                // di controller Anda sudah menangani request AJAX untuk DataTables siswa.
-                // URL untuk DataTables disesuaikan dengan route yang memanggil view ini.
-                let ajaxUrl;
-                @if (isset($selectedClassId))
-                    // Jika halaman ini dibuka untuk kelas tertentu (dari createForClass)
-                    ajaxUrl = '{{ route('manage-student-class-assignments.create-for-class', $selectedClassId) }}';
-                @else
-                    // Jika halaman ini dibuka secara umum (dari create biasa)
-                    ajaxUrl = '{{ route('manage-student-class-assignments.create') }}';
-                @endif
+            // Tentukan URL AJAX berdasarkan apakah kelas sudah dipilih atau belum
+            let ajaxUrl;
+            @if (isset($selectedClassId))
+                ajaxUrl = '{{ route("manage-student-class-assignments.create-for-class", $selectedClassId) }}';
+            @else
+                ajaxUrl = '{{ route("manage-student-class-assignments.create") }}';
+            @endif
 
-                const table = $('#studentsTable').DataTable({
-                    processing: true,
-                    serverSide: true,
-                    responsive: true,
-                    // ... (konfigurasi DataTables Anda yang lain) ...
-                    ajax: ajaxUrl, // Menggunakan URL yang sudah disesuaikan
-                    columns: [{
-                            data: 'DT_RowIndex',
-                            name: 'DT_RowIndex',
-                            className: 'text-center',
-                            orderable: false,
-                            searchable: false,
-                            width: '60px'
-                        },
-                        {
-                            data: 'nisn',
-                            name: 'nisn',
-                            className: 'text-center',
-                            width: '100px'
-                        },
-                        {
-                            data: 'nis',
-                            name: 'nis',
-                            className: 'text-center',
-                            width: '100px'
-                        },
-                        {
-                            data: 'name',
-                            name: 'name',
-                            className: 'text-left'
-                        },
-                        {
-                            data: 'gender',
-                            name: 'gender',
-                            className: 'text-center',
-                            width: '120px'
-                        },
-                        {
-                            data: 'enter_year',
-                            name: 'enter_year',
-                            className: 'text-center',
-                            width: '100px'
-                        },
-                        {
-                            data: 'class_name',
-                            name: 'class_name',
-                            className: 'text-center',
-                            orderable: true,
-                            searchable: true,
-                            width: '150px',
-                            render: function(data, type, row) {
-                                /* ... render badge kelas ... */
-                                if (type === 'display') {
-                                    if (!data || data === '-' || data === '' || data === null) {
-                                        return '<span class="badge-no-class">Belum Ada Kelas</span>';
-                                    }
-                                    return '<span class="badge-has-class">' + data + '</span>';
-                                }
-                                return data || '';
+            const table = $('#studentsTable').DataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                ajax: ajaxUrl,
+                columns: [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', className: 'text-center', orderable: false, searchable: false, width: '50px' },
+                    { data: 'nisn', name: 'nisn', className: 'text-center', width: '100px' },
+                    { data: 'nis', name: 'nis', className: 'text-center', width: '100px' },
+                    { data: 'name', name: 'name', className: 'text-left' },
+                    { data: 'gender', name: 'gender', className: 'text-center', width: '120px' },
+                    { data: 'enter_year', name: 'enter_year', className: 'text-center', width: '100px' },
+                    {
+                        data: 'class_name', name: 'class_name', className: 'text-center', width: '120px',
+                        render: function(data, type) {
+                            if (type === 'display') {
+                                return data && data !== '-' ? `<span class="badge-has-class">${data}</span>` : `<span class="badge-no-class">Belum Ada Kelas</span>`;
                             }
-                        },
-                        {
-                            data: 'nisn',
-                            orderable: false,
-                            searchable: false,
-                            className: 'dt-center-flex',
-                            headerClassName: 'dt-center-flex-header',
-                            width: '60px',
-                            render: function(data, type, row) {
-                                /* ... render checkbox ... */
-                                return '<input type="checkbox" class="row-select form-check-input" value="' +
-                                    data + '">';
-                            }
-                            // Untuk sorting dan filtering: return raw value
-                            return data || '';
+                            return data;
                         }
                     },
                     {
-                        data: null,
-                        orderable: false,
-                        searchable: false,
-                        render: function(data, type, row) {
-                            return '<div class="d-flex justify-content-center align-items-center" style="height: 100%;"><input type="checkbox" name="selected_students[]" value="' + row.nisn + '" class="row-select"></div>';
+                        data: 'nisn', title: 'Pilih', orderable: false, searchable: false, className: 'checkbox-cell', headerClassName: 'dt-center-flex-header', width: '60px',
+                        render: function(data) {
+                           return `<div class="checkbox-container"><input type="checkbox" class="row-select form-check-input" value="${data}"></div>`;
                         }
-                    ],
-                    order: [
-                        [6, 'asc'],
-                        [3, 'asc']
-                    ], // Default: Kelas A-Z, lalu Nama A-Z
-                    language: {
-                        /* ... bahasa Anda ... */ },
-                    drawCallback: function() {
-                        /* ... drawCallback Anda ... */
-                        $('.row-select').each(function() {
-                            const nisn = $(this).val();
-                            $(this).prop('checked', selectedStudents.has(nisn));
-                        });
-                        updateCount();
-                        updateSelectAllState();
                     }
-                });
-
-                function updateCount() {
-                    /* ... fungsi updateCount Anda ... */
-                    const count = selectedStudents.size;
-                    $('#selectedCount').text(count + ' Siswa');
-                    $('#selectedCount').toggleClass('bg-success', count > 0).toggleClass('bg-primary', count === 0);
-                    updateConfirmButton();
-                }
-
-                function updateSelectAllState() {
-                    /* ... fungsi updateSelectAllState Anda ... */
-                    const visibleCheckboxes = $('.row-select');
-                    const checkedVisibleCheckboxes = $('.row-select:checked');
-                    if (visibleCheckboxes.length === 0) {
-                        $('#selectAll').prop({
-                            indeterminate: false,
-                            checked: false
-                        });
-                    } else if (checkedVisibleCheckboxes.length === visibleCheckboxes.length) {
-                        $('#selectAll').prop({
-                            indeterminate: false,
-                            checked: true
-                        });
-                    } else {
-                        $('#selectAll').prop({
-                            indeterminate: checkedVisibleCheckboxes.length > 0,
-                            checked: false
-                        });
-                    }
-                }
-
-                function updateConfirmButton() {
-                    const hasSelectedStudents = selectedStudents.size > 0;
-                    // Tahun Akademik: Gunakan PRE_SELECTED_ACADEMIC_YEAR_ID jika ada (dari kelas),
-                    // atau ambil dari dropdown #targetYear jika tidak ditentukan oleh kelas.
-                    const targetYearValue = PRE_SELECTED_ACADEMIC_YEAR_ID || $('#targetYear').val();
-                    const hasTargetYear = targetYearValue !== '';
-
-                    // Kelas Tujuan: Jika PRE_SELECTED_CLASS_ID ada, berarti kelas sudah ditentukan.
-                    // Jika tidak, ambil dari dropdown #targetClass (skenario lama).
-                    const hasTargetClass = PRE_SELECTED_CLASS_ID ? true : ($('#targetClass').val() !== '');
-
-                    const enableButton = hasSelectedStudents && hasTargetYear && hasTargetClass;
-                    $('#confirmBtn').prop('disabled', !enableButton);
-                }
-
-                // Event handlers (checkbox siswa, selectAll) tidak banyak berubah
-                $('#studentsTable tbody').on('change', '.row-select', function() {
-                    /* ... event handler Anda ... */
-                    const nisn = $(this).val();
-                    $(this).is(':checked') ? selectedStudents.add(nisn) : selectedStudents.delete(nisn);
+                ],
+                order: [ [6, 'asc'], [3, 'asc'] ],
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-2x fa-fw"></i><span class="sr-only">Loading...</span>',
+                    search: "Cari Siswa:",
+                    lengthMenu: "Tampilkan _MENU_ entri",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ siswa",
+                    infoEmpty: "Menampilkan 0 dari 0 siswa",
+                    infoFiltered: "(disaring dari _MAX_ total siswa)",
+                    zeroRecords: "Tidak ada siswa yang ditemukan",
+                    paginate: { first: "Awal", last: "Akhir", next: "Berikutnya", previous: "Sebelumnya" }
+                },
+                drawCallback: function() {
+                    $('.row-select').each(function() {
+                        $(this).prop('checked', selectedStudents.has($(this).val()));
+                    });
                     updateCount();
                     updateSelectAllState();
-                });
-
-                $('#selectAll').change(function() {
-                    /* ... event handler Anda ... */
-                    const isChecked = $(this).is(':checked');
-                    $('.row-select').each(function() {
-                        const nisn = $(this).val();
-                        $(this).prop('checked', isChecked);
-                        isChecked ? selectedStudents.add(nisn) : selectedStudents.delete(nisn);
-                    });
-                    updateCount();
-                });
-
-                // Update tombol konfirmasi jika dropdown TAHUN AKADEMIK berubah
-                // (hanya jika dropdown tersebut tidak di-disable).
-                // Dropdown KELAS TUJUAN hanya relevan jika tidak ada PRE_SELECTED_CLASS_ID.
-                $('#targetYear').change(function() {
-                    if (!$(this).is(':disabled')) { // Hanya jika tidak di-disable
-                        updateConfirmButton();
-                    }
-                });
-                if (!PRE_SELECTED_CLASS_ID) { // Hanya aktifkan event listener ini jika kelas belum dipilih
-                    $('#targetClass').change(updateConfirmButton);
                 }
-
-
-                $('#confirmBtn').click(function() {
-                    const nisns = Array.from(selectedStudents);
-                    // Ambil class_id dari PRE_SELECTED_CLASS_ID jika ada, jika tidak, ambil dari dropdown #targetClass.
-                    const kelasId = PRE_SELECTED_CLASS_ID || $('#targetClass').val();
-                    // Ambil academic_year_id dari PRE_SELECTED_ACADEMIC_YEAR_ID jika ada, jika tidak, ambil dari dropdown #targetYear.
-                    const tahunAkademikId = PRE_SELECTED_ACADEMIC_YEAR_ID || $('#targetYear').val();
-
-                    if (!nisns.length) {
-                        /* ... validasi nisns ... */
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Peringatan',
-                            text: 'Pilih minimal satu siswa untuk dipindahkan!',
-                            confirmButtonColor: '#183C70'
-                        });
-                        return;
-                    }
-                    if (!tahunAkademikId) {
-                        /* ... validasi tahun akademik ... */
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Peringatan',
-                            text: 'Pilih tahun akademik terlebih dahulu!',
-                            confirmButtonColor: '#183C70'
-                        });
-                        return;
-                    }
-                    if (!kelasId) {
-                        /* ... validasi kelas (seharusnya tidak terjadi jika PRE_SELECTED_CLASS_ID ada) ... */
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Peringatan',
-                            text: 'Pilih kelas tujuan terlebih dahulu!',
-                            confirmButtonColor: '#183C70'
-                        });
-                        return;
-                    }
-
-                    // Ambil nama kelas untuk pesan konfirmasi
-                    const selectedClassNameForAlert = PRE_SELECTED_CLASS_ID ? PRE_SELECTED_CLASS_NAME : $(
-                        '#targetClass option:selected').text();
-                    // Ambil teks tahun akademik untuk pesan konfirmasi
-                    let selectedYearTextForAlert = "";
-                    if (PRE_SELECTED_ACADEMIC_YEAR_ID && $('#targetYear').is(':disabled')) {
-                        // Jika T.A. sudah ditentukan oleh kelas, ambil teksnya dari opsi yang terpilih (yang sudah kita set)
-                        selectedYearTextForAlert = $('#targetYear option:selected').text();
-                    } else {
-                        // Jika T.A. dipilih manual, ambil dari opsi yang terpilih
-                        selectedYearTextForAlert = $('#targetYear option:selected').text();
-                    }
-
-
-                    Swal.fire({
-                        /* ... SweetAlert konfirmasi Anda ... */
-                        title: 'Konfirmasi Penempatan',
-                        html: `
-                    <div style="text-align: left; padding: 10px;">
-                        <p><strong>Jumlah Siswa:</strong> ${nisns.length} siswa</p>
-                        <p><strong>Tahun Akademik:</strong> ${selectedYearTextForAlert}</p>
-                        <p><strong>Kelas Tujuan:</strong> ${selectedClassNameForAlert}</p>
-                        <hr>
-                        <p style="color: #dc3545; font-weight: 600;">Apakah Anda yakin ingin melanjutkan?</p>
-                    </div>`,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#183C70',
-                        cancelButtonColor: '#dc3545',
-                        confirmButtonText: 'Ya, Pindahkan!',
-                        cancelButtonText: 'Batal',
-                        showLoaderOnConfirm: true,
-                        preConfirm: () => {
-                            return $.post(
-                                '{{ route('manage-student-class-assignments.store') }}', {
-                                    nisns: nisns,
-                                    academic_year_id: tahunAkademikId, // Kirim tahunAkademikId yang benar
-                                    class_id: kelasId, // Kirim kelasId yang benar
-                                    _token: '{{ csrf_token() }}' // Jangan lupa CSRF token
-                                });
-                        },
-                        allowOutsideClick: () => !Swal.isLoading()
-                    }).then((result) => {
-                        /* ... SweetAlert .then() Anda ... */
-                        if (result.isConfirmed) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                html: `
-                            <div style="text-align: center;">
-                                <p>${result.value.message || 'Siswa berhasil dipindahkan ke kelas baru.'}</p>
-                                <p style="color: #28a745; font-weight: 600;">${nisns.length} siswa telah dipindahkan ke ${selectedClassNameForAlert}</p>
-                            </div>`,
-                                confirmButtonColor: '#183C70',
-                                timer: 4000,
-                                timerProgressBar: true
-                            });
-
-                            selectedStudents.clear();
-                            table.ajax.reload(null, false); // false agar tidak reset ke page pertama
-                            $('#selectAll').prop('checked', false);
-
-                            // Reset tahun akademik hanya jika tidak di-disable (artinya tidak ditentukan oleh kelas)
-                            if (!$('#targetYear').is(':disabled')) {
-                                $('#targetYear').val('');
-                            }
-                            // Dropdown kelas tujuan tidak perlu direset jika memang sudah dipilih dari awal (PRE_SELECTED_CLASS_ID ada)
-                            if (!PRE_SELECTED_CLASS_ID) {
-                                $('#targetClass').val('');
-                            }
-                            updateCount(); // Ini akan memanggil updateConfirmButton juga
-                        }
-                    }).catch((error) => {
-                        /* ... SweetAlert .catch() Anda ... */
-                        console.error('Error:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Terjadi Kesalahan',
-                            text: error.responseJSON?.message ||
-                                'Gagal memindahkan siswa. Silakan coba lagi.',
-                            confirmButtonColor: '#183C70'
-                        });
-                    });
-                });
-
-                // Inisialisasi awal
-                updateCount(); // Ini akan memanggil updateConfirmButton juga
             });
-        </script>
-    @endpush
+
+                    // GANTI FUNGSI updateCount() LAMA ANDA DENGAN YANG INI
+            function updateCount() {
+                const count = selectedStudents.size;
+                $('#selectedCount').text(count + ' Siswa');
+
+                // LOGIKA BARU: Tambah/hapus kelas 'is-active' pada seluruh kotak info
+                if (count > 0) {
+                    $('#info-box-selected').addClass('is-active');
+                } else {
+                    $('#info-box-selected').removeClass('is-active');
+                }
+                
+                // Fungsi untuk mengaktifkan/menonaktifkan tombol konfirmasi tetap dipanggil
+                updateConfirmButton();
+            }
+
+            function updateSelectAllState() {
+                const allCheckboxes = $('.row-select');
+                const checkedCheckboxes = $('.row-select:checked');
+                if (allCheckboxes.length > 0 && checkedCheckboxes.length === allCheckboxes.length) {
+                    $('#selectAll').prop({ indeterminate: false, checked: true });
+                } else {
+                    $('#selectAll').prop({ indeterminate: checkedCheckboxes.length > 0, checked: false });
+                }
+            }
+
+            function updateConfirmButton() {
+                const hasSelectedStudents = selectedStudents.size > 0;
+                // Jika T.A ditentukan oleh kelas, atau jika dipilih dari dropdown
+                const targetYearValue = PRE_SELECTED_ACADEMIC_YEAR_ID || $('#targetYear').val();
+                const hasTargetYear = targetYearValue !== '';
+                $('#confirmBtn').prop('disabled', !(hasSelectedStudents && hasTargetYear));
+            }
+
+            $('#studentsTable tbody').on('change', '.row-select', function() {
+                const nisn = $(this).val();
+                this.checked ? selectedStudents.add(nisn) : selectedStudents.delete(nisn);
+                updateCount();
+                updateSelectAllState();
+            });
+
+            $('#selectAll').on('change', function() {
+                const isChecked = this.checked;
+                $('.row-select').each(function() {
+                    const nisn = $(this).val();
+                    $(this).prop('checked', isChecked);
+                    isChecked ? selectedStudents.add(nisn) : selectedStudents.delete(nisn);
+                });
+                updateCount();
+            });
+
+            // Hanya aktifkan event listener ini jika T.A. perlu dipilih manual
+            if (!PRE_SELECTED_ACADEMIC_YEAR_ID) {
+                $('#targetYear').on('change', updateConfirmButton);
+            }
+
+            $('#confirmBtn').on('click', function() {
+                const nisns = Array.from(selectedStudents);
+                const kelasId = PRE_SELECTED_CLASS_ID; // Sudah pasti dari sini
+                const tahunAkademikId = PRE_SELECTED_ACADEMIC_YEAR_ID || $('#targetYear').val();
+                const tahunAkademikText = PRE_SELECTED_ACADEMIC_YEAR_ID ? $('.info-text:contains("/")').text().trim() : $('#targetYear option:selected').text();
+
+                if (nisns.length === 0) {
+                    Swal.fire('Peringatan', 'Pilih minimal satu siswa untuk dipindahkan!', 'warning');
+                    return;
+                }
+                
+                Swal.fire({
+                    title: 'Konfirmasi Penempatan',
+                    html: `<div style="text-align: left; padding: 10px;">
+                               <p>Anda akan memindahkan <strong>${nisns.length} siswa</strong>.</p>
+                               <p><strong>Kelas Tujuan:</strong> ${PRE_SELECTED_CLASS_NAME}</p>
+                               <p><strong>Tahun Akademik:</strong> ${tahunAkademikText}</p>
+                               <hr>
+                               <p class="text-danger fw-bold">Apakah Anda yakin ingin melanjutkan?</p>
+                           </div>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Pindahkan!',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#198754',
+                    cancelButtonColor: '#dc3545',
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        return $.post('{{ route('manage-student-class-assignments.store') }}', {
+                            nisns: nisns,
+                            academic_year_id: tahunAkademikId,
+                            class_id: kelasId
+                        }).fail(function(jqXHR) {
+                            Swal.showValidationMessage(`Request Gagal: ${jqXHR.responseJSON?.message || jqXHR.statusText}`);
+                        });
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: result.value.message || `${nisns.length} siswa berhasil dipindahkan.`,
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                        selectedStudents.clear();
+                        table.ajax.reload(null, false);
+                    }
+                });
+            });
+
+            updateCount(); // Panggil saat inisialisasi
+        });
+    </script>
+@endpush
