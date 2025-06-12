@@ -154,33 +154,70 @@
             </div>
         </div>
     </div>
+    <style>
+    .search-input-group {
+        display: flex;
+        align-items: center;
+    }
+
+    .search-input {
+        position: relative;
+        flex-grow: 1;
+    }
+
+    .search-results {
+        display: none;
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ddd;
+        z-index: 1000;
+        width: 100%;
+        max-height: 150px;
+        overflow-y: auto;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .search-result-item {
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+    .search-result-item:hover {
+        background-color: #f0f0f0;
+    }
+
+    .form-group-consistent {
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+
 
     {{-- SCRIPT --}}
     <script>
-        const subjects = @json($subjects);
-        const hoursData = @json($hoursData);
-        const teachingAssignments = @json($teachingAssignments);
-        const scheduleData = @json($scheduleData);
+    const subjects = @json($subjects);
+    const hoursData = @json($hoursData);
+    const teachingAssignments = @json($teachingAssignments);
+    const scheduleData = @json($scheduleData);
 
-        // Helper function to get hours for specific day
-        function getHoursForDay(day) {
-            return day === 'Jumat' ? hoursData.friday : hoursData.weekdays;
-        }
+    function getHoursForDay(day) {
+        return day === 'Jumat' ? hoursData.friday : hoursData.weekdays;
+    }
 
-        function addScheduleRow(day) {
-            const container = document.getElementById('schedule-' + day);
-            const index = container.children.length;
+    function addScheduleRow(day) {
+        const container = document.getElementById('schedule-' + day);
+        const index = container.children.length;
 
-            const row = document.createElement('div');
-            row.className = 'row g-2 align-items-end mb-3';
+        const row = document.createElement('div');
+        row.className = 'row g-2 mb-3 align-items-end';
 
-            row.innerHTML = `
-            <div class="col-md-2">
-                <label class="form-label">Tipe Sesi</label>
+        row.innerHTML = `
+            <div class="col-md-2 form-group-consistent">
+                <label class="form-label fw-semibold small mb-1">Tipe Sesi</label>
                 <select
                     name="schedules[${day}][${index}][session_type]"
-                    class="form-select session-type"
-                    onchange="filterHours(this)"
+                    class="form-select form-select-sm session-type"
+                    onchange="filterHours(this, '${day}')"
                     required
                 >
                     <option value="">-- Pilih --</option>
@@ -189,11 +226,11 @@
                 </select>
             </div>
 
-            <div class="col-md-2">
-                <label class="form-label d-block">Jam Mulai</label>
+            <div class="col-md-2 form-group-consistent">
+                <label class="form-label fw-semibold small mb-1">Jam Mulai</label>
                 <select
                     name="schedules[${day}][${index}][start_hour_id]"
-                    class="form-select hour-select-start"
+                    class="form-select form-select-sm hour-select-start"
                     onchange="updateEndHours(this); toggleSubjectTeacher(this)"
                     data-day="${day}"
                     required
@@ -202,11 +239,11 @@
                 </select>
             </div>
 
-            <div class="col-md-2">
-                <label class="form-label d-block">Jam Selesai</label>
+            <div class="col-md-2 form-group-consistent">
+                <label class="form-label fw-semibold small mb-1">Jam Selesai</label>
                 <select
                     name="schedules[${day}][${index}][end_hour_id]"
-                    class="form-select hour-select-end"
+                    class="form-select form-select-sm hour-select-end"
                     data-day="${day}"
                     required
                 >
@@ -214,34 +251,79 @@
                 </select>
             </div>
 
-            <div class="col-md-4 assignment-container">
-                <label class="form-label">Mata Pelajaran & Guru</label>
-                <select
-                    name="schedules[${day}][${index}][assignment_id]"
-                    class="form-select assignment-select"
-                >
-                    <option value="">Pilih</option>
-                    ${teachingAssignments.map(a => `
-                                    <option value="${a.id}">
-                                        ${a.subject_name} - ${a.teacher_name}
-                                    </option>
-                                `).join('')}
-                </select>
-            </div>
-
-            <div class="col-md-1 text-center">
-                <button
-                    type="button"
-                    class="btn btn-sm btn-outline-danger mt-4"
-                    onclick="this.closest('.row').remove()"
-                >
-                    ✖
-                </button>
+            <div class="col-md-5 assignment-container form-group-consistent">
+                <label class="form-label fw-semibold small mb-1">Mata Pelajaran & Guru</label>
+                <div class="search-input-group" style="gap: 0.5rem;">
+                    <div class="search-input me-2">
+                        <input type="text"
+                            class="form-control form-control-sm assignment-search"
+                            placeholder="Ketik untuk mencari mata pelajaran & guru..."
+                            autocomplete="off"
+                            onkeyup="searchAssignment(this)"
+                            onclick="showSearchResults(this)">
+                        <input type="hidden"
+                            name="schedules[${day}][${index}][assignment_id]"
+                            class="assignment-id">
+                        <div class="search-results"></div>
+                    </div>
+                    <button type="button"
+                            class="btn btn-outline-danger btn-sm"
+                            onclick="this.closest('.row').remove()">
+                        Hapus
+                    </button>
+                </div>
             </div>
         `;
 
-            container.appendChild(row);
+        container.appendChild(row);
+    }
+
+    // Assignment search handlers
+    function searchAssignment(input) {
+        const value = input.value.toLowerCase();
+        const resultsBox = input.parentElement.querySelector('.search-results');
+        const hiddenInput = input.parentElement.querySelector('.assignment-id');
+
+        resultsBox.innerHTML = '';
+        resultsBox.style.display = 'none';
+
+        if (value.length < 2) return;
+
+        const filtered = teachingAssignments.filter(a =>
+            a.subject_name.toLowerCase().includes(value) ||
+            a.teacher_name.toLowerCase().includes(value)
+        );
+
+        if (filtered.length === 0) return;
+
+        filtered.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'search-result-item';
+            div.textContent = `${item.subject_name} – ${item.teacher_name}`;
+            div.onclick = () => {
+                input.value = div.textContent;
+                hiddenInput.value = item.id;
+                resultsBox.style.display = 'none';
+            };
+            resultsBox.appendChild(div);
+        });
+
+        resultsBox.style.display = 'block';
+    }
+
+    function showSearchResults(input) {
+        const box = input.parentElement.querySelector('.search-results');
+        if (box && box.innerHTML.trim() !== '') {
+            box.style.display = 'block';
         }
+    }
+
+    // Optional: close search results when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.search-input')) {
+            document.querySelectorAll('.search-results').forEach(el => el.style.display = 'none');
+        }
+    });
 
         function populateHourSelect(select, sessionType, day, selectedValue = '') {
             const hours = getHoursForDay(day);
