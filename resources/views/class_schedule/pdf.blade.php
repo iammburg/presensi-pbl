@@ -6,7 +6,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 10px;
+            font-size: 9px;
             margin: 8px;
             color: #333;
             line-height: 1.2;
@@ -14,9 +14,9 @@
 
         h2, h3, .academic-year {
             text-align: center;
-            margin: 4px 0;
+            margin: 5px 0;
             color: #000;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .header-info {
@@ -26,9 +26,9 @@
 
         .day-title {
             margin-top: 12px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             text-align: center;
             background-color: #f8f9fa;
             padding: 4px;
@@ -38,17 +38,21 @@
             letter-spacing: 0.5px;
         }
 
+        .day-title:first-of-type {
+            margin-top: 6px;
+        }
+
         .table-container {
             overflow-x: auto;
             margin-bottom: 8px;
             border-radius: 3px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 9px;
+            font-size: 8.5px;
             background-color: white;
             table-layout: fixed;
         }
@@ -66,8 +70,9 @@
             padding: 3px 4px;
             text-align: center;
             vertical-align: middle;
-            font-size: 9px;
+            font-size: 8.5px;
             word-wrap: break-word;
+            line-height: 1.2;
         }
 
         th {
@@ -76,6 +81,7 @@
             color: #333;
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            padding: 4px;
         }
 
         .break-cell {
@@ -89,14 +95,14 @@
         .subject-cell {
             text-align: center;
             text-transform: uppercase;
-            font-size: 9px;
+            font-size: 8.5px;
             font-weight: 600;
             color: #2c3e50;
         }
 
         .teacher-cell {
             text-align: center;
-            font-size: 9px;
+            font-size: 8.5px;
             color: #34495e;
         }
 
@@ -104,7 +110,7 @@
             font-style: italic;
             color: #666;
             text-align: center;
-            padding: 8px;
+            padding: 6px;
             background-color: #f8f9fa;
         }
 
@@ -116,39 +122,43 @@
 
         .time-cell {
             background-color: #f8f9fa;
-            font-size: 9px;
+            font-size: 8.5px;
         }
 
         @media print {
             @page {
                 size: 210mm 330mm; 
-                margin: 20mm;
+                margin: 15mm 18mm;
             }
 
             body {
                 margin: 0;
-                font-size: 8px;
-                line-height: 1.1;
+                font-size: 7.5px;
+                line-height: 1.15;
             }
 
             h2, h3, .academic-year {
                 font-size: 11px;
-                margin: 2px 0;
+                margin: 3px 0;
             }
 
             .day-title {
                 page-break-before: avoid;
                 page-break-after: avoid;
-                margin-top: 6px;
+                margin-top: 8px;
                 margin-bottom: 3px;
-                font-size: 10px;
-                padding: 2px;
+                font-size: 9px;
+                padding: 3px;
+            }
+
+            .day-title:first-of-type {
+                margin-top: 4px;
             }
 
             .table-container {
                 page-break-inside: avoid;
                 box-shadow: none;
-                margin-bottom: 4px;
+                margin-bottom: 5px;
             }
 
             table {
@@ -159,16 +169,30 @@
                 padding: 2px 3px;
                 font-size: 7.5px;
                 border: 0.5px solid #333;
+                line-height: 1.15;
+            }
+
+            th {
+                padding: 3px;
+            }
+
+            .subject-cell, .teacher-cell {
+                font-size: 7.5px;
+            }
+
+            .no-schedule {
+                padding: 4px;
             }
         }
     </style>
 </head>
 <body>
     <div class="header-info" style="display: flex; justify-content: space-between; align-items: center;">
-        <h2 style="margin: 0;">JADWAL PELAJARAN</h2>
-        <h3 style="margin: 0;">
-            KELAS {{ $class->name ?? 'N/A' }}{{ isset($class->parallel_name) ? ' - ' . $class->parallel_name : '' }}
-        </h3>
+        <h2 style="margin: 0;">
+            JADWAL PELAJARAN - KELAS
+            {{ $class->name ?? 'N/A' }}{{ isset($class->parallel_name) ? ' ' . $class->parallel_name : '' }}
+        </h2>
+
     </div>
     <div class="academic-year">
         TAHUN AKADEMIK {{ $schedule->schoolClass->academicYear->start_year }} / {{ $schedule->schoolClass->academicYear->end_year }}
@@ -180,7 +204,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 12%;">Jam Ke</th>
+                        <th style="width: 12%;">Jam</th>
                         <th style="width: 20%;">Waktu</th>
                         <th style="width: 34%;">Mata Pelajaran</th>
                         <th style="width: 34%;">Guru Pengampu</th>
