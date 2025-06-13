@@ -43,6 +43,11 @@ class HomeController extends Controller
 
             // Total Izin
             $excused = Attendance::where('status', 'Izin')->count();
+            $weeks = [
+                'this_week' => 'Minggu Ini',
+                'last_week' => 'Minggu Lalu'
+            ];
+
 
             // Chart: jumlah hadir per kelas
             $chart = Attendance::where('status', 'Hadir')
@@ -61,7 +66,7 @@ class HomeController extends Controller
 
 
 
-            return view('home', compact('activeStudents', 'present', 'absent', 'excused', 'chart'));
+            return view('home', compact('activeStudents', 'present', 'absent', 'excused', 'chart', 'weeks'));
         } else {
             return view('home');
         }
