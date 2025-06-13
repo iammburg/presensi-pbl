@@ -103,10 +103,8 @@ class ViolationValidationController extends Controller
         ];
 
         // Logika untuk memperbarui 'status' utama berdasarkan 'validation_status'
-        if ($request->validation_status === 'approved') {
-            $updateData['status'] = 'processed'; // Atau 'pending' jika masih ada langkah lain
-        } elseif ($request->validation_status === 'rejected') {
-            // $updateData['status'] = 'pending'; // Atau status lain yang sesuai
+        if ($request->validation_status === 'approved' || $request->validation_status === 'rejected') {
+            $updateData['status'] = 'completed'; // Ubah ke 'completed' baik disetujui maupun ditolak
         }
 
         $violation->update($updateData);

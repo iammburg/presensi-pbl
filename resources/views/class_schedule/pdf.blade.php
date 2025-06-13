@@ -6,51 +6,51 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 13px;
-            margin: 20px;
+            font-size: 10px;
+            margin: 8px;
             color: #333;
-            line-height: 1.4;
+            line-height: 1.2;
         }
 
         h2, h3, .academic-year {
             text-align: center;
-            margin: 10px 0;
+            margin: 4px 0;
             color: #000;
-            font-size: 21px; 
+            font-size: 14px;
         }
 
         .header-info {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
         }
 
         .day-title {
-            margin-top: 30px;
-            margin-bottom: 15px;
+            margin-top: 12px;
+            margin-bottom: 6px;
             font-weight: bold;
-            font-size: 18px; 
+            font-size: 12px;
             text-align: center;
             background-color: #f8f9fa;
-            padding: 12px;
-            border: 2px solid #333;
-            border-radius: 5px;
+            padding: 4px;
+            border: 1px solid #333;
+            border-radius: 3px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .table-container {
             overflow-x: auto;
-            margin-bottom: 25px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
+            border-radius: 3px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 15px;
-            min-width: 600px; 
+            font-size: 9px;
             background-color: white;
+            table-layout: fixed;
         }
 
         thead {
@@ -63,10 +63,10 @@
 
         th, td {
             border: 1px solid #333;
-            padding: 10px 8px;
+            padding: 3px 4px;
             text-align: center;
             vertical-align: middle;
-            font-size: 15px;
+            font-size: 9px;
             word-wrap: break-word;
         }
 
@@ -75,8 +75,7 @@
             font-weight: bold;
             color: #333;
             text-transform: uppercase;
-            font-size: 14px;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
 
         .break-cell {
@@ -90,14 +89,14 @@
         .subject-cell {
             text-align: center;
             text-transform: uppercase;
-            font-size: 15px;
+            font-size: 9px;
             font-weight: 600;
             color: #2c3e50;
         }
 
         .teacher-cell {
             text-align: center;
-            font-size: 15px;
+            font-size: 9px;
             color: #34495e;
         }
 
@@ -105,7 +104,7 @@
             font-style: italic;
             color: #666;
             text-align: center;
-            padding: 20px;
+            padding: 8px;
             background-color: #f8f9fa;
         }
 
@@ -117,65 +116,60 @@
 
         .time-cell {
             background-color: #f8f9fa;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 9px;
         }
 
-        @media screen and (max-width: 768px) {
-            body {
-                margin: 10px;
-            }
-            
-            .day-title {
-                font-size: 16px;
-                padding: 10px;
-            }
-            
-            th, td {
-                padding: 6px 4px;
-                font-size: 13px;
-            }
-            
-            .table-container {
-                overflow-x: scroll;
-            }
-        }
-
-        /* Print styles */
         @media print {
+            @page {
+                size: 210mm 330mm; 
+                margin: 20mm;
+            }
+
             body {
                 margin: 0;
-                font-size: 12px;
+                font-size: 8px;
+                line-height: 1.1;
             }
-            
+
+            h2, h3, .academic-year {
+                font-size: 11px;
+                margin: 2px 0;
+            }
+
             .day-title {
-                page-break-before: auto;
-                margin-top: 20px;
-                font-size: 16px;
+                page-break-before: avoid;
+                page-break-after: avoid;
+                margin-top: 6px;
+                margin-bottom: 3px;
+                font-size: 10px;
+                padding: 2px;
             }
-            
+
             .table-container {
                 page-break-inside: avoid;
                 box-shadow: none;
+                margin-bottom: 4px;
             }
-            
+
             table {
-                page-break-inside: auto;
+                font-size: 7.5px;
             }
-            
-            tr {
-                page-break-inside: avoid;
+
+            th, td {
+                padding: 2px 3px;
+                font-size: 7.5px;
+                border: 0.5px solid #333;
             }
         }
     </style>
 </head>
 <body>
     <div class="header-info" style="display: flex; justify-content: space-between; align-items: center;">
-    <h2 style="margin: 0;">JADWAL PELAJARAN</h2>
-    <h3 style="margin: 0;">
-        KELAS {{ $class->name ?? 'N/A' }}{{ isset($class->parallel_name) ? ' - ' . $class->parallel_name : '' }}
-    </h3>
-</div>
+        <h2 style="margin: 0;">JADWAL PELAJARAN</h2>
+        <h3 style="margin: 0;">
+            KELAS {{ $class->name ?? 'N/A' }}{{ isset($class->parallel_name) ? ' - ' . $class->parallel_name : '' }}
+        </h3>
+    </div>
     <div class="academic-year">
         TAHUN AKADEMIK {{ $schedule->schoolClass->academicYear->start_year }} / {{ $schedule->schoolClass->academicYear->end_year }}
     </div>
@@ -187,9 +181,9 @@
                 <thead>
                     <tr>
                         <th style="width: 12%;">Jam Ke</th>
-                        <th style="width: 18%;">Waktu</th>
-                        <th style="width: 35%;">Mata Pelajaran</th>
-                        <th style="width: 35%;">Guru Pengampu</th>
+                        <th style="width: 20%;">Waktu</th>
+                        <th style="width: 34%;">Mata Pelajaran</th>
+                        <th style="width: 34%;">Guru Pengampu</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -57,7 +57,7 @@ class AchievementController extends Controller
         $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
             $query->where('class_id', $homeroomClass->class_id)
                   ->where('academic_year_id', $homeroomClass->academic_year_id);
-        })->get();
+        })->with('currentAssignment')->get();
 
         $achievementPoints = AchievementPoint::all();
         $academicYears = AcademicYear::where('is_active', true)->get();
@@ -162,7 +162,7 @@ class AchievementController extends Controller
         $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
             $query->where('class_id', $homeroomClass->class_id)
                   ->where('academic_year_id', $homeroomClass->academic_year_id);
-        })->get();
+        })->with('currentAssignment')->get();
 
         $achievementPoints = AchievementPoint::all();
         $academicYears = AcademicYear::where('is_active', true)->get();
@@ -293,14 +293,25 @@ class AchievementController extends Controller
                           ->where('academic_year_id', $homeroomClass->academic_year_id);
                 })
                 ->where('name', 'like', '%' . $term . '%')
-                ->get(['nisn', 'name']);
+                ->with('currentAssignment.schoolClass')
+                ->get();
         }
 
         $result = [];
         foreach ($students as $student) {
+            $className = optional(optional($student->currentAssignment)->schoolClass)->name;
+            $parallelName = optional(optional($student->currentAssignment)->schoolClass)->parallel_name;
+            $classInfo = '';
+
+            if ($className && $parallelName) {
+                $classInfo = ' - ' . $className . ' ' . $parallelName;
+            } elseif ($className) {
+                $classInfo = ' - ' . $className;
+            }
+
             $result[] = [
                 'id' => $student->nisn,
-                'value' => $student->name . ' - ' . $student->nisn
+                'value' => $student->name . $classInfo
             ];
         }
         return response()->json($result);

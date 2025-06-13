@@ -28,7 +28,7 @@ class ViolationController extends Controller
         $teacher = $user->teacher;
         if ($teacher) {
             // Hanya tampilkan pelanggaran yang dilaporkan oleh guru yang login
-            $violations = Violation::with(['student', 'violationPoint', 'academicYear', 'teacher'])
+            $violations = Violation::with(['student', 'violationPoint', 'academicYear', 'teacher', 'validator'])
                 ->where('reported_by', $teacher->nip)
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
@@ -61,7 +61,7 @@ class ViolationController extends Controller
         $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
             $query->where('class_id', $homeroomClass->class_id)
                   ->where('academic_year_id', $homeroomClass->academic_year_id);
-        })->get();
+        })->with('currentAssignment')->get();
 
         $violationPoints = ViolationPoint::all();
         $academicYears = AcademicYear::where('is_active', true)->get();
@@ -143,7 +143,7 @@ class ViolationController extends Controller
         if ($teacher && $violation->reported_by !== $teacher->nip) {
             abort(403, 'Anda tidak berhak mengakses detail pelanggaran ini.');
         }
-        $violation->load(['student', 'violationPoint', 'academicYear', 'teacher']);
+        $violation->load(['student', 'violationPoint', 'academicYear', 'teacher', 'validator']); // Tambahkan eager loading validator
         return view('violations.show', compact('violation'));
     }
 
@@ -169,7 +169,7 @@ class ViolationController extends Controller
         $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
             $query->where('class_id', $homeroomClass->class_id)
                   ->where('academic_year_id', $homeroomClass->academic_year_id);
-        })->get();
+        })->with('currentAssignment')->get();
 
         $violationPoints = ViolationPoint::all();
         $academicYears = AcademicYear::where('is_active', true)->get();

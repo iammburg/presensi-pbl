@@ -261,6 +261,7 @@
             minLength: 2,
             select: function(event, ui) {
                 $('#student_id').val(ui.item.id);
+                $('#student_autocomplete').val(ui.item.value);
             }
         });
     });

@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-    <!--  -->
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -56,21 +55,21 @@
 
                                 @php $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']; @endphp
 
-                                <div class="container-fluid px-4">
+                                <div class="container-fluid px-2">
                                     @foreach ($days as $day)
                                         <div class="card mb-3 border-light border">
                                             <div class="card-header fw-semibold py-2 px-3 text-white"
                                                 style="background-color: #1D3F72;">{{ $day }}</div>
-                                            <div class="card-body p-3 schedule-body" id="schedule-{{ $day }}">
+                                            <div class="card-body p-2 schedule-body" id="schedule-{{ $day }}">
                                                 {{-- Load existing schedules --}}
                                                 @if (isset($scheduleData[$day]))
                                                     @foreach ($scheduleData[$day] as $index => $schedule)
-                                                        <div class="row g-2 align-items-end mb-3">
+                                                        <div class="row g-2 align-items-end mb-2 schedule-row">
                                                             <div class="col-md-2">
-                                                                <label class="form-label">Tipe Sesi</label>
+                                                                <label class="form-label small mb-1">Tipe Sesi</label>
                                                                 <select
                                                                     name="schedules[{{ $day }}][{{ $index }}][session_type]"
-                                                                    class="form-select session-type"
+                                                                    class="form-select form-select-sm session-type"
                                                                     onchange="filterHours(this)" required>
                                                                     <option value="">-- Pilih --</option>
                                                                     <option value="Jam Pelajaran"
@@ -83,51 +82,59 @@
                                                             </div>
 
                                                             <div class="col-md-2">
-                                                                <label class="form-label">Jam Mulai</label>
+                                                                <label class="form-label small mb-1">Jam Mulai</label>
                                                                 <select
                                                                     name="schedules[{{ $day }}][{{ $index }}][start_hour_id]"
-                                                                    class="form-select hour-select-start"
+                                                                    class="form-select form-select-sm hour-select-start"
                                                                     onchange="updateEndHours(this); toggleSubjectTeacher(this)"
-                                                                    data-day="{{ $day }}" required>
-                                                                    <option value="">Jam ke-</option>
-                                                                    {{-- Hours will be populated by JavaScript --}}
+                                                                    data-day="{{ $day }}"
+                                                                    data-selected="{{ $schedule['start_hour_id'] }}" required>
+                                                                    <option value="">-- Pilih Jam Mulai --</option>
                                                                 </select>
                                                             </div>
 
                                                             <div class="col-md-2">
-                                                                <label class="form-label">Jam Selesai</label>
+                                                                <label class="form-label small mb-1">Jam Selesai</label>
                                                                 <select
                                                                     name="schedules[{{ $day }}][{{ $index }}][end_hour_id]"
-                                                                    class="form-select hour-select-end"
-                                                                    data-day="{{ $day }}" required>
-                                                                    <option value="">Jam ke-</option>
-                                                                    {{-- Hours will be populated by JavaScript --}}
+                                                                    class="form-select form-select-sm hour-select-end"
+                                                                    data-day="{{ $day }}"
+                                                                    data-selected="{{ $schedule['end_hour_id'] }}" required>
+                                                                    <option value="">-- Pilih Jam Selesai --</option>
                                                                 </select>
                                                             </div>
 
-                                                            <div class="col-md-4 assignment-container"
+                                                            <div class="col-md-5 assignment-container"
                                                                 style="{{ $schedule['session_type'] == 'Jam Istirahat' ? 'display: none;' : '' }}">
-                                                                <label class="form-label">Guru & Mata Pelajaran</label>
-                                                                <select
-                                                                    name="schedules[{{ $day }}][{{ $index }}][assignment_id]"
-                                                                    class="form-select assignment-select"
-                                                                    {{ $schedule['session_type'] == 'Jam Pelajaran' ? 'required' : '' }}
-                                                                    {{ $schedule['session_type'] == 'Jam Istirahat' ? 'disabled' : '' }}>
-                                                                    <option value="">Pilih</option>
-                                                                    @foreach ($teachingAssignments as $assignment)
-                                                                        <option value="{{ $assignment['id'] }}"
-                                                                            {{ $schedule['assignment_id'] == $assignment['id'] ? 'selected' : '' }}>
-                                                                            {{ $assignment['subject_name'] }} -
-                                                                            {{ $assignment['teacher_name'] }}
-                                                                        </option>
-                                                                    @endforeach
-                                                                </select>
+                                                                <label class="form-label small mb-1">Mata Pelajaran & Guru</label>
+                                                                <div class="d-flex gap-2 align-items-center">
+                                                                    <div class="search-input flex-grow-1">
+                                                                        <input type="text"
+                                                                            class="form-control form-control-sm assignment-search"
+                                                                            placeholder="Ketik untuk mencari..."
+                                                                            autocomplete="off"
+                                                                            onkeyup="searchAssignment(this)"
+                                                                            onclick="showSearchResults(this)"
+                                                                            value="{{ isset($schedule['assignment_id']) && $schedule['assignment_id'] ? $teachingAssignments->where('id', $schedule['assignment_id'])->first()['subject_name'] ?? '' . ' - ' . $teachingAssignments->where('id', $schedule['assignment_id'])->first()['teacher_name'] ?? '' : '' }}">
+                                                                        <input type="hidden"
+                                                                            name="schedules[{{ $day }}][{{ $index }}][assignment_id]"
+                                                                            class="assignment-id"
+                                                                            value="{{ $schedule['assignment_id'] ?? '' }}">
+                                                                        <div class="search-results"></div>
+                                                                    </div>
+                                                                    <button type="button"
+                                                                        class="btn btn-sm btn-outline-danger"
+                                                                        onclick="this.closest('.schedule-row').remove()">
+                                                                        Hapus
+                                                                    </button>
+                                                                </div>
                                                             </div>
 
-                                                            <div class="col-md-1 text-center">
+                                                            <div class="col-md-1 text-center assignment-hidden"
+                                                                style="{{ $schedule['session_type'] == 'Jam Pelajaran' ? 'display: none;' : '' }}">
                                                                 <button type="button"
-                                                                    class="btn btn-sm btn-outline-danger mt-4"
-                                                                    onclick="this.closest('.row').remove()">
+                                                                    class="btn btn-sm btn-outline-danger"
+                                                                    onclick="this.closest('.schedule-row').remove()">
                                                                     Hapus
                                                                 </button>
                                                             </div>
@@ -137,15 +144,18 @@
                                             </div>
                                             <div class="card-footer bg-white text-end py-2 px-3">
                                                 <button type="button" class="btn btn-outline-primary btn-sm"
-                                                    onclick="addScheduleRow('{{ $day }}')">+ Tambah</button>
+                                                    onclick="addScheduleRow('{{ $day }}')">
+                                                    <i class="fas fa-plus"></i> Tambah
+                                                </button>
                                             </div>
                                         </div>
                                     @endforeach
 
-                                    <button type="submit" class="btn btn-block btn-flat text-white"
-                                        style="background-color: #1D3F72">
-                                        <i class="fa fa-save"></i> Update Jadwal
-                                    </button>
+                                    <div class="text-center mt-4">
+                                        <button type="submit" class="btn btn-block btn-flat text-white" style="background-color: #1D3F72">
+                                            <i class="fa fa-save"></i> Update Jadwal
+                                        </button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -155,14 +165,79 @@
         </div>
     </div>
 
-    {{-- SCRIPT --}}
+    <style>
+        .schedule-row {
+            border: 1px solid #e9ecef;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem !important;
+            background-color: transparent;
+        }
+
+        .search-input {
+            position: relative;
+        }
+
+        .search-results {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 0.375rem;
+            z-index: 1000;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            top: 100%;
+            left: 0;
+        }
+
+        .search-result-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.875rem;
+        }
+
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .form-label.small {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-body.schedule-body {
+            min-height: 60px;
+        }
+
+        .assignment-container .d-flex {
+            min-height: 31px;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .gap-2 {
+            gap: 0.5rem !important;
+        }
+    </style>
+
     <script>
         const subjects = @json($subjects);
         const hoursData = @json($hoursData);
         const teachingAssignments = @json($teachingAssignments);
         const scheduleData = @json($scheduleData);
 
-        // Helper function to get hours for specific day
         function getHoursForDay(day) {
             return day === 'Jumat' ? hoursData.friday : hoursData.weekdays;
         }
@@ -172,76 +247,138 @@
             const index = container.children.length;
 
             const row = document.createElement('div');
-            row.className = 'row g-2 align-items-end mb-3';
+            row.className = 'row g-2 align-items-end mb-2 schedule-row';
 
             row.innerHTML = `
-            <div class="col-md-2">
-                <label class="form-label">Tipe Sesi</label>
-                <select
-                    name="schedules[${day}][${index}][session_type]"
-                    class="form-select session-type"
-                    onchange="filterHours(this)"
-                    required
-                >
-                    <option value="">-- Pilih --</option>
-                    <option value="Jam Pelajaran">Jam Pelajaran</option>
-                    <option value="Jam Istirahat">Jam Istirahat</option>
-                </select>
-            </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Tipe Sesi</label>
+                    <select
+                        name="schedules[${day}][${index}][session_type]"
+                        class="form-select form-select-sm session-type"
+                        onchange="filterHours(this)"
+                        required
+                    >
+                        <option value="">-- Pilih --</option>
+                        <option value="Jam Pelajaran">Jam Pelajaran</option>
+                        <option value="Jam Istirahat">Jam Istirahat</option>
+                    </select>
+                </div>
 
-            <div class="col-md-2">
-                <label class="form-label d-block">Jam Mulai</label>
-                <select
-                    name="schedules[${day}][${index}][start_hour_id]"
-                    class="form-select hour-select-start"
-                    onchange="updateEndHours(this); toggleSubjectTeacher(this)"
-                    data-day="${day}"
-                    required
-                >
-                    <option value="">Jam ke-</option>
-                </select>
-            </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Jam Mulai</label>
+                    <select
+                        name="schedules[${day}][${index}][start_hour_id]"
+                        class="form-select form-select-sm hour-select-start"
+                        onchange="updateEndHours(this); toggleSubjectTeacher(this)"
+                        data-day="${day}"
+                        required
+                    >
+                        <option value="">-- Pilih Jam Mulai --</option>
+                    </select>
+                </div>
 
-            <div class="col-md-2">
-                <label class="form-label d-block">Jam Selesai</label>
-                <select
-                    name="schedules[${day}][${index}][end_hour_id]"
-                    class="form-select hour-select-end"
-                    data-day="${day}"
-                    required
-                >
-                    <option value="">Jam ke-</option>
-                </select>
-            </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Jam Selesai</label>
+                    <select
+                        name="schedules[${day}][${index}][end_hour_id]"
+                        class="form-select form-select-sm hour-select-end"
+                        data-day="${day}"
+                        required
+                    >
+                        <option value="">-- Pilih Jam Selesai --</option>
+                    </select>
+                </div>
 
-            <div class="col-md-4 assignment-container">
-                <label class="form-label">Mata Pelajaran & Guru</label>
-                <select
-                    name="schedules[${day}][${index}][assignment_id]"
-                    class="form-select assignment-select"
-                >
-                    <option value="">Pilih</option>
-                    ${teachingAssignments.map(a => `
-                                    <option value="${a.id}">
-                                        ${a.subject_name} - ${a.teacher_name}
-                                    </option>
-                                `).join('')}
-                </select>
-            </div>
+                <div class="col-md-5 assignment-container">
+                    <label class="form-label small mb-1">Mata Pelajaran & Guru</label>
+                    <div class="d-flex gap-2 align-items-center">
+                        <div class="search-input flex-grow-1">
+                            <input type="text"
+                                class="form-control form-control-sm assignment-search"
+                                placeholder="Ketik untuk mencari..."
+                                autocomplete="off"
+                                onkeyup="searchAssignment(this)"
+                                onclick="showSearchResults(this)">
+                            <input type="hidden"
+                                name="schedules[${day}][${index}][assignment_id]"
+                                class="assignment-id">
+                            <div class="search-results"></div>
+                        </div>
+                        <button type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            onclick="this.closest('.schedule-row').remove()">
+                            Hapus
+                        </button>
+                    </div>
+                </div>
 
-            <div class="col-md-1 text-center">
-                <button
-                    type="button"
-                    class="btn btn-sm btn-outline-danger mt-4"
-                    onclick="this.closest('.row').remove()"
-                >
-                    ✖
-                </button>
-            </div>
-        `;
+                <div class="col-md-1 text-center assignment-hidden" style="display: none;">
+                    <button type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        onclick="this.closest('.schedule-row').remove()">
+                        Hapus
+                    </button>
+                </div>
+            `;
 
             container.appendChild(row);
         }
+
+        // Assignment search handlers
+        function searchAssignment(input) {
+            const value = input.value.toLowerCase();
+            const resultsBox = input.parentElement.querySelector('.search-results');
+            const hiddenInput = input.parentElement.querySelector('.assignment-id');
+
+            resultsBox.innerHTML = '';
+            resultsBox.style.display = 'none';
+
+            if (value.length < 2) return;
+
+            const filtered = teachingAssignments.filter(a =>
+                a.subject_name.toLowerCase().includes(value) ||
+                a.teacher_name.toLowerCase().includes(value)
+            );
+
+            if (filtered.length === 0) {
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.style.color = '#6c757d';
+                div.style.fontStyle = 'italic';
+                div.textContent = 'Tidak ada hasil ditemukan';
+                resultsBox.appendChild(div);
+                resultsBox.style.display = 'block';
+                return;
+            }
+
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.textContent = `${item.subject_name} - ${item.teacher_name}`;
+                div.onclick = () => {
+                    input.value = div.textContent;
+                    hiddenInput.value = item.id;
+                    resultsBox.style.display = 'none';
+                };
+                resultsBox.appendChild(div);
+            });
+
+            resultsBox.style.display = 'block';
+        }
+
+        function showSearchResults(input) {
+            const box = input.parentElement.querySelector('.search-results');
+            if (box && box.innerHTML.trim() !== '') {
+                box.style.display = 'block';
+            }
+        }
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.search-input')) {
+                document.querySelectorAll('.search-results').forEach(el => el.style.display = 'none');
+            }
+        });
 
         function populateHourSelect(select, sessionType, day, selectedValue = '') {
             const hours = getHoursForDay(day);
@@ -251,12 +388,12 @@
                 `<option value="${h.id}" data-type="${h.session_type}" data-start="${h.start_time}" data-end="${h.end_time}" data-slot="${h.slot_number}" ${selectedValue == h.id ? 'selected' : ''}>Jam ke-${h.slot_number}</option>`
             ).join('');
 
-            select.innerHTML = `<option value="">Jam ke-</option>` + options;
+            select.innerHTML = `<option value="">-- Pilih Jam Mulai --</option>` + options;
         }
 
         function filterHours(select) {
             const sessionType = select.value;
-            const row = select.closest('.row');
+            const row = select.closest('.schedule-row');
             const day = row.querySelector('.hour-select-start').dataset.day;
 
             const startSelect = row.querySelector('.hour-select-start');
@@ -273,7 +410,7 @@
         }
 
         function updateEndHours(startSelect) {
-            const row = startSelect.closest('.row');
+            const row = startSelect.closest('.schedule-row');
             const endSelect = row.querySelector('.hour-select-end');
             const day = startSelect.dataset.day;
             const sessionType = row.querySelector('.session-type').value;
@@ -295,30 +432,33 @@
                 `<option value="${h.id}" data-type="${h.session_type}">Jam ke-${h.slot_number}</option>`
             ).join('');
 
-            endSelect.innerHTML = `<option value="">Jam ke-</option>` + options;
+            endSelect.innerHTML = `<option value="">-- Pilih Jam Selesai --</option>` + options;
 
             // Auto-select start hour as minimum end hour
             endSelect.value = startHourId;
         }
 
         function toggleSubjectTeacher(select) {
-            const row = select.closest('.row');
+            const row = select.closest('.schedule-row');
             const sessionTypeSelect = row.querySelector('.session-type');
             const assignmentDiv = row.querySelector('.assignment-container');
-            const assignmentSelect = row.querySelector('.assignment-select');
+            const assignmentHiddenDiv = row.querySelector('.assignment-hidden');
+            const assignmentInput = row.querySelector('.assignment-search');
+            const assignmentHiddenInput = row.querySelector('.assignment-id');
 
             const sessionType = sessionTypeSelect.value;
             const isBreak = (sessionType === 'Jam Istirahat');
 
             if (isBreak) {
                 assignmentDiv.style.display = 'none';
-                assignmentSelect.disabled = true;
-                assignmentSelect.removeAttribute('required');
-                assignmentSelect.value = '';
+                assignmentHiddenDiv.style.display = '';
+                assignmentInput.removeAttribute('required');
+                assignmentInput.value = '';
+                assignmentHiddenInput.value = '';
             } else {
                 assignmentDiv.style.display = '';
-                assignmentSelect.disabled = false;
-                assignmentSelect.setAttribute('required', 'required');
+                assignmentHiddenDiv.style.display = 'none';
+                assignmentInput.setAttribute('required', 'required');
             }
         }
 
@@ -328,7 +468,7 @@
             document.querySelectorAll('.session-type').forEach(select => {
                 const sessionType = select.value;
                 if (sessionType) {
-                    const row = select.closest('.row');
+                    const row = select.closest('.schedule-row');
                     const day = row.querySelector('.hour-select-start').dataset.day;
                     const startSelect = row.querySelector('.hour-select-start');
                     const endSelect = row.querySelector('.hour-select-end');
@@ -341,39 +481,14 @@
                     populateHourSelect(startSelect, sessionType, day, startValue);
                     populateHourSelect(endSelect, sessionType, day, endValue);
 
+                    // Set the selected values
+                    if (startValue) startSelect.value = startValue;
+                    if (endValue) endSelect.value = endValue;
+
                     // Initialize subject/teacher visibility
                     toggleSubjectTeacher(startSelect);
                 }
             });
         });
-
-        // Store selected values in data attributes for initialization
-        @foreach ($days as $day)
-            @if (isset($scheduleData[$day]))
-                @foreach ($scheduleData[$day] as $index => $schedule)
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const startSelect = document.querySelector(
-                            `select[name="schedules[{{ $day }}][{{ $index }}][start_hour_id]"]`
-                        );
-                        const endSelect = document.querySelector(
-                            `select[name="schedules[{{ $day }}][{{ $index }}][end_hour_id]"]`);
-
-                        if (startSelect) {
-                            startSelect.dataset.selected = '{{ $schedule['start_hour_id'] }}';
-                            // Populate and select the correct option
-                            const sessionType = '{{ $schedule['session_type'] }}';
-                            const day = '{{ $day }}';
-                            populateHourSelect(startSelect, sessionType, day, '{{ $schedule['start_hour_id'] }}');
-
-                            // Setup end hours
-                            setTimeout(() => {
-                                updateEndHours(startSelect);
-                                endSelect.value = '{{ $schedule['end_hour_id'] }}';
-                            }, 100);
-                        }
-                    });
-                @endforeach
-            @endif
-        @endforeach
     </script>
 @endsection

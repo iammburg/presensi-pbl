@@ -56,9 +56,9 @@ class Violation extends Model
         return $this->belongsTo(Teacher::class, 'reported_by', 'nip');
     }
 
-    public function validator() // Relasi untuk guru yang memvalidasi (validator_id berisi ID Teacher)
+    public function validator() // Relasi untuk guru yang memvalidasi (validator_id berisi NIP Teacher)
     {
-        // Asumsi validator_id adalah foreign key ke primary key (id) tabel teachers
-        return $this->belongsTo(Teacher::class, 'validator_id');
+        // Cocokkan validator_id (nip guru) dengan kolom nip di tabel teachers
+        return $this->belongsTo(Teacher::class, 'validator_id', 'nip');
     }
 }

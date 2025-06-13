@@ -25,6 +25,7 @@ use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AchievementValidationController;
 use App\Http\Controllers\ViolationValidationController;
+use App\Http\Controllers\AttendanceHistoryController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -67,10 +68,14 @@ Route::resource('manage-teacher-subject-assignments', TeachingAssignmentControll
     ->parameters(['manage-teacher-subject-assignments' => 'teacherAssignment']);
 Route::resource('manage-student-class-assignments', StudentClassAssignmentController::class)
     ->parameters(['manage-student-class-assignments' => 'studentAssignment']);
+Route::get('/manage-student-class-assignments/create/for-class/{class_id}', [StudentClassAssignmentController::class, 'createForClass'])
+    ->name('manage-student-class-assignments.create-for-class')
+    ->middleware(['auth']); 
 Route::resource('manage-hours', HourController::class);
 Route::resource('manage-schedules', ClassScheduleController::class);
 Route::get('manage-schedules/{manage_schedule}/export-pdf', [ClassScheduleController::class, 'exportPdf'])->name('manage-schedules.export-pdf');
 Route::resource('manage-attendances', AttendanceController::class);
+Route::resource('manage-attendances-history', AttendanceHistoryController::class)->only(['index', 'show']);
 
 // Route buat Guru BK
 Route::resource('violation-management', ViolationPointController::class);
@@ -85,7 +90,8 @@ Route::resource('achievement-validations', AchievementValidationController::clas
 Route::post('achievement-validations/{achievement}/validate', [AchievementValidationController::class, 'validateAchievement'])->name('achievement-validations.validate');
 
 // Route untuk validasi pelanggaran oleh Guru BK
-Route::post('violations/{violation}/validate', [\App\Http\Controllers\ViolationValidationController::class, 'validateViolation'])->name('violations.validate');
+Route::post('violation-validations/{violation}/validate', [ViolationValidationController::class, 'validateViolation'])->name('violation-validations.validate');
+Route::post('violations/{violation}/validate', [ViolationController::class, 'validateViolation'])->name('violations.validate');
 Route::resource('violation-validations', ViolationValidationController::class)->only(['index', 'show']);
 
 // Edit & update keputusan validasi oleh Guru BK yang memvalidasi
@@ -99,8 +105,11 @@ Route::get('/student/attendance', [StudentAttendanceController::class, 'index'])
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
 
-// Route tambahan untuk subjects
-Route::resource('subjects', SubjectController::class);
+// Route utama untuk subject, dengan prefix dan nama route 'manage-subject'
+Route::resource('manage-subject', SubjectController::class);
+
+// Route tambahan untuk mendapatkan nama jadwal pelajaran
+Route::get('manage-subject/schedule-names', [SubjectController::class, 'getScheduleNames'])->name('manage-subject.schedule-names');
 
 // Route tambahan untuk mendapatkan nama jadwal pelajaran
 Route::get('subjects/schedule-names', [SubjectController::class, 'getScheduleNames'])->name('subjects.schedule-names');

@@ -65,8 +65,23 @@ $(function() {
         minLength: 2,
         select: function(event, ui) {
             $('#student_id').val(ui.item.id);
+            $('#student_autocomplete').val(ui.item.value);
         }
     });
+
+    @if ($achievement->student && $achievement->student->currentAssignment && $achievement->student->currentAssignment->schoolClass)
+        var studentName = "{{ $achievement->student->name }}";
+        var className = "{{ $achievement->student->currentAssignment->schoolClass->name }}";
+        var parallelName = "{{ $achievement->student->currentAssignment->schoolClass->parallel_name }}";
+        var classInfo = '';
+
+        if (className && parallelName) {
+            classInfo = ' - ' + className + ' ' + parallelName;
+        } else if (className) {
+            classInfo = ' - ' + className;
+        }
+        $('#student_autocomplete').val(studentName + classInfo);
+    @endif
 });
 </script>
 @endpush

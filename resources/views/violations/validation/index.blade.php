@@ -26,11 +26,11 @@
         </div>
     </div>
 </div>
-
 <div class="content">
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
+                <div class="card card-primary card-outline">
                 <div class="card card-primary card-outline">
                     <div class="card-header">
                         <h3 class="card-title">Data Laporan</h3>
@@ -64,7 +64,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($violations as $index => $violation)
+                                    @forelse($violations as $violation)
                                         <tr>
                                             <td class="text-center">{{ $index + $violations->firstItem() }}</td>
                                             <td>{{ $violation->student ? $violation->student->name : 'N/A' }}</td>
