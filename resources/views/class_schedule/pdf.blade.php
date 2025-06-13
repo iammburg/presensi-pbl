@@ -121,7 +121,7 @@
 
         @media print {
             @page {
-                size: 210mm 330mm; /* Ukuran F4 */
+                size: 210mm 330mm; 
                 margin: 20mm;
             }
 
