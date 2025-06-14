@@ -44,7 +44,7 @@
                     <div class="card-header">
                         <h3 class="card-title">Formulir Laporan Prestasi</h3>
                     </div>
-                    <form action="{{ route('achievements.store') }}" method="POST" enctype="multipart/form-data">
+                    <form id="form-lapor-prestasi" action="{{ route('achievements.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="card-body">
                             @if ($errors->any())
@@ -104,7 +104,7 @@
                         <div class="card-footer">
                             <div class="d-flex justify-content-between">
                                 <a href="{{ route('achievements.index') }}" class="btn btn-secondary"><i class="fas fa-times mr-1"></i> Batal</a>
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane mr-1"></i> Laporkan Prestasi</button>
+                                <button type="button" id="btn-lapor-prestasi" class="btn btn-primary"><i class="fas fa-paper-plane mr-1"></i> Laporkan Prestasi</button>
                             </div>
                         </div>
                     </form>
@@ -118,15 +118,41 @@
 @push('js')
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(function() {
     $("#student_autocomplete").autocomplete({
         source: "{{ route('autocomplete.siswa') }}",
-        minLength: 2,
+        minLength: 0,
         select: function(event, ui) {
             $('#student_id').val(ui.item.id);
             $('#student_autocomplete').val(ui.item.value);
         }
+    }).on('focus', function () {
+        $(this).autocomplete("search", "");
+    });
+
+    // SweetAlert konfirmasi sebelum submit
+    $("#btn-lapor-prestasi").on('click', function(e) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Konfirmasi Laporan',
+            text: 'Anda yakin ingin melaporkan prestasi ini?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Laporkan',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'swal2-confirm btn btn-primary mx-2',
+                cancelButton: 'swal2-cancel btn btn-secondary mx-2'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $('#form-lapor-prestasi').submit();
+            }
+        });
     });
 });
 </script>

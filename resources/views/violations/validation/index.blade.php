@@ -48,63 +48,43 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="datatable-main" class="table table-bordered table-striped">
+                        <table id="datatable-violations" class="table table-bordered table-striped">
                             <thead class="bg-tertiary text-white">
                                 <tr>
-                                    <th style="width: 40px;">No</th>
-                                    <th>Nama</th>
-                                    <th>Kelas</th>
-                                    <th>Pelapor</th>
-                                    <th>Nama pelanggaran</th>
-                                    <th>Jenis pelanggaran</th>
-                                    <th>Bukti</th>
-                                    <th style="width: 100px;">Aksi</th>
+                                    <th>No</th>
+                                    <th>Siswa</th>
+                                    <th>Jenis Pelanggaran</th>
+                                    <th>Tanggal</th>
+                                    <th>Status</th>
+                                    <th>Dilaporkan Oleh</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($violations as $key => $violation)
+                                @forelse($violations as $violation)
                                     <tr>
-                                        <td class="text-center">{{ $violations->firstItem() + $key }}</td>
-                                        <td>{{ $violation->student ? $violation->student->name : 'N/A' }}</td>
-                                        <td>{{ $violation->student && $violation->student->schoolClass ? $violation->student->schoolClass->parallel_name : '-' }}</td>
-                                        <td>{{ $violation->teacher ? $violation->teacher->name : ($violation->reported_by ?: 'N/A') }}</td>
-                                        <td>{{ $violation->violationPoint ? $violation->violationPoint->violation_type : 'N/A' }}</td>
-                                        <td>{{ $violation->violationPoint ? $violation->violationPoint->violation_level : '-' }}</td>
-                                        <td class="text-center">
-                                            @if($violation->evidence)
-                                                <a href="{{ Storage::url($violation->evidence) }}" target="_blank" class="btn btn-outline-info btn-sm" title="Lihat Bukti"><i class="fas fa-image"></i></a>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $violation->student ? $violation->student->name : '-' }}</td>
+                                        <td>{{ $violation->violationPoint ? $violation->violationPoint->violation_type : '-' }}</td>
+                                        <td>{{ $violation->violation_date ? \Carbon\Carbon::parse($violation->violation_date)->format('d/m/Y') : '-' }}</td>
+                                        <td>
+                                            @if($violation->validation_status === 'pending')
+                                                <span class="badge badge-warning">Menunggu Validasi</span>
+                                            @elseif($violation->validation_status === 'approved')
+                                                <span class="badge badge-success">Disetujui</span>
                                             @else
-                                                <span class="text-muted">-</span>
+                                                <span class="badge badge-danger">Ditolak</span>
                                             @endif
                                         </td>
-                                        <td class="text-center">
-                                            @role('Guru BK')
-                                                <a href="{{ route('violation-validations.show', $violation->id) }}" class="btn btn-info btn-sm" title="Detail">
-                                                    @if($violation->validation_status === 'pending')
-                                                        <span class="badge badge-warning">Menunggu Validasi</span>
-                                                    @elseif($violation->validation_status === 'approved')
-                                               
-                                               
-                                               
-                                               
-                                               
-                                               
-                                               
-                                                    <span class="badge badge-success">Disetujui</span>
-                                                    @elseif($violation->validation_status === 'rejected')
-                                                        <span class="badge badge-danger">Ditolak</span>
-                                                    @else
-                                                        <span class="badge badge-secondary">-</span>
-                                                    @endif
-                                                </a>
-                                            @endrole
+                                        <td>{{ $violation->teacher ? $violation->teacher->name : '-' }}</td>
+                                        <td>
+                                            <a href="{{ route('violation-validations.show', $violation) }}" class="btn btn-info btn-sm">Detail</a>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center text-muted">
-                                            <i class="fas fa-check-circle fa-3x my-2 text-success"></i><br>
-                                            Tidak ada laporan pelanggaran yang perlu divalidasi saat ini.
+                                        <td colspan="7" class="text-center text-gray-500">
+                                            Tidak ada pelanggaran yang perlu divalidasi
                                         </td>
                                     </tr>
                                 @endforelse
@@ -119,24 +99,25 @@
 @endsection
 
 @push('js')
-    <!-- DataTables Scripts -->
-    <script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
-    <script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
-    <script src="{{ asset('plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
-    <script src="{{ asset('plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
-    <script>
-        $(function () {
-            $('#datatable-violations-validation').DataTable({
-                "responsive": true,
-                "lengthChange": false,
-                "autoWidth": false,
-                "paging": false, // Laravel paginasi
-                "searching": false, // Search manual di atas
-                "ordering": true,
-                "info": false
-            });
-        });
-    </script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap4.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
+<script>
+$(document).ready(function() {
+    $.fn.dataTable.ext.errMode = 'none';
+    $('#datatable-violations').DataTable({
+        "ordering": true,
+        "responsive": true,
+        "autoWidth": false,
+        "language": {
+            "search": "Cari:",
+            "lengthMenu": "Tampilkan _MENU_ data",
+            "zeroRecords": "Tidak ada data ditemukan",
+            "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            "infoEmpty": "Tidak ada data",
+            "infoFiltered": "(disaring dari _MAX_ total data)"
+        }
+    });
+});
+</script>
 @endpush

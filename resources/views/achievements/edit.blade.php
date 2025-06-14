@@ -62,11 +62,13 @@
 $(function() {
     $("#student_autocomplete").autocomplete({
         source: "{{ route('autocomplete.siswa') }}",
-        minLength: 2,
+        minLength: 0, // ubah dari 2 ke 0 agar langsung muncul saat klik/fokus
         select: function(event, ui) {
             $('#student_id').val(ui.item.id);
             $('#student_autocomplete').val(ui.item.value);
         }
+    }).on('focus', function () {
+        $(this).autocomplete("search", "");
     });
 
     @if ($achievement->student && $achievement->student->currentAssignment && $achievement->student->currentAssignment->schoolClass)

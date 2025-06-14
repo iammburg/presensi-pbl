@@ -278,7 +278,7 @@ class AchievementController extends Controller
      */
     public function autocompleteSiswa(Request $request)
     {
-        $term = $request->get('term');
+        $term = $request->get('term', '');
         $teacher = Auth::user()->teacher;
         $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
             ->whereHas('academicYear', function($query) {
@@ -288,13 +288,14 @@ class AchievementController extends Controller
 
         $students = [];
         if ($homeroomClass) {
-            $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
-                    $query->where('class_id', $homeroomClass->class_id)
-                          ->where('academic_year_id', $homeroomClass->academic_year_id);
-                })
-                ->where('name', 'like', '%' . $term . '%')
-                ->with('currentAssignment.schoolClass')
-                ->get();
+            $query = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
+                $query->where('class_id', $homeroomClass->class_id)
+                      ->where('academic_year_id', $homeroomClass->academic_year_id);
+            });
+            if ($term !== '') {
+                $query->where('name', 'like', '%' . $term . '%');
+            }
+            $students = $query->with('currentAssignment.schoolClass')->get();
         }
 
         $result = [];
