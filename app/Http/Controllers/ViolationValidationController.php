@@ -60,18 +60,12 @@ class ViolationValidationController extends Controller
         $violations = $query->orderByDesc('created_at')->paginate(10)->appends($request->all());
 
         return view('violations.validation.index', compact('violations')); // Pastikan view ini ada
-    }
-
-    public function show($id) // Sebaiknya gunakan Route Model Binding
+    }    public function show($id) // Sebaiknya gunakan Route Model Binding
     {
         // $violation = Violation::with(['student', 'violationPoint', 'teacher'])->findOrFail($id);
         // Dengan Route Model Binding:
         $violation = Violation::with(['student', 'violationPoint', 'teacher', 'validator'])->findOrFail($id);
-        // Jika status masih pending dan belum pernah dilihat, set viewed_at sekarang
-        if ($violation->validation_status === 'pending' && is_null($violation->viewed_at)) {
-            $violation->viewed_at = now();
-            $violation->save();
-        }
+
         return view('violations.validation.show', compact('violation')); // Pastikan view ini ada
     }
 
@@ -115,6 +109,7 @@ class ViolationValidationController extends Controller
 
     /**
      * Show the form for editing the validation decision (only for the validator Guru BK).
+     * Redirect ke show page karena sekarang menggunakan modal popup.
      */
     public function editValidation(Violation $violation)
     {
@@ -126,7 +121,10 @@ class ViolationValidationController extends Controller
         if ($violation->validator_id !== $user->teacher->nip) {
             abort(403, 'Anda hanya dapat mengedit validasi yang Anda lakukan.');
         }
-        return view('violations.validation.edit', compact('violation'));
+
+        // Redirect ke show page dengan fragment untuk membuka modal edit
+        return redirect()->route('violation-validations.show', $violation->id)
+            ->with('open_edit_modal', true);
     }
 
     /**
@@ -143,7 +141,9 @@ class ViolationValidationController extends Controller
         }
         $request->validate([
             'validation_status' => 'required|in:approved,rejected',
-            'validation_notes' => 'nullable|string|max:1000',
+            'validation_notes' => 'required_if:validation_status,rejected|nullable|string|max:1000',
+        ], [
+            'validation_notes.required_if' => 'Catatan validasi wajib diisi ketika menolak laporan.',
         ]);
         $violation->validation_status = $request->validation_status;
         $violation->validation_notes = $request->validation_notes;

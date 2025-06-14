@@ -70,7 +70,7 @@ Route::resource('manage-student-class-assignments', StudentClassAssignmentContro
     ->parameters(['manage-student-class-assignments' => 'studentAssignment']);
 Route::get('/manage-student-class-assignments/create/for-class/{class_id}', [StudentClassAssignmentController::class, 'createForClass'])
     ->name('manage-student-class-assignments.create-for-class')
-    ->middleware(['auth']); 
+    ->middleware(['auth']);
 Route::resource('manage-hours', HourController::class);
 Route::resource('manage-schedules', ClassScheduleController::class);
 Route::get('manage-schedules/{manage_schedule}/export-pdf', [ClassScheduleController::class, 'exportPdf'])->name('manage-schedules.export-pdf');
@@ -88,6 +88,10 @@ Route::resource('kelola-pelanggaran', ViolationPointController::class);
 Route::post('achievements/{achievement}/validate', [AchievementController::class, 'validateAchievement'])->name('achievements.validate');
 Route::resource('achievement-validations', AchievementValidationController::class)->only(['index', 'show']);
 Route::post('achievement-validations/{achievement}/validate', [AchievementValidationController::class, 'validateAchievement'])->name('achievement-validations.validate');
+
+// Edit & update keputusan validasi prestasi oleh Guru BK yang memvalidasi
+Route::get('achievement-validations/{achievement}/edit-validation', [AchievementValidationController::class, 'editValidation'])->name('achievement-validations.editValidation');
+Route::put('achievement-validations/{achievement}/update-validation', [AchievementValidationController::class, 'updateValidation'])->name('achievement-validations.updateValidation');
 
 // Route untuk validasi pelanggaran oleh Guru BK
 Route::post('violations/{violation}/validate', [ViolationValidationController::class, 'validateViolation'])->name('violations.validate');

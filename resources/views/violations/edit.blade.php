@@ -132,7 +132,7 @@
                                 @enderror
                             </div>
 
-                            <div class="form-group mb-3">
+                            {{-- <div class="form-group mb-3">
                                 <label for="penalty">Sanksi/Penalti yang Diberikan (Opsional)</label>
                                 <input type="text" name="penalty" id="penalty" class="form-control @error('penalty') is-invalid @enderror" value="{{ old('penalty', $violation->penalty) }}">
                                 @error('penalty')
@@ -140,7 +140,7 @@
                                         <strong>{{ $message }}</strong>
                                     </span>
                                 @enderror
-                            </div>
+                            </div> --}}
 
                             <div class="form-group mb-3">
                                 <label for="evidence">Bukti (Opsional, Gambar: jpg, jpeg, png. Maks: 2MB)</label>
@@ -204,23 +204,27 @@
         }
 
         $(function() {
-            // Autocomplete siswa sudah ada
+            // Autocomplete siswa
             $("#student_autocomplete").autocomplete({
                 source: "{{ route('autocomplete.siswa') }}",
-                minLength: 2,
+                minLength: 0, // ubah dari 2 ke 0 agar langsung muncul saat klik/fokus
                 select: function(event, ui) {
                     $('#student_id').val(ui.item.id);
                     $('#student_autocomplete').val(ui.item.value);
                 }
+            }).on('focus', function () {
+                $(this).autocomplete("search", "");
             });
             // Autocomplete jenis pelanggaran
             $("#violation_point_autocomplete").autocomplete({
                 source: "{{ route('autocomplete.violation-points') }}",
-                minLength: 2,
+                minLength: 0, // ubah dari 2 ke 0
                 select: function(event, ui) {
                     $('#violation_points_id').val(ui.item.id);
                     $('#violation_point_autocomplete').val(ui.item.value);
                 }
+            }).on('focus', function () {
+                $(this).autocomplete("search", "");
             });
         });
 

@@ -155,7 +155,7 @@ class TeacherController extends Controller
                 'phone' => $teacher->phone,
                 'address' => $teacher->address,
                 'gender' => $teacher->gender,
-                'birth_date' => $teacher->birth_date ? $teacher->birth_date->format('d/m/Y') : null,
+                'birth_date' => $teacher->birth_date,
                 'photo_url' => $teacher->photo ? asset('storage/' . $teacher->photo) : null,
                 'status' => $status,
                 // 'subjects' => $subjects
