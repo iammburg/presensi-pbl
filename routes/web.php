@@ -90,8 +90,7 @@ Route::resource('achievement-validations', AchievementValidationController::clas
 Route::post('achievement-validations/{achievement}/validate', [AchievementValidationController::class, 'validateAchievement'])->name('achievement-validations.validate');
 
 // Route untuk validasi pelanggaran oleh Guru BK
-Route::post('violation-validations/{violation}/validate', [ViolationValidationController::class, 'validateViolation'])->name('violation-validations.validate');
-Route::post('violations/{violation}/validate', [ViolationController::class, 'validateViolation'])->name('violations.validate');
+Route::post('violations/{violation}/validate', [ViolationValidationController::class, 'validateViolation'])->name('violations.validate');
 Route::resource('violation-validations', ViolationValidationController::class)->only(['index', 'show']);
 
 // Edit & update keputusan validasi oleh Guru BK yang memvalidasi
@@ -115,3 +114,5 @@ Route::get('manage-subject/schedule-names', [SubjectController::class, 'getSched
 Route::get('subjects/schedule-names', [SubjectController::class, 'getScheduleNames'])->name('subjects.schedule-names');
 
 Route::get('/autocomplete/siswa', [App\Http\Controllers\AchievementController::class, 'autocompleteSiswa'])->name('autocomplete.siswa');
+// Autocomplete jenis pelanggaran (violation points)
+Route::get('/autocomplete/violation-points', [App\Http\Controllers\ViolationPointController::class, 'autocomplete'])->name('autocomplete.violation-points');

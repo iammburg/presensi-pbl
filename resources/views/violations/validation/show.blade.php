@@ -220,6 +220,7 @@
     <div class="modal-dialog" role="document">
         <form id="form-validate-{{ $violation->id }}" action="{{ route('violations.validate', $violation->id) }}" method="POST">
             @csrf
+            <input type="hidden" name="validation_status" id="validation_status_modal-{{ $violation->id }}">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="validateModalLabelShow-{{ $violation->id }}">Validasi Laporan Pelanggaran</h5>
@@ -239,13 +240,13 @@
                         </button>
                     </div>
                     <div class="form-group mt-4">
-                        <label for="validation_notes_modal-{{ $violation->id }}">Catatan Validasi (Opsional)</label>
+                        <label for="validation_notes_modal-{{ $violation->id }}">Catatan Validasi</label>
                         <textarea name="validation_notes" id="validation_notes_modal-{{ $violation->id }}" class="form-control" rows="3" placeholder="Berikan catatan jika diperlukan...">{{ old('validation_notes') }}</textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
+                {{-- <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                </div>
+                </div> --}}
             </div>
         </form>
     </div>
@@ -263,6 +264,18 @@
         $('.btn-validate-action').on('click', function(e) {
             var id = $(this).data('id');
             var status = $(this).data('status');
+            var notes = $('#validation_notes_modal-' + id).val().trim();
+            if (!notes) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Catatan Validasi Wajib Diisi',
+                    text: 'Silakan isi catatan validasi terlebih dahulu.',
+                    confirmButtonText: 'OK',
+                    customClass: { confirmButton: 'btn btn-primary mx-2' },
+                    buttonsStyling: false
+                });
+                return;
+            }
             var select = $('#validation_status_modal-' + id);
             select.val(status); // Set value select sesuai tombol
             var actionText = status === 'approved' ? 'memvalidasi (MENYETUJUI)' : 'menolak';
@@ -277,8 +290,8 @@
                 cancelButtonText: 'Batal',
                 reverseButtons: true,
                 customClass: {
-                    confirmButton: 'swal2-confirm btn btn-primary mx-2', // Tambah mx-2 di sini
-                    cancelButton: 'swal2-cancel btn btn-secondary mx-2'  // Tambah mx-2 di sini
+                    confirmButton: 'swal2-confirm btn btn-primary mx-2',
+                    cancelButton: 'swal2-cancel btn btn-secondary mx-2'
                 },
                 buttonsStyling: false
             }).then((result) => {
