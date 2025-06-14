@@ -11,31 +11,12 @@
     <link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
-        .dropdown-menu {
-            min-width: 100px;
-            z-index: 1050 !important;
-        }
-
-        .dropdown-menu a,
-        .dropdown-menu button.dropdown-item {
-            font-size: 0.95rem;
-            padding: 10px 18px;
-        }
-
-        .dropdown-menu .dropdown-item.text-danger {
-            color: #e74c3c !important;
-            font-weight: 500;
-        }
-
-        .dropdown-menu .dropdown-item.text-danger:hover {
-            background: #ffeaea;
-            color: #c0392b !important;
-        }
-
-        .dropdown-menu {
-            border-radius: 8px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-        }
+        .dropdown-menu { min-width: 100px; z-index: 1050 !important; }
+        .dropdown-menu a, .dropdown-menu button.dropdown-item { font-size: 0.95rem; padding: 10px 18px; }
+        .dropdown-menu .dropdown-item.text-danger { color: #e74c3c !important; font-weight: 500; }
+        .dropdown-menu .dropdown-item.text-danger:hover { background: #ffeaea; color: #c0392b !important; }
+        .dropdown-menu { border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+        .dropdown-toggle.btn-sm { min-width: 100px; }
     </style>
 @endpush
 
@@ -48,7 +29,6 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        {{-- Tambahkan breadcrumb jika diperlukan --}}
                     </ol>
                 </div>
             </div>
@@ -89,11 +69,26 @@
                                                 <td>{{ $academicYear->end_year }}</td>
                                                 <td>{{ $academicYear->semester == 0 ? 'Genap' : 'Ganjil' }}</td>
                                                 <td>
-                                                    @if ($academicYear->is_active)
-                                                        <span class="badge badge-success">Aktif</span>
-                                                    @else
-                                                        <span class="badge badge-danger">Tidak Aktif</span>
-                                                    @endif
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm dropdown-toggle {{ $academicYear->is_active ? 'btn-success' : 'btn-secondary' }}"
+                                                                type="button"
+                                                                id="dropdownMenuStatus{{ $academicYear->id }}"
+                                                                data-toggle="dropdown"
+                                                                aria-haspopup="true"
+                                                                aria-expanded="false">
+                                                            {{ $academicYear->is_active ? 'Aktif' : 'Tidak Aktif' }}
+                                                        </button>
+                                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuStatus{{ $academicYear->id }}">
+                                                            <a class="dropdown-item status-option {{ $academicYear->is_active ? 'disabled' : '' }}"
+                                                               href="#"
+                                                               data-id="{{ $academicYear->id }}"
+                                                               data-status="1">Aktif</a>
+                                                            <a class="dropdown-item status-option {{ !$academicYear->is_active ? 'disabled' : '' }}"
+                                                               href="#"
+                                                               data-id="{{ $academicYear->id }}"
+                                                               data-status="0">Tidak Aktif</a>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <td>
                                                     <div class="btn-group">
@@ -125,9 +120,9 @@
                                         @endforeach
                                     </tbody>
                                 </table>
-                            </div> {{-- table-responsive --}}
-                        </div> {{-- card-body --}}
-                    </div> {{-- card --}}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -145,47 +140,29 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // Debugging to track script execution
-        console.log('DataTable script loaded at: ' + new Date().toISOString());
+        document.addEventListener('turbolinks:load', function () {
 
-        // Initialize DataTable on page load or Turbolinks load
-        document.addEventListener('turbolinks:load', function() {
-            console.log('Turbolinks load event triggered');
-
-            // Destroy existing DataTable instance if it exists
             if ($.fn.DataTable.isDataTable('#datatable-main')) {
-                console.log('Destroying existing DataTable instance');
                 $('#datatable-main').DataTable().destroy();
             }
 
-            // Initialize DataTable
-            console.log('Initializing new DataTable instance');
             $('#datatable-main').DataTable({
                 responsive: true,
                 autoWidth: false,
-                language: {
-                    url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
-                },
-                columnDefs: [{
-                        "orderable": false,
-                        "targets": 5
-                    } // Disable ordering for 'Aksi' column
-                ]
+                language: { url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json" },
+                columnDefs: [{ "orderable": false, "targets": 5 }]
             });
 
-            // Toastr notifications for errors from validation
             @if ($errors->any())
                 @foreach ($errors->all() as $error)
                     toastr.error('{{ $error }}');
                 @endforeach
             @endif
 
-            // Toastr notification for success message from session
             @if (session('success'))
                 toastr.success('{{ session('success') }}');
             @endif
 
-            // Toastr notification for error message from session
             @if (session('error'))
                 toastr.error('{{ session('error') }}');
             @endif
@@ -208,5 +185,33 @@
                 }
             });
         }
+
+        $(document).on('click', '.status-option', function (e) {
+            e.preventDefault();
+
+            const academicYearId = $(this).data('id');
+            const newStatus = $(this).data('status');
+
+            $.ajax({
+                url: `/manage-academic-years/${academicYearId}`,
+                type: 'POST',
+                data: {
+                    _method: 'PUT',
+                    _token: '{{ csrf_token() }}',
+                    status: newStatus
+                },
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        setTimeout(() => { location.reload(); }, 800);
+                    } else {
+                        toastr.error("Gagal memperbarui status.");
+                    }
+                },
+                error: function () {
+                    toastr.error("Terjadi kesalahan saat memperbarui status.");
+                }
+            });
+        });
     </script>
 @endpush
