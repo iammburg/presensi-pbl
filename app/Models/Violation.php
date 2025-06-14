@@ -24,6 +24,7 @@ class Violation extends Model
         'validator_id', // Ini akan menyimpan ID dari tabel teachers
         'validation_notes',
         'validated_at',
+        'viewed_at',
     ];
 
     protected $casts = [
@@ -31,6 +32,7 @@ class Violation extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'validated_at' => 'datetime',
+        'viewed_at' => 'datetime',
     ];
 
     public function student()

@@ -83,22 +83,10 @@
                             </div>
 
                             <div class="form-group mb-3">
-                                <label for="violation_point_id">Jenis Pelanggaran <span class="text-danger">*</span></label>
-                                <select name="violation_point_id" id="violation_point_id" class="form-control @error('violation_point_id') is-invalid @enderror" required>
-                                    <option value="">-- Pilih Jenis Pelanggaran --</option>
-                                     @if(isset($violationPoints) && $violationPoints->count() > 0)
-                                        @foreach($violationPoints as $point)
-                                            {{-- Perhatikan bahwa di controller store, $violation->violation_points_id diisi dari 'violation_point_id' --}}
-                                            {{-- Jadi, untuk edit, kita bandingkan old('violation_point_id') dengan $violation->violation_points_id --}}
-                                            <option value="{{ $point->id }}" {{ old('violation_point_id', $violation->violation_points_id) == $point->id ? 'selected' : '' }}>
-                                                {{ $point->violation_type }} (Poin: {{ $point->points }})
-                                            </option>
-                                        @endforeach
-                                    @else
-                                        <option value="" disabled>Tidak ada data jenis pelanggaran</option>
-                                    @endif
-                                </select>
-                                @error('violation_point_id')
+                                <label for="violation_point_autocomplete">Jenis Pelanggaran <span class="text-danger">*</span></label>
+                                <input type="text" id="violation_point_autocomplete" class="form-control @error('violation_points_id') is-invalid @enderror" placeholder="Cari jenis/level pelanggaran..." autocomplete="off" required value="{{ old('violation_points_id', optional($violation->violationPoint)->violation_type ? optional($violation->violationPoint)->violation_type . ' (' . optional($violation->violationPoint)->violation_level . ', Poin: ' . optional($violation->violationPoint)->points . ')' : '') }}">
+                                <input type="hidden" name="violation_points_id" id="violation_points_id" value="{{ old('violation_points_id', $violation->violation_points_id) }}">
+                                @error('violation_points_id')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
@@ -176,6 +164,8 @@
                                     </span>
                                 @enderror
                             </div>
+
+                            <input type="hidden" name="status" value="{{ old('status', $violation->status ?? 'pending') }}">
                         </div>
                         <div class="card-footer">
                             <div class="d-flex justify-content-between">
@@ -213,13 +203,25 @@
             });
         }
 
-        $("#student_autocomplete").autocomplete({
-            source: "{{ route('autocomplete.siswa') }}",
-            minLength: 2,
-            select: function(event, ui) {
-                $('#student_id').val(ui.item.id);
-                $('#student_autocomplete').val(ui.item.value); // Update visible input
-            }
+        $(function() {
+            // Autocomplete siswa sudah ada
+            $("#student_autocomplete").autocomplete({
+                source: "{{ route('autocomplete.siswa') }}",
+                minLength: 2,
+                select: function(event, ui) {
+                    $('#student_id').val(ui.item.id);
+                    $('#student_autocomplete').val(ui.item.value);
+                }
+            });
+            // Autocomplete jenis pelanggaran
+            $("#violation_point_autocomplete").autocomplete({
+                source: "{{ route('autocomplete.violation-points') }}",
+                minLength: 2,
+                select: function(event, ui) {
+                    $('#violation_points_id').val(ui.item.id);
+                    $('#violation_point_autocomplete').val(ui.item.value);
+                }
+            });
         });
 
         // Set initial value for autocomplete input on page load

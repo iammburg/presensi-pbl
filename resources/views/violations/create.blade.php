@@ -47,7 +47,7 @@
                     <div class="card-header">
                         <h3 class="card-title">Formulir Laporan Pelanggaran</h3>
                     </div>
-                    <form action="{{ route('violations.store') }}" method="POST" enctype="multipart/form-data">
+                    <form id="form-lapor-pelanggaran" action="{{ route('violations.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="card-body">
                             @if ($errors->any())
@@ -78,19 +78,9 @@
                             </div>
 
                             <div class="form-group mb-3">
-                                <label for="violation_point_id">Jenis Pelanggaran <span class="text-danger">*</span></label>
-                                <select name="violation_points_id" id="violation_point_id" class="form-control @error('violation_points_id') is-invalid @enderror" required>
-                                    <option value="">-- Pilih Jenis Pelanggaran --</option>
-                                     @if(isset($violationPoints) && $violationPoints->count() > 0)
-                                        @foreach($violationPoints as $point)
-                                            <option value="{{ $point->id }}" {{ old('violation_points_id') == $point->id ? 'selected' : '' }}>
-                                                {{ $point->violation_type }} (Poin: {{ $point->points }})
-                                            </option>
-                                        @endforeach
-                                    @else
-                                        <option value="" disabled>Tidak ada data jenis pelanggaran</option>
-                                    @endif
-                                </select>
+                                <label for="violation_point_autocomplete">Jenis Pelanggaran <span class="text-danger">*</span></label>
+                                <input type="text" id="violation_point_autocomplete" class="form-control @error('violation_points_id') is-invalid @enderror" placeholder="Cari jenis/level pelanggaran..." autocomplete="off" required>
+                                <input type="hidden" name="violation_points_id" id="violation_points_id" value="{{ old('violation_points_id') }}">
                                 @error('violation_points_id')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -168,7 +158,7 @@
                             <div class="d-flex justify-content-between">
                                 <a href="{{ route('violations.index') }}" class="btn btn-secondary"><i class="fas fa-times mr-1"></i> Batal</a>
                                 {{-- Mengubah btn-danger menjadi btn-primary --}}
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane mr-1"></i> Laporkan Pelanggaran</button>
+                                <button type="button" id="btn-lapor-pelanggaran" class="btn btn-primary"><i class="fas fa-paper-plane mr-1"></i> Laporkan Pelanggaran</button>
                             </div>
                         </div>
                     </form>
@@ -187,6 +177,7 @@
 {{-- Skrip untuk bs-custom-file-input jika belum di-include global oleh AdminLTE --}}
 {{-- Contoh: <script src="{{ asset('plugins/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script> --}}
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function () {
         // Inisialisasi bsCustomFileInput jika tersedia
@@ -230,15 +221,47 @@
         setTimeout(function() {
             $(".alert-dismissible").alert('close');
         }, 7000); // Alert akan hilang setelah 7 detik
+
+        $('#btn-lapor-pelanggaran').on('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Konfirmasi Laporan',
+                text: 'Anda yakin ingin melaporkan pelanggaran ini?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Laporkan',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'swal2-confirm btn btn-primary mx-2',
+                    cancelButton: 'swal2-cancel btn btn-secondary mx-2'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#form-lapor-pelanggaran').submit();
+                }
+            });
+        });
     });
 
     $(function() {
+        // Autocomplete siswa sudah ada
         $("#student_autocomplete").autocomplete({
             source: "{{ route('autocomplete.siswa') }}",
             minLength: 2,
             select: function(event, ui) {
                 $('#student_id').val(ui.item.id);
                 $('#student_autocomplete').val(ui.item.value);
+            }
+        });
+        // Autocomplete jenis pelanggaran
+        $("#violation_point_autocomplete").autocomplete({
+            source: "{{ route('autocomplete.violation-points') }}",
+            minLength: 2,
+            select: function(event, ui) {
+                $('#violation_points_id').val(ui.item.id);
+                $('#violation_point_autocomplete').val(ui.item.value);
             }
         });
     });

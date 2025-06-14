@@ -18,7 +18,8 @@ class ViolationController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('homeroom.teacher')->except(['index', 'show']);
+        // Hapus middleware wali kelas untuk validasi, biarkan hanya untuk create/edit
+        $this->middleware('homeroom.teacher')->only(['create', 'store', 'edit', 'update']);
     }
 
     public function index()
