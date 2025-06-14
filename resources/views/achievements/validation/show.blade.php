@@ -31,7 +31,7 @@
                                     </tr>
                                     <tr>
                                         <th>Jenis Prestasi</th>
-                                        <td>{{ $achievement->achievementPoint->jenis_prestasi ?? '-' }} ({{ $achievement->achievementPoint->poin ?? '-' }} poin)</td>
+                                        <td>{{ $achievement->achievementPoint->achievement_type ?? '-' }} ({{ $achievement->achievementPoint->points ?? '-' }} poin) - {{ $achievement->achievementPoint->achievement_category ?? '-' }}</td>
                                     </tr>
                                     <tr>
                                         <th>Tanggal Prestasi</th>
@@ -40,7 +40,7 @@
                                     <tr>
                                         <th>Tahun Ajaran</th>
                                         <td>
-                                            {{ $achievement->academicYear ? $achievement->academicYear->start_year . '/' . $achievement->academicYear->end_year . ' ' . ($achievement->academicYear->semester == 0 ? 'Ganjil' : 'Genap') : '-' }}
+                                            {{ $achievement->academicYear ? $achievement->academicYear->start_year . '/' . $achievement->academicYear->end_year . ' ' . ($achievement->academicYear->semester == 0 ? 'Genap' : 'Ganjil') : '-' }}
                                         </td>
                                     </tr>
                                     <tr>

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class StudentController extends Controller
 {
@@ -56,7 +57,7 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nis' => 'required|string|max:20',
+            'nis' => 'required|string|max:20|unique:students,nis',
             'nisn' => 'required|string|size:10|unique:students,nisn',
             'name' => 'required|string|max:255',
             'address' => 'required|string',
@@ -81,9 +82,12 @@ class StudentController extends Controller
                 $user->assignRole('Siswa');
             }
 
-            $photoPath = $request->hasFile('photo')
-                ? $request->file('photo')->store('student-photos', 'public')
-                : null;
+            $photoPath = null;
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo');
+                $fileName = $validated['nisn'] . '_' . preg_replace('/\s+/', '', $validated['name']) . '.' . $file->getClientOriginalExtension();
+                $photoPath = $file->storeAs('student-photos', $fileName, 'public');
+            }
 
             Student::create([
                 'nis' => $validated['nis'],
@@ -120,7 +124,7 @@ class StudentController extends Controller
         $student = Student::where('nisn', $nisn)->firstOrFail();
 
         $validated = $request->validate([
-            'nis' => 'required|string|max:20',
+            'nis' => 'required|string|max:20|unique:students,nis,' . $student->nis . ',nis',
             'nisn' => 'required|string|size:10|unique:students,nisn,' . $student->nisn . ',nisn',
             'name' => 'required|string|max:255',
             'address' => 'required|string',
@@ -197,7 +201,7 @@ class StudentController extends Controller
         try {
             Excel::import(new StudentsImport, $request->file('file'));
             return redirect()->route('manage-students.index')->with('success', 'Data siswa berhasil diimport.');
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+        } catch (ValidationException $e) {
             $errors = collect($e->failures())->map(fn($failure) => "Baris {$failure->row()}: {$failure->errors()[0]}")->implode('<br>');
             return redirect()->back()->with('error', $errors);
         } catch (\Exception $e) {

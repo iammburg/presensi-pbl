@@ -67,7 +67,7 @@
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $academicYear->start_year }}</td>
                                                 <td>{{ $academicYear->end_year }}</td>
-                                                <td>{{ $academicYear->semester == 0 ? 'Ganjil' : 'Genap' }}</td>
+                                                <td>{{ $academicYear->semester == 0 ? 'Genap' : 'Ganjil' }}</td>
                                                 <td>
                                                     <div class="dropdown">
                                                         <button class="btn btn-sm dropdown-toggle {{ $academicYear->is_active ? 'btn-success' : 'btn-secondary' }}"
@@ -93,8 +93,9 @@
                                                 <td>
                                                     <div class="btn-group">
                                                         <button type="button"
-                                                                class="btn btn-sm btn-outline-info dropdown-toggle"
-                                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            class="btn btn-sm btn-outline-info dropdown-toggle"
+                                                            data-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false">
                                                             <i class="fas fa-cog"></i>
                                                         </button>
                                                         <div class="dropdown-menu">
@@ -103,13 +104,13 @@
                                                                 <i class="fas fa-edit mr-2"></i>Edit
                                                             </a>
                                                             <form id="delete-form-{{ $academicYear->id }}"
-                                                                  action="{{ route('manage-academic-years.destroy', $academicYear->id) }}"
-                                                                  method="POST" style="display: none;">
+                                                                action="{{ route('manage-academic-years.destroy', $academicYear->id) }}"
+                                                                method="POST" style="display: none;">
                                                                 @csrf
                                                                 @method('DELETE')
                                                             </form>
                                                             <button type="button" class="dropdown-item text-danger"
-                                                                    onclick="confirmDelete('{{ $academicYear->id }}', '{{ $academicYear->start_year }}/{{ $academicYear->end_year }} - {{ $academicYear->semester == 0 ? 'Ganjil' : 'Genap' }}')">
+                                                                onclick="confirmDelete('{{ $academicYear->id }}', '{{ $academicYear->start_year }}/{{ $academicYear->end_year }} - {{ $academicYear->semester == 0 ? 'Genap' : 'Ganjil' }}')">
                                                                 <i class="fas fa-trash mr-2"></i>Hapus
                                                             </button>
                                                         </div>
@@ -140,6 +141,7 @@
 
     <script>
         document.addEventListener('turbolinks:load', function () {
+
             if ($.fn.DataTable.isDataTable('#datatable-main')) {
                 $('#datatable-main').DataTable().destroy();
             }
@@ -169,7 +171,8 @@
         function confirmDelete(academicYearId, academicYearName) {
             Swal.fire({
                 title: 'Yakin ingin menghapus?',
-                html: "Anda akan menghapus tahun akademik: <br><strong>" + academicYearName + "</strong><br>Data yang dihapus tidak bisa dikembalikan!",
+                html: "Anda akan menghapus tahun akademik: <br><strong>" + academicYearName +
+                    "</strong><br>Data yang dihapus tidak bisa dikembalikan!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',

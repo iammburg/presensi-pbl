@@ -15,9 +15,18 @@
                         <div class="card-body">
                             <div class="form-group">
                                 <label for="nip">NIP</label>
-                                <input type="text" class="form-control @error('nip') is-invalid @enderror" id="nip"
+                                <input type="text" maxlength="18" class="form-control @error('nip') is-invalid @enderror" id="nip"
                                     name="nip" value="{{ old('nip') }}" required>
                                 @error('nip')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                            <div class="form-group">
+                                <label for="dapodik_number">Nomor Dapodik</label>
+                                <input type="text" maxlength="16" class="form-control @error('dapodik_number') is-invalid @enderror" id="dapodik_number" name="dapodik_number" value="{{ old('dapodik_number') }}">
+                                @error('dapodik_number')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>

@@ -61,8 +61,8 @@
                                     <label>Semester</label>
                                     <select name="semester" class="form-control @error('semester') is-invalid @enderror">
                                         <option value="">-- Pilih Semester --</option>
-                                        <option value="0" {{ old('semester') == '0' ? 'selected' : '' }}>Ganjil</option>
-                                        <option value="1" {{ old('semester') == '1' ? 'selected' : '' }}>Genap</option>
+                                        <option value="0" {{ old('semester') == '0' ? 'selected' : '' }}>Genap</option>
+                                        <option value="1" {{ old('semester') == '1' ? 'selected' : '' }}>Ganjil</option>
                                     </select>
                                     @error('semester')
                                         <div class="invalid-feedback">

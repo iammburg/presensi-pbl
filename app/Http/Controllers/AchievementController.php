@@ -7,6 +7,8 @@ use App\Models\Student;
 use App\Models\AchievementPoint;
 use App\Models\AcademicYear;
 use App\Models\Teacher;
+use App\Models\HomeroomAssignment;
+use App\Models\StudentClassAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +16,11 @@ use Illuminate\Support\Facades\Auth;
 
 class AchievementController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('homeroom.teacher')->except(['index', 'show']);
+    }
+
     public function index()
     {
         $user = Auth::user();
@@ -33,12 +40,29 @@ class AchievementController extends Controller
 
     public function create()
     {
-        $students = Student::all();
-        $achievementPoints = AchievementPoint::all();
-        $academicYears = AcademicYear::all();
-        $teachers = Teacher::all();
+        $teacher = Auth::user()->teacher;
 
-        return view('achievements.create', compact('students', 'achievementPoints', 'academicYears', 'teachers'));
+        // Ambil kelas yang diampu oleh guru sebagai wali kelas
+        $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
+            ->whereHas('academicYear', function($query) {
+                $query->where('is_active', true);
+            })
+            ->first();
+
+        if (!$homeroomClass) {
+            return redirect()->route('home')->with('error', 'Anda tidak memiliki kelas yang diampu sebagai wali kelas.');
+        }
+
+        // Ambil siswa dari kelas tersebut
+        $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
+            $query->where('class_id', $homeroomClass->class_id)
+                  ->where('academic_year_id', $homeroomClass->academic_year_id);
+        })->with('currentAssignment')->get();
+
+        $achievementPoints = AchievementPoint::all();
+        $academicYears = AcademicYear::where('is_active', true)->get();
+
+        return view('achievements.create', compact('students', 'achievementPoints', 'academicYears'));
     }
 
     public function store(Request $request)
@@ -60,6 +84,27 @@ class AchievementController extends Controller
             if (!$teacher) {
                 return back()->with('error', 'Hanya guru yang dapat melaporkan prestasi.');
             }
+
+            // Verifikasi bahwa siswa tersebut adalah siswa dari kelas yang diampu guru
+            $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
+                ->whereHas('academicYear', function($query) {
+                    $query->where('is_active', true);
+                })
+                ->first();
+
+            if (!$homeroomClass) {
+                return back()->with('error', 'Anda tidak memiliki kelas yang diampu sebagai wali kelas.');
+            }
+
+            $isStudentInClass = StudentClassAssignment::where('student_id', $request->student_id)
+                ->where('class_id', $homeroomClass->class_id)
+                ->where('academic_year_id', $homeroomClass->academic_year_id)
+                ->exists();
+
+            if (!$isStudentInClass) {
+                return back()->with('error', 'Siswa tersebut bukan dari kelas yang Anda ampu.');
+            }
+
             $achievement = new Achievement([
                 'student_id' => $request->student_id,
                 'achievements_name' => $request->achievements_name,
@@ -100,12 +145,29 @@ class AchievementController extends Controller
 
     public function edit(Achievement $achievement)
     {
-        $students = Student::all();
-        $achievementPoints = AchievementPoint::all();
-        $academicYears = AcademicYear::all();
-        $teachers = Teacher::all();
+        $teacher = Auth::user()->teacher;
 
-        return view('achievements.edit', compact('achievement', 'students', 'achievementPoints', 'academicYears', 'teachers'));
+        // Ambil kelas yang diampu oleh guru sebagai wali kelas
+        $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
+            ->whereHas('academicYear', function($query) {
+                $query->where('is_active', true);
+            })
+            ->first();
+
+        if (!$homeroomClass) {
+            return redirect()->route('home')->with('error', 'Anda tidak memiliki kelas yang diampu sebagai wali kelas.');
+        }
+
+        // Ambil siswa dari kelas tersebut
+        $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
+            $query->where('class_id', $homeroomClass->class_id)
+                  ->where('academic_year_id', $homeroomClass->academic_year_id);
+        })->with('currentAssignment')->get();
+
+        $achievementPoints = AchievementPoint::all();
+        $academicYears = AcademicYear::where('is_active', true)->get();
+
+        return view('achievements.edit', compact('achievement', 'students', 'achievementPoints', 'academicYears'));
     }
 
     public function update(Request $request, Achievement $achievement)
@@ -117,26 +179,56 @@ class AchievementController extends Controller
             'achievement_date' => 'required|date',
             'academic_year_id' => 'required|exists:academic_years,id',
             'description' => 'required|string',
-            'awarded_by' => 'nullable|exists:teachers,id',
             'evidence' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'status' => 'required|in:pending,processed,completed,rejected'
         ]);
 
         DB::beginTransaction();
         try {
-            $achievement->fill($request->except('evidence'));
+            $teacher = Auth::user()->teacher;
+            if (!$teacher) {
+                return back()->with('error', 'Hanya guru yang dapat mengedit prestasi.');
+            }
+
+            // Verifikasi bahwa siswa tersebut adalah siswa dari kelas yang diampu guru
+            $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
+                ->whereHas('academicYear', function($query) {
+                    $query->where('is_active', true);
+                })
+                ->first();
+
+            if (!$homeroomClass) {
+                return back()->with('error', 'Anda tidak memiliki kelas yang diampu sebagai wali kelas.');
+            }
+
+            $isStudentInClass = StudentClassAssignment::where('student_id', $request->student_id)
+                ->where('class_id', $homeroomClass->class_id)
+                ->where('academic_year_id', $homeroomClass->academic_year_id)
+                ->exists();
+
+            if (!$isStudentInClass) {
+                return back()->with('error', 'Siswa tersebut bukan dari kelas yang Anda ampu.');
+            }
+
+            $achievement->update([
+                'student_id' => $request->student_id,
+                'achievements_name' => $request->achievements_name,
+                'achievement_points_id' => $request->achievement_points_id,
+                'achievement_date' => $request->achievement_date,
+                'academic_year_id' => $request->academic_year_id,
+                'description' => $request->description,
+                'status' => $request->status,
+            ]);
 
             if ($request->hasFile('evidence')) {
-                // Hapus file lama jika ada
+                // Hapus bukti lama jika ada
                 if ($achievement->evidence) {
                     Storage::disk('public')->delete($achievement->evidence);
                 }
-
                 $path = $request->file('evidence')->store('achievements/evidence', 'public');
                 $achievement->evidence = $path;
+                $achievement->save();
             }
-
-            $achievement->save();
 
             DB::commit();
             return redirect()->route('achievements.index')->with('success', 'Prestasi berhasil diperbarui');
@@ -153,9 +245,7 @@ class AchievementController extends Controller
             if ($achievement->evidence) {
                 Storage::disk('public')->delete($achievement->evidence);
             }
-
             $achievement->delete();
-
             DB::commit();
             return redirect()->route('achievements.index')->with('success', 'Prestasi berhasil dihapus');
         } catch (\Exception $e) {
@@ -181,5 +271,49 @@ class AchievementController extends Controller
         $achievement->save();
 
         return redirect()->route('achievements.index')->with('success', 'Validasi prestasi berhasil.');
+    }
+
+    /**
+     * Endpoint untuk autocomplete siswa berdasarkan nama dan wali kelas
+     */
+    public function autocompleteSiswa(Request $request)
+    {
+        $term = $request->get('term');
+        $teacher = Auth::user()->teacher;
+        $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
+            ->whereHas('academicYear', function($query) {
+                $query->where('is_active', true);
+            })
+            ->first();
+
+        $students = [];
+        if ($homeroomClass) {
+            $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
+                    $query->where('class_id', $homeroomClass->class_id)
+                          ->where('academic_year_id', $homeroomClass->academic_year_id);
+                })
+                ->where('name', 'like', '%' . $term . '%')
+                ->with('currentAssignment.schoolClass')
+                ->get();
+        }
+
+        $result = [];
+        foreach ($students as $student) {
+            $className = optional(optional($student->currentAssignment)->schoolClass)->name;
+            $parallelName = optional(optional($student->currentAssignment)->schoolClass)->parallel_name;
+            $classInfo = '';
+
+            if ($className && $parallelName) {
+                $classInfo = ' - ' . $className . ' ' . $parallelName;
+            } elseif ($className) {
+                $classInfo = ' - ' . $className;
+            }
+
+            $result[] = [
+                'id' => $student->nisn,
+                'value' => $student->name . $classInfo
+            ];
+        }
+        return response()->json($result);
     }
 }

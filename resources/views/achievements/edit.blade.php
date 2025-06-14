@@ -8,12 +8,8 @@
         @method('PUT')
         <div class="form-group">
             <label for="student_id">Siswa</label>
-            <select name="student_id" id="student_id" class="form-control" required>
-                <option value="">-- Pilih Siswa --</option>
-                @foreach($students as $student)
-                    <option value="{{ $student->nisn }}" {{ old('student_id', $achievement->student_id) == $student->nisn ? 'selected' : '' }}>{{ $student->name }}</option>
-                @endforeach
-            </select>
+            <input type="text" id="student_autocomplete" class="form-control" placeholder="Ketik nama siswa..." autocomplete="off" required value="{{ old('student_name', $achievement->student ? $achievement->student->name : '') }}">
+            <input type="hidden" name="student_id" id="student_id" value="{{ old('student_id', $achievement->student_id) }}">
         </div>
         <div class="form-group">
             <label for="achievements_name">Nama Prestasi</label>
@@ -22,9 +18,9 @@
         <div class="form-group">
             <label for="achievement_points_id">Jenis Prestasi</label>
             <select name="achievement_points_id" id="achievement_points_id" class="form-control" required>
-                <option value="">-- Pilih Jenis Prestasi --</option>
+                <option value="">Pilih Jenis Prestasi</option>
                 @foreach($achievementPoints as $point)
-                    <option value="{{ $point->id }}" {{ old('achievement_points_id', $achievement->achievement_points_id) == $point->id ? 'selected' : '' }}>{{ $point->jenis_prestasi }} ({{ $point->kategori_prestasi }}, {{ $point->poin }} poin)</option>
+                    <option value="{{ $point->id }}" {{ old('achievement_points_id', $achievement->achievement_points_id) == $point->id ? 'selected' : '' }}>{{ $point->achievement_type }} ({{ $point->achievement_category }}, {{ $point->points }} poin)</option>
                 @endforeach
             </select>
         </div>
@@ -37,7 +33,7 @@
             <select name="academic_year_id" id="academic_year_id" class="form-control" required>
                 <option value="">-- Pilih Tahun Akademik --</option>
                 @foreach($academicYears as $year)
-                    <option value="{{ $year->id }}" {{ old('academic_year_id', $achievement->academic_year_id) == $year->id ? 'selected' : '' }}>{{ $year->start_year }}/{{ $year->end_year }} {{ $year->semester == 0 ? 'Ganjil' : 'Genap' }}</option>
+                    <option value="{{ $year->id }}" {{ old('academic_year_id', $achievement->academic_year_id) == $year->id ? 'selected' : '' }}>{{ $year->start_year }}/{{ $year->end_year }} {{ $year->semester == 0 ? 'Genap' : 'Ganjil' }}</option>
                 @endforeach
             </select>
         </div>
@@ -58,3 +54,34 @@
     </form>
 </div>
 @endsection
+
+@push('js')
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script>
+$(function() {
+    $("#student_autocomplete").autocomplete({
+        source: "{{ route('autocomplete.siswa') }}",
+        minLength: 2,
+        select: function(event, ui) {
+            $('#student_id').val(ui.item.id);
+            $('#student_autocomplete').val(ui.item.value);
+        }
+    });
+
+    @if ($achievement->student && $achievement->student->currentAssignment && $achievement->student->currentAssignment->schoolClass)
+        var studentName = "{{ $achievement->student->name }}";
+        var className = "{{ $achievement->student->currentAssignment->schoolClass->name }}";
+        var parallelName = "{{ $achievement->student->currentAssignment->schoolClass->parallel_name }}";
+        var classInfo = '';
+
+        if (className && parallelName) {
+            classInfo = ' - ' + className + ' ' + parallelName;
+        } else if (className) {
+            classInfo = ' - ' + className;
+        }
+        $('#student_autocomplete').val(studentName + classInfo);
+    @endif
+});
+</script>
+@endpush
