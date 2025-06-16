@@ -38,16 +38,17 @@
     </div>
 
     <div class="content">
-        <div class="container-fluid text-center">
+        <div class="container-fluid text-center mb-3">
             <div class="mb-3">
                 <p>
                     Waktu presensi akan ditutup pada:
                     <strong id="deadline" class="text-danger"></strong>
                     <br>
-                    <span id="countdown" style="font-weight:bold;"></span>
+                    {{-- <span id="countdown" style="font-weight:bold;"></span> --}}
+                    <span>Posisikan wajah Anda tepat di tengah kamera</span>
                 </p>
             </div>
-            <video id="video" width="480" height="360" autoplay playsinline style="border:1px solid #ccc;"></video>
+            <video id="video" width="600" height="350" autoplay playsinline style="border:1px solid #fff;"></video>
             <canvas id="canvas" width="160" height="160" style="display:none;"></canvas>
             <div id="message-container" class="m-2">
                 <span id="message-placeholder" style="visibility: hidden;">Placeholder</span>
@@ -58,6 +59,7 @@
                 </div>
                 <button id="btn-scan" class="btn btn-primary">Mulai Scan</button>
                 <button id="btn-stop" class="btn btn-danger">Berhenti Scan</button>
+                {{--  --}}
             </div>
         </div>
     </div>
@@ -109,6 +111,8 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const scheduleIds = @json($scheduleIds);
+            // console.log('Schedule IDs:', scheduleIds);
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
             const btnScan = document.getElementById('btn-scan');
@@ -158,30 +162,35 @@
                                     "{{ route('manage-attendances.store') }}", {
                                         method: 'POST',
                                         headers: {
+                                            'Accept': 'application/json',
                                             'Content-Type': 'application/json',
                                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                                         },
                                         body: JSON.stringify({
-                                            class_schedule_id: {{ request('class_id') }},
+                                            class_schedule_id: scheduleIds[
+                                                0],
                                             nisn: scan1.label,
                                             meeting_date: new Date()
                                                 .toISOString().slice(0,
                                                     10)
                                         })
                                     });
-                                console.log('Response Laravel status:', resp2
-                                    .status);
+                                // console.log('Response Laravel status:', resp2
+                                //     .status);
+
                                 const scan2 = await resp2.json();
-                                console.log('Response Laravel body:', scan2);
+                                // console.log('Response Laravel body:', scan2);
 
-                                console.log('scan2.success =', scan2,
-                                    ', message=', scan2);
-
-                                if (scan2.success) {
+                                // Menampilkan pesan berdasarkan respons dari Laravel
+                                if (resp2.ok) {
                                     showToast(scan2.message, 'success');
-                                    console.log('Presensi berhasil:', scan2);
+                                } else if (resp2.status === 409) {
+                                    showToast(scan2.message, 'success');
+                                } else if (resp2.status === 500) {
+                                    showToast(scan2.message, 'danger');
                                 } else {
-                                    showToast(scan2.message, 'success');
+                                    showToast('Terjadi kesalahan tidak terduga.',
+                                        'danger');
                                 }
                             } else if (scan1.method === 'no_face') {
                                 scanMessage(
@@ -192,7 +201,8 @@
                             }
                         } catch (err) {
                             console.error(err);
-                            showToast('Error koneksi ke server.', 'danger');
+                            showToast('Terjadi kesalahan saat memproses data: ' +
+                                err, 'danger');
                         }
                     }, 'image/jpeg');
                 }, 1000);
@@ -247,7 +257,7 @@
                     if (toast) {
                         toast.remove();
                     }
-                }, 3500);
+                }, 2000);
             }
         });
     </script>

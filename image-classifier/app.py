@@ -5,6 +5,7 @@ from PIL import Image
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from facenet_pytorch import MTCNN, InceptionResnetV1
+from torchvision import transforms
 
 app = Flask(__name__)
 CORS(app)
@@ -29,6 +30,15 @@ db_embeddings = {}
 CACHE_LOCK = threading.Lock()
 REFRESH_INTERVAL = 300
 
+augmentations = transforms.Compose(
+    [
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomRotation(degrees=10),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+        # bisa tambah Gaussian blur, noise, dsb
+    ]
+)
+
 
 def load_db_embeddings():
     global db_embeddings
@@ -38,15 +48,29 @@ def load_db_embeddings():
             continue
         nisn = fname.split("_")[0]
         path = os.path.join(STUDENT_PHOTOS_DIR, fname)
+
         try:
             img = Image.open(path).convert("RGB")
+            emb_list = []
+
             face = mtcnn(img)
-            if face is None:
-                continue
-            face = face.unsqueeze(0).to(device)
-            with torch.no_grad():
-                emb = resnet(face).cpu().numpy()[0]
-            temp[nisn] = emb / np.linalg.norm(emb)
+            if face is not None:
+                emb = resnet(face.unsqueeze(0).to(device)).cpu().detach().numpy()[0]
+                emb_list.append(emb)
+
+            for _ in range(4):
+                aug_img = augmentations(img)
+                face = mtcnn(aug_img)
+                if face is not None:
+                    emb_aug = (
+                        resnet(face.unsqueeze(0).to(device)).cpu().detach().numpy()[0]
+                    )
+                    emb_list.append(emb_aug)
+
+            if emb_list:
+                mean_emb = np.mean(emb_list, axis=0)
+                temp[nisn] = mean_emb / np.linalg.norm(mean_emb)
+
         except Exception as e:
             app.logger.warning(f"Gagal embed {fname}: {e}")
 

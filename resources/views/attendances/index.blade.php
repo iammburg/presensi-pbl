@@ -92,10 +92,17 @@
                                                 <input type="hidden" name="day_of_week"
                                                     value="{{ $schedule->day_of_week }}">
 
-                                                <button type="submit" class="btn btn-primary" @disabled(now()->lt(\Carbon\Carbon::parse($schedule->start_time)) || now()->gt(\Carbon\Carbon::parse($schedule->end_time)))>
+                                                <button type="submit" class="btn btn-primary" @disabled(now()->lt(\Carbon\Carbon::today()->setTimeFromTimeString($schedule->start_time)->subMinutes(30)) ||
+                                                        now()->gt(\Carbon\Carbon::today()->setTimeFromTimeString($schedule->end_time)))>
                                                     <i class="fas fa-clipboard-check mr-2"></i> Mulai Presensi
                                                 </button>
+
                                             </form>
+                                            <a href="{{ route('manage-attendances.show-by-class', $schedule->class_id) }}">
+                                                <button class="btn btn-secondary mt-2">
+                                                    <i class="fas fa-eye mr-2"></i> Lihat Presensi
+                                                </button>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
