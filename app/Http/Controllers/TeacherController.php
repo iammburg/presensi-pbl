@@ -8,6 +8,7 @@ use App\Imports\TeachersImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Traits\HasPermissions;
@@ -127,42 +128,57 @@ class TeacherController extends Controller
      */
     public function show(string $nip)
     {
-        $teacher = Teacher::with(['user', 'teachingAssignments.subject', 'teachingAssignments.class'])->where('nip', $nip)->firstOrFail();
+        try {
+            $teacher = Teacher::with(['user', 'teachingAssignments.subject', 'teachingAssignments.schoolClass'])->where('nip', $nip)->firstOrFail();
 
-        // Jika request AJAX, kembalikan JSON
-        if (request()->ajax()) {
-            // Ambil mata pelajaran yang diampu
-            $subjects = $teacher->teachingAssignments->map(function ($assignment) {
-                return [
-                    'subject' => $assignment->subject->name,
-                    'class' => $assignment->class->name . ($assignment->class->parallel_name ? ' - ' . $assignment->class->parallel_name : '')
-                ];
-            });
+            // Jika request AJAX, kembalikan JSON
+            if (request()->ajax()) {
+                // Ambil mata pelajaran yang diampu
+                $subjects = $teacher->teachingAssignments->map(function ($assignment) {
+                    return [
+                        'subject' => $assignment->subject ? $assignment->subject->name : '-',
+                        'class' => $assignment->schoolClass ?
+                            ($assignment->schoolClass->name . ($assignment->schoolClass->parallel_name ? ' - ' . $assignment->schoolClass->parallel_name : ''))
+                            : '-'
+                    ];
+                });
 
-            // Buat status berdasarkan mata pelajaran
-            $status = 'Guru';
-            if ($teacher->user->hasRole('Guru BK')) {
-                $status = 'Guru BK';
-            } else if ($subjects->isNotEmpty()) {
-                $status = 'Guru ' . $subjects->pluck('subject')->unique()->join(', ');
+                // Buat status berdasarkan mata pelajaran
+                $status = 'Guru';
+                if ($teacher->user->hasRole('Guru BK')) {
+                    $status = 'Guru BK';
+                } else if ($subjects->isNotEmpty()) {
+                    $status = 'Guru ' . $subjects->pluck('subject')->unique()->join(', ');
+                }
+
+                return response()->json([
+                    'nip' => $teacher->nip,
+                    'dapodik_number' => $teacher->dapodik_number,
+                    'name' => $teacher->name,
+                    'email' => $teacher->user->email,
+                    'phone' => $teacher->phone,
+                    'address' => $teacher->address,
+                    'gender' => $teacher->gender,
+                    'birth_date' => $teacher->birth_date,
+                    'photo_url' => $teacher->photo ? asset('storage/' . $teacher->photo) : null,
+                    'status' => $status,
+                    // 'subjects' => $subjects
+                ]);
             }
 
-            return response()->json([
-                'nip' => $teacher->nip,
-                'dapodik_number' => $teacher->dapodik_number,
-                'name' => $teacher->name,
-                'email' => $teacher->user->email,
-                'phone' => $teacher->phone,
-                'address' => $teacher->address,
-                'gender' => $teacher->gender,
-                'birth_date' => $teacher->birth_date,
-                'photo_url' => $teacher->photo ? asset('storage/' . $teacher->photo) : null,
-                'status' => $status,
-                // 'subjects' => $subjects
-            ]);
-        }
+            return view('teachers.show', compact('teacher'));
+        } catch (\Exception $e) {
+            Log::error('Error in TeacherController@show: ' . $e->getMessage());
 
-        return view('teachers.show', compact('teacher'));
+            if (request()->ajax()) {
+                return response()->json([
+                    'error' => 'Tidak dapat mengambil data guru'
+                ], 500);
+            }
+
+            return redirect()->route('manage-teachers.index')
+                ->with('error', 'Tidak dapat mengambil data guru');
+        }
     }
 
     /**

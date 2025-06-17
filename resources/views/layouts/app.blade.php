@@ -133,13 +133,11 @@
 
         <div class="content-wrapper">
             @yield('content')
-        </div>
-
-        <footer class="main-footer">
+        </div>        <footer class="main-footer">
             <div class="float-right d-none d-sm-block">
                 <b>Version</b> 1.0.0
             </div>
-            <strong>&copy; {{ date('Y') }} <i>Task Force</i> PBL IK-TRK Polines</strong>
+            <strong>&copy; {{ date('Y') }} <i>Monitera</i> - Sistem Presensi Digital</strong>
         </footer>
     </div>
 
