@@ -16,6 +16,7 @@
         .dropdown-menu .dropdown-item.text-danger { color: #e74c3c !important; font-weight: 500; }
         .dropdown-menu .dropdown-item.text-danger:hover { background: #ffeaea; color: #c0392b !important; }
         .dropdown-menu { border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+        .dropdown-toggle.btn-sm { min-width: 100px; }
     </style>
 @endpush
 
@@ -28,7 +29,6 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        {{-- Tambahkan breadcrumb jika diperlukan --}}
                     </ol>
                 </div>
             </div>
@@ -67,19 +67,35 @@
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $academicYear->start_year }}</td>
                                                 <td>{{ $academicYear->end_year }}</td>
-                                                <td>{{ $academicYear->semester == 0 ? 'Ganjil' : 'Genap' }}</td>
+                                                <td>{{ $academicYear->semester == 0 ? 'Genap' : 'Ganjil' }}</td>
                                                 <td>
-                                                    @if ($academicYear->is_active)
-                                                        <span class="badge badge-success">Aktif</span>
-                                                    @else
-                                                        <span class="badge badge-danger">Tidak Aktif</span>
-                                                    @endif
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm dropdown-toggle {{ $academicYear->is_active ? 'btn-success' : 'btn-secondary' }}"
+                                                                type="button"
+                                                                id="dropdownMenuStatus{{ $academicYear->id }}"
+                                                                data-toggle="dropdown"
+                                                                aria-haspopup="true"
+                                                                aria-expanded="false">
+                                                            {{ $academicYear->is_active ? 'Aktif' : 'Tidak Aktif' }}
+                                                        </button>
+                                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuStatus{{ $academicYear->id }}">
+                                                            <a class="dropdown-item status-option {{ $academicYear->is_active ? 'disabled' : '' }}"
+                                                               href="#"
+                                                               data-id="{{ $academicYear->id }}"
+                                                               data-status="1">Aktif</a>
+                                                            <a class="dropdown-item status-option {{ !$academicYear->is_active ? 'disabled' : '' }}"
+                                                               href="#"
+                                                               data-id="{{ $academicYear->id }}"
+                                                               data-status="0">Tidak Aktif</a>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <td>
                                                     <div class="btn-group">
                                                         <button type="button"
-                                                                class="btn btn-sm btn-outline-info dropdown-toggle"
-                                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            class="btn btn-sm btn-outline-info dropdown-toggle"
+                                                            data-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false">
                                                             <i class="fas fa-cog"></i>
                                                         </button>
                                                         <div class="dropdown-menu">
@@ -88,13 +104,13 @@
                                                                 <i class="fas fa-edit mr-2"></i>Edit
                                                             </a>
                                                             <form id="delete-form-{{ $academicYear->id }}"
-                                                                  action="{{ route('manage-academic-years.destroy', $academicYear->id) }}"
-                                                                  method="POST" style="display: none;">
+                                                                action="{{ route('manage-academic-years.destroy', $academicYear->id) }}"
+                                                                method="POST" style="display: none;">
                                                                 @csrf
                                                                 @method('DELETE')
                                                             </form>
                                                             <button type="button" class="dropdown-item text-danger"
-                                                                    onclick="confirmDelete('{{ $academicYear->id }}', '{{ $academicYear->start_year }}/{{ $academicYear->end_year }} - {{ $academicYear->semester == 0 ? 'Ganjil' : 'Genap' }}')">
+                                                                onclick="confirmDelete('{{ $academicYear->id }}', '{{ $academicYear->start_year }}/{{ $academicYear->end_year }} - {{ $academicYear->semester == 0 ? 'Genap' : 'Ganjil' }}')">
                                                                 <i class="fas fa-trash mr-2"></i>Hapus
                                                             </button>
                                                         </div>
@@ -104,9 +120,9 @@
                                         @endforeach
                                     </tbody>
                                 </table>
-                            </div> {{-- table-responsive --}}
-                        </div> {{-- card-body --}}
-                    </div> {{-- card --}}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -124,45 +140,29 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // Debugging to track script execution
-        console.log('DataTable script loaded at: ' + new Date().toISOString());
-
-        // Initialize DataTable on page load or Turbolinks load
         document.addEventListener('turbolinks:load', function () {
-            console.log('Turbolinks load event triggered');
 
-            // Destroy existing DataTable instance if it exists
             if ($.fn.DataTable.isDataTable('#datatable-main')) {
-                console.log('Destroying existing DataTable instance');
                 $('#datatable-main').DataTable().destroy();
             }
 
-            // Initialize DataTable
-            console.log('Initializing new DataTable instance');
             $('#datatable-main').DataTable({
                 responsive: true,
                 autoWidth: false,
-                language: {
-                    url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
-                },
-                columnDefs: [
-                    { "orderable": false, "targets": 5 } // Disable ordering for 'Aksi' column
-                ]
+                language: { url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json" },
+                columnDefs: [{ "orderable": false, "targets": 5 }]
             });
 
-            // Toastr notifications for errors from validation
             @if ($errors->any())
                 @foreach ($errors->all() as $error)
                     toastr.error('{{ $error }}');
                 @endforeach
             @endif
 
-            // Toastr notification for success message from session
             @if (session('success'))
                 toastr.success('{{ session('success') }}');
             @endif
 
-            // Toastr notification for error message from session
             @if (session('error'))
                 toastr.error('{{ session('error') }}');
             @endif
@@ -171,7 +171,8 @@
         function confirmDelete(academicYearId, academicYearName) {
             Swal.fire({
                 title: 'Yakin ingin menghapus?',
-                html: "Anda akan menghapus tahun akademik: <br><strong>" + academicYearName + "</strong><br>Data yang dihapus tidak bisa dikembalikan!",
+                html: "Anda akan menghapus tahun akademik: <br><strong>" + academicYearName +
+                    "</strong><br>Data yang dihapus tidak bisa dikembalikan!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
@@ -184,5 +185,33 @@
                 }
             });
         }
+
+        $(document).on('click', '.status-option', function (e) {
+            e.preventDefault();
+
+            const academicYearId = $(this).data('id');
+            const newStatus = $(this).data('status');
+
+            $.ajax({
+                url: `/manage-academic-years/${academicYearId}`,
+                type: 'POST',
+                data: {
+                    _method: 'PUT',
+                    _token: '{{ csrf_token() }}',
+                    status: newStatus
+                },
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        setTimeout(() => { location.reload(); }, 800);
+                    } else {
+                        toastr.error("Gagal memperbarui status.");
+                    }
+                },
+                error: function () {
+                    toastr.error("Terjadi kesalahan saat memperbarui status.");
+                }
+            });
+        });
     </script>
 @endpush

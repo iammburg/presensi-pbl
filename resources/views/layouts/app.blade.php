@@ -52,14 +52,15 @@
             <ul class="navbar-nav ml-auto ">
                 <li class="nav-item dropdown user-menu">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        <img src="../../dist/img/user2-160x160.jpg" class="user-image img-circle elevation-2"
-                            alt="User Image">
+                        <img src="{{ asset('../../dist/img/user2-160x160.jpg') }}"
+                            class="user-image img-circle elevation-2" alt="User Image">
                         <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
 
                         <li class="user-header bg-info">
-                            <img src="../../dist/img/user2-160x160.jpg" class="img-circle elevation-3" alt="User Image">
+                            <img src="{{ asset('../../dist/img/user2-160x160.jpg') }}" class="img-circle elevation-3"
+                                alt="User Image">
                             <p>
                                 {{ Auth::user()->name }}
                                 <small>Politeknik Negeri Semarang</small>
@@ -132,13 +133,11 @@
 
         <div class="content-wrapper">
             @yield('content')
-        </div>
-
-        <footer class="main-footer">
+        </div>        <footer class="main-footer">
             <div class="float-right d-none d-sm-block">
                 <b>Version</b> 1.0.0
             </div>
-            <strong>&copy; {{ date('Y') }} <i>Task Force</i> PBL IK-TRK Polines</strong>
+            <strong>&copy; {{ date('Y') }} <i>Monitera</i> - Sistem Presensi Digital</strong>
         </footer>
     </div>
 

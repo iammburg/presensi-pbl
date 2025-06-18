@@ -117,7 +117,7 @@
                                         <option value="">-- Pilih Mata Pelajaran --</option>
                                         @foreach($subjects as $subject)
                                             <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>
-                                                {{ $subject->name }}
+                                                {{ $subject->subject_name }}
                                             </option>
                                         @endforeach
                                     </select>

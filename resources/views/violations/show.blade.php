@@ -48,7 +48,7 @@
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-md-10"> {{-- Atau col-md-12 untuk lebar penuh --}}
-                <div class="card card-danger card-outline">
+                <div class="card card-primary card-outline">
                     <div class="card-header">
                         <h3 class="card-title">Informasi Laporan Pelanggaran</h3>
                         <div class="card-tools">
@@ -61,7 +61,7 @@
                         <div class="row">
                             {{-- Kolom Informasi Utama Pelanggaran --}}
                             <div class="col-md-7">
-                                <h5 class="mb-3 text-danger">Rincian Pelanggaran</h5>
+                                <h5 class="mb-3 text-primary">Rincian Pelanggaran</h5>
                                 <table class="table table-sm table-borderless">
                                     <tr>
                                         <th>Nama Siswa</th>
@@ -122,19 +122,19 @@
 
                             {{-- Kolom Informasi Status dan Validasi --}}
                             <div class="col-md-5">
-                                <h5 class="mb-3 text-danger">Status & Validasi</h5>
+                                <h5 class="mb-3 text-primary">Status & Validasi</h5>
                                 <table class="table table-sm table-borderless">
                                     <tr>
                                         <th>Status Utama Laporan</th>
                                         <td>:
-                                            @if($violation->status === 'pending')
-                                                <span class="badge badge-info">Menunggu Diproses</span>
-                                            @elseif($violation->status === 'processed')
-                                                <span class="badge badge-primary">Sedang Diproses</span>
-                                            @elseif($violation->status === 'completed')
-                                                <span class="badge badge-success">Selesai Diproses</span>
+                                            @if($violation->validation_status === 'pending')
+                                                @if(empty($violation->viewed_at))
+                                                    <span class="badge badge-info">Menunggu Diproses</span>
+                                                @else
+                                                    <span class="badge badge-primary">Sedang Diproses</span>
+                                                @endif
                                             @else
-                                                <span class="badge badge-secondary">{{ Str::title($violation->status ?? 'N/A') }}</span>
+                                                <span class="badge badge-success">Selesai Diproses</span>
                                             @endif
                                         </td>
                                     </tr>
@@ -152,10 +152,10 @@
                                             @endif
                                         </td>
                                     </tr>
-                                    @if($violation->validation_status !== 'pending' && $violation->validator)
+                                    @if($violation->validation_status !== 'pending')
                                     <tr>
                                         <th>Divalidasi Oleh</th>
-                                        <td>: {{ $violation->validator->name ?? 'N/A' }}</td>
+                                        <td>: {{ $violation->validator ? $violation->validator->name : '-' }}</td>
                                     </tr>
                                     <tr>
                                         <th>Tanggal Validasi</th>

@@ -82,9 +82,12 @@ class StudentController extends Controller
                 $user->assignRole('Siswa');
             }
 
-            $photoPath = $request->hasFile('photo')
-                ? $request->file('photo')->store('student-photos', 'public')
-                : null;
+            $photoPath = null;
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo');
+                $fileName = $validated['nisn'] . '_' . preg_replace('/\s+/', '', $validated['name']) . '.' . $file->getClientOriginalExtension();
+                $photoPath = $file->storeAs('student-photos', $fileName, 'public');
+            }
 
             Student::create([
                 'nis' => $validated['nis'],

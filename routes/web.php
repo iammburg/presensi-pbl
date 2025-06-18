@@ -25,6 +25,7 @@ use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AchievementValidationController;
 use App\Http\Controllers\ViolationValidationController;
+use App\Http\Controllers\AttendanceHistoryController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -68,10 +69,17 @@ Route::resource('manage-teacher-subject-assignments', TeachingAssignmentControll
     ->parameters(['manage-teacher-subject-assignments' => 'teacherAssignment']);
 Route::resource('manage-student-class-assignments', StudentClassAssignmentController::class)
     ->parameters(['manage-student-class-assignments' => 'studentAssignment']);
+Route::get('/manage-student-class-assignments/create/for-class/{class_id}', [StudentClassAssignmentController::class, 'createForClass'])
+    ->name('manage-student-class-assignments.create-for-class')
+    ->middleware(['auth']);
 Route::resource('manage-hours', HourController::class);
 Route::resource('manage-schedules', ClassScheduleController::class);
 Route::get('manage-schedules/{manage_schedule}/export-pdf', [ClassScheduleController::class, 'exportPdf'])->name('manage-schedules.export-pdf');
+Route::get('manage-attendances/class/{class_id}', [AttendanceController::class, 'showByClass'])->name('manage-attendances.show-by-class');
+Route::post('manage-attendances/update-status', [AttendanceController::class, 'updateStatus'])->name('manage-attendances.update-status');
 Route::resource('manage-attendances', AttendanceController::class);
+Route::resource('manage-attendances-history', AttendanceHistoryController::class)->only(['index', 'show']);
+Route::get('attendances/history-detail', [AttendanceHistoryController::class, 'detail'])->name('attendances.history-detail');
 
 // Route buat Guru BK
 Route::resource('violation-management', ViolationPointController::class);
@@ -85,9 +93,17 @@ Route::post('achievements/{achievement}/validate', [AchievementController::class
 Route::resource('achievement-validations', AchievementValidationController::class)->only(['index', 'show']);
 Route::post('achievement-validations/{achievement}/validate', [AchievementValidationController::class, 'validateAchievement'])->name('achievement-validations.validate');
 
+// Edit & update keputusan validasi prestasi oleh Guru BK yang memvalidasi
+Route::get('achievement-validations/{achievement}/edit-validation', [AchievementValidationController::class, 'editValidation'])->name('achievement-validations.editValidation');
+Route::put('achievement-validations/{achievement}/update-validation', [AchievementValidationController::class, 'updateValidation'])->name('achievement-validations.updateValidation');
+
 // Route untuk validasi pelanggaran oleh Guru BK
-Route::post('violations/{violation}/validate', [ViolationController::class, 'validateViolation'])->name('violations.validate');
+Route::post('violations/{violation}/validate', [ViolationValidationController::class, 'validateViolation'])->name('violations.validate');
 Route::resource('violation-validations', ViolationValidationController::class)->only(['index', 'show']);
+
+// Edit & update keputusan validasi oleh Guru BK yang memvalidasi
+Route::get('violation-validations/{violation}/edit-validation', [ViolationValidationController::class, 'editValidation'])->name('violation-validations.editValidation');
+Route::put('violation-validations/{violation}/update-validation', [ViolationValidationController::class, 'updateValidation'])->name('violation-validations.updateValidation');
 
 // Route buat Siswa
 Route::get('/manage-attendance-students', [StudentAttendanceController::class, 'index'])
@@ -96,10 +112,15 @@ Route::get('/student/attendance', [StudentAttendanceController::class, 'index'])
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
 
-// Route tambahan untuk subjects
-Route::resource('subjects', SubjectController::class);
+// Route utama untuk subject, dengan prefix dan nama route 'manage-subject'
+Route::resource('manage-subject', SubjectController::class);
+
+// Route tambahan untuk mendapatkan nama jadwal pelajaran
+Route::get('manage-subject/schedule-names', [SubjectController::class, 'getScheduleNames'])->name('manage-subject.schedule-names');
 
 // Route tambahan untuk mendapatkan nama jadwal pelajaran
 Route::get('subjects/schedule-names', [SubjectController::class, 'getScheduleNames'])->name('subjects.schedule-names');
 
 Route::get('/autocomplete/siswa', [App\Http\Controllers\AchievementController::class, 'autocompleteSiswa'])->name('autocomplete.siswa');
+// Autocomplete jenis pelanggaran (violation points)
+Route::get('/autocomplete/violation-points', [App\Http\Controllers\ViolationPointController::class, 'autocomplete'])->name('autocomplete.violation-points');

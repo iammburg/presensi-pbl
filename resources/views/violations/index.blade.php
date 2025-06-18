@@ -159,7 +159,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="6" class="text-center text-muted">
+                                                <td colspan="8" class="text-center text-muted">
                                                     Belum ada laporan pelanggaran yang dibuat.
                                                 </td>
                                             </tr>
@@ -179,35 +179,31 @@
 @endsection
 
 @push('js')
-    <script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
-    <script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
-    <script src="{{ asset('plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
-    <script src="{{ asset('plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
-    {{-- Opsional: jika Anda memerlukan tombol ekspor --}}
-    {{-- <script src="{{ asset('plugins/jszip/jszip.min.js') }}"></script>
-    <script src="{{ asset('plugins/pdfmake/pdfmake.min.js') }}"></script>
-    <script src="{{ asset('plugins/pdfmake/vfs_fonts.js') }}"></script>
-    <script src="{{ asset('plugins/datatables-buttons/js/buttons.html5.min.js') }}"></script>
-    <script src="{{ asset('plugins/datatables-buttons/js/buttons.print.min.js') }}"></script>
-    <script src="{{ asset('plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script> --}}
-
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap4.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
-        $(function () {
-            $("#datatable-violations").DataTable({
-                "responsive": true, "lengthChange": false, "autoWidth": false,
-                "paging": false, // Dinonaktifkan karena sudah ada paginasi Laravel
-                "searching": true, // Aktifkan jika ingin ada fitur search DataTables
-                "ordering": true,
-                "info": false, // Dinonaktifkan karena sudah ada info paginasi Laravel
-                // "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"] // Aktifkan jika perlu tombol
-            }).buttons().container().appendTo('#datatable-violations_wrapper .col-md-6:eq(0)');
-            // Jika Anda tidak menggunakan tombol DataTables, baris di atas bisa dihilangkan atau disesuaikan.
-            // Jika Anda menggunakan paginasi Laravel, pastikan lengthChange dan paging di DataTables disetel false
-            // atau sesuaikan agar tidak bentrok.
+        $(document).ready(function() {
+            $.fn.dataTable.ext.errMode = 'none';
+            $('#datatable-violations').DataTable({
+                responsive: true,
+                autoWidth: false,
+                lengthChange: true,
+                pageLength: 10,
+                language: {
+                    lengthMenu: "Tampilkan _MENU_ entri",
+                    zeroRecords: "Data tidak ditemukan",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                    infoEmpty: "Tidak ada entri yang ditampilkan",
+                    infoFiltered: "(disaring dari _MAX_ total entri)",
+                    search: "Cari:",
+                    paginate: {
+                        previous: "Sebelumnya",
+                        next: "Berikutnya"
+                    }
+                }
+            });
         });
 
         function confirmDelete(id) {
@@ -216,8 +212,8 @@
                 text: "Laporan pelanggaran ini akan dihapus secara permanen!",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33', // Red color for delete button
-                cancelButtonColor: '#6c757d', // Secondary color for cancel button
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Ya, hapus!',
                 cancelButtonText: 'Batal'
             }).then((result) => {
@@ -227,7 +223,6 @@
             });
         }
 
-        // Menampilkan notifikasi dari session jika ada
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
