@@ -34,7 +34,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 20px;
+                font-size: 15px;
                 color: #333;
             }
 
@@ -61,76 +61,296 @@
                     <div class="summary-card bg-primary">
                         <div class="summary-icon"><i class="fas fa-users"></i></div>
                         <div>
-                            <span style="font-size: 18px;">AKTIF</span>  <br>
-                            <span style="font-size: 19px;">{{ $activeStudents }}</span>
+                            <span style="font-size: 16px;">SISWA AKTIF: </span>
+                            <br>
+                            <span style="font-size: 16px;">{{ $activeStudents }}</span>
                         </div>
                     </div>
                     <div class="summary-card bg-success">
                         <div class="summary-icon"><i class="fas fa-check"></i></div>
                         <div>
-                            <span style="font-size: 18px;">HADIR</span> <br>
-                            <span style="font-size: 19px;">{{ $present }}</span>
+                            <span style="font-size: 16px;">HADIR: </span>
+                            <br>
+                            <span style="font-size: 16px;">{{ $present }}</span>
                         </div>
                     </div>
                     <div class="summary-card bg-danger">
                         <div class="summary-icon"><i class="fas fa-times"></i></div>
                         <div>
-                            <span style="font-size: 18px;">ALPHA</span> <br>
-                            <span style="font-size: 19px;">{{ $absent }}</span>
+                            <span style="font-size: 16px;">ALPHA: </span>
+                            <br>
+                            <span style="font-size: 16px;">{{ $absent }}</span>
+                        </div>
+                    </div>
+                    <div class="summary-card bg-info text-dark">
+                        <div class="summary-icon"><i class="fas fa-home"></i></div>
+                        <div>
+                            <span style="font-size: 16px;">IZIN: </span>
+                            <br>
+                            <span style="font-size: 16px;">{{ $excused }}</span>
                         </div>
                     </div>
                     <div class="summary-card bg-warning text-dark">
-                        <div class="summary-icon"><i class="fas fa-home"></i></div>
+                        <div class="summary-icon"><i class="fas fa-clinic-medical"></i></div>
                         <div>
-                            <span style="font-size: 18px;">IZIN</span> <br>
-                            <span style="font-size: 19px;">{{ $excused }}</span>
+                            <span style="font-size: 16px;">SAKIT: </span>
+                            <br>
+                            <span style="font-size: 16px;">{{ $excused }}</span>
                         </div>
                     </div>
                 </div>
 
+
                 {{-- Grafik Presensi --}}
                 <div class="col-md-9">
                     <div class="card-container">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0">Jumlah Presensi Siswa Setiap Kelas</h5>
-                            <select id="weekFilter" class="form-select w-auto">
-                                @foreach ($weeks as $key => $label)
-                                    <option value="{{ $key }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
+                        <form method="GET" class="mb-3">
+                            <label for="weekFilter" class="form-label">Pilih Minggu:</label>
+                            <input type="week" name="week" id="weekFilter" class="form-control w-auto d-inline-block"
+                                value="{{ $weekIso }}">
+                            <button type="submit" class="btn btn-primary ms-2">Tampilkan</button>
+                        </form>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Jumlah Kehadiran per Kelas ({{ $startOfWeek->format('d M') }} -
+                                    {{ $endOfWeek->format('d M Y') }})</h5>
+                                <canvas id="attendanceChart" height="100"></canvas>
+                            </div>
                         </div>
-                        <canvas id="attendanceChart" height="60"></canvas>
+                        {{-- <canvas id="attendanceChart" height="60"></canvas> --}}
                         <div class="legend text-center">
                             <i class="fas fa-square" style="color:#2c3e50; font-size: 14px;"></i>
                             Jumlah Presensi Siswa Setiap Kelas
                         </div>
-                        {{-- <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0">Jumlah Presensi Siswa Setiap Kelas</h5>
-                            <select id="weekFilter" class="form-select w-auto">
-                                @foreach ($weeks as $key => $label)
-                                    <option value="{{ $key }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div> --}}
-                        {{-- <canvas id="attendanceChart" height="60"></canvas>
-                        <div class="legend text-center">
-                            <i class="fas fa-square" style="color:#2c3e50; font-size: 14px;"></i>
-                            Jumlah Presensi Siswa Setiap Kelas
-                        </div>
-                                                
-                        <div class="legend text-center">
-                            <i class="fas fa-square" style="color:#2c3e50; font-size: 14px;"></i>
-                            Jumlah Presensi Siswa Setiap Kelas
-                        </div> --}}
                     </div>
                 </div>
             </div>
         </div>
     @else
-        <div class="container">
-            <p>Selamat Datang</p>
-        </div>
+        @if (Auth::user()->hasRole('Siswa'))
+            <div class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h4 class="m-0">Selamat datang, {{ ucwords(auth()->user()->name) }}!</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="container-fluid">
+
+                    {{-- Pemberitahuan --}}
+                    <div class="alert alert-info">
+                        <h6><strong>Pemberitahuan Kepada Orang Tua/Wali Murid</strong></h6>
+                        <p>
+                            Dengan hormat,<br>
+                            Kami dengan bangga menginformasikan bahwa putra/putri Bapak/Ibu telah meraih pencapaian prestasi
+                            yang membanggakan di sekolah.
+                            Sebagai bentuk apresiasi, sekolah telah menyiapkan reward yang dapat diambil oleh siswa yang
+                            bersangkutan.
+                            Silakan menghubungi guru BK untuk pengambilan hadiah.<br>
+                            Atas perhatian dan kerja samanya, kami ucapkan terima kasih.
+                        </p>
+                    </div>
+
+                    {{-- Layout Utama --}}
+                    <div class="row mb-4">
+
+                        {{-- Kolom Kiri --}}
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <div class="card text-white bg-success">
+                                    <div class="card-body text-center">
+                                        <h5 class="fw-bold">
+                                            <i class="fas fa-star"></i> PRESTASI
+                                        </h5>
+                                        <h1 clas="fw-bold">95</h1>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="card text-white bg-danger">
+                                    <div class="card-body text-center">
+                                        <h5 class="fw-bold">
+                                            <i class="fas fa-exclamation-circle"></i> PELANGGARAN
+                                        </h5>
+                                        <h1 class="fw-bold">20</h1>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="card text-white bg-warning">
+                                    <div class="card-body text-center">
+                                        <h5 class="fw-bold">
+                                            <i class="fas fa-star-half-alt"></i> TOTAL POIN
+                                        </h5>
+                                        <h1 class="fw-bold">75</h1>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Kolom Kanan --}}
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label class="font-weight-bold">Progress Prestasi</label>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-success" style="width: 95%;"></div>
+                                    <div class="progress-bar" style="width: 5%; background-color: #b7f7b7;"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="font-weight-bold">Progress Pelanggaran</label>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-danger" style="width: 20%;"></div>
+                                    <div class="progress-bar" style="width: 80%; background-color: #f7b7b7;"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="font-weight-bold">Total Poin</label>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-warning" style="width: 75%;"></div>
+                                    <div class="progress-bar" style="width: 25%; background-color: #ffe8a1;"></div>
+                                </div>
+                            </div>
+
+                            <div class="card shadow-sm" style="background-color: #fffaf0; border-radius: 15px;">
+                                <div class="card-body">
+                                    <h5 class="font-weight-bold text-secondary">Keterangan</h5>
+                                    <hr>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-secondary">Poin Prestasi</span>
+                                        <span>95</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-secondary">Poin Pelanggaran</span>
+                                        <span>20</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between">
+                                        <strong>Total Poin</strong>
+                                        <strong>75</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Grafik Performa Kehadiran --}}
+                    <div class="card card-outline card-primary">
+                        <div class="card-header">
+                            <h5 class="m-0">Performa Kehadiran</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="kehadiranChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        @endif
+
+        @if (Auth::user()->hasRole('Guru BK'))
+            <style>
+                .dashboard-title {
+                    font-size: 24px;
+                    font-weight: bold;
+                    margin-bottom: 20px;
+                }
+
+                .dashboard-section-title {
+                    font-size: 20px;
+                    font-weight: 600;
+                    margin-bottom: 18px;
+                    margin-top: 32px;
+                }
+
+                .dashboard-table-box {
+                    background: #fff8e1;
+                    border-radius: 16px;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+                    padding: 24px 32px 12px 32px;
+                    margin-bottom: 24px;
+                }
+
+                .dashboard-table-header,
+                .dashboard-table-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 16px;
+                }
+
+                .dashboard-table-header {
+                    font-weight: bold;
+                    color: #222;
+                    margin-bottom: 8px;
+                }
+
+                .dashboard-table-row {
+                    margin-bottom: 4px;
+                }
+
+                .dashboard-table-row span {
+                    min-width: 120px;
+                }
+
+                .see-detail-link {
+                    color: #bfa14a;
+                    font-weight: 600;
+                    text-decoration: underline;
+                    cursor: pointer;
+                    font-size: 15px;
+                }
+            </style>
+            <div class="container-fluid py-4 px-5">
+                <h4 class="dashboard-title">Dashboard Guru BK</h4>
+                <div class="dashboard-section-title">Siswa dengan Poin Prestasi Tertinggi</div>
+                <div class="dashboard-table-box">
+                    <div class="dashboard-table-header">
+                        <span>Nama Siswa</span>
+                        <span>Kelas</span>
+                        <span>Total Poin</span>
+                        <span><a href="{{ route('achievements.index') }}" class="see-detail-link">Lihat detail
+                                &gt;&gt;</a></span>
+                    </div>
+                    @foreach ($topAchievementStudents as $item)
+                        <div class="dashboard-table-row">
+                            <span>{{ $item->name }}</span>
+                            <span>{{ $item->class_name }}</span>
+                            <span>{{ $item->total_point }}</span>
+                            <span></span>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="dashboard-section-title">Siswa dengan Poin Pelanggaran Tertinggi</div>
+                <div class="dashboard-table-box">
+                    <div class="dashboard-table-header">
+                        <span>Nama Siswa</span>
+                        <span>Kelas</span>
+                        <span>Total Poin</span>
+                        <span><a href="{{ route('violations.index') }}" class="see-detail-link">Lihat detail
+                                &gt;&gt;</a></span>
+                    </div>
+                    @foreach ($topViolationStudents as $item)
+                        <div class="dashboard-table-row">
+                            <span>{{ $item->name }}</span>
+                            <span>{{ $item->class_name }}</span>
+                            <span>{{ $item->total_point }}</span>
+                            <span></span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     @endif
+
+
 @endsection
 
 
@@ -197,6 +417,47 @@
                     }
                 },
                 plugins: [ChartDataLabels]
+            });
+        </script>
+    @endpush
+@endif
+@if (Auth::user()->hasRole('Siswa'))
+    @push('js')
+        {{-- FontAwesome --}}
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+        {{-- Chart.js --}}
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const ctx = document.getElementById('kehadiranChart').getContext('2d');
+            const kehadiranChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'],
+                    datasets: [{
+                            label: 'Minggu Ini',
+                            data: [20, 40, 60, 80, 70],
+                            borderColor: 'orange',
+                            backgroundColor: 'rgba(255,165,0,0.2)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Minggu Lalu',
+                            data: [30, 50, 70, 90, 60],
+                            borderColor: 'red',
+                            backgroundColor: 'rgba(255,99,132,0.2)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
             });
         </script>
     @endpush
