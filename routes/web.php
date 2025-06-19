@@ -109,6 +109,12 @@ Route::get('/manage-attendance-students', [StudentAttendanceController::class, '
     ->middleware(['role:Siswa']);
 Route::get('/student/attendance', [StudentAttendanceController::class, 'index'])->name('student.attendance');
 
+// Route untuk menu Poin Prestasi dan Poin Pelanggaran siswa
+Route::middleware(['auth', 'role:Siswa'])->group(function() {
+    Route::get('/poin-prestasi', [App\Http\Controllers\HomeController::class, 'studentAchievements'])->name('student.achievements');
+    Route::get('/poin-pelanggaran', [App\Http\Controllers\HomeController::class, 'studentViolations'])->name('student.violations');
+});
+
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
 
 // Route utama untuk subject, dengan prefix dan nama route 'manage-subject'
