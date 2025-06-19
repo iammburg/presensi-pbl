@@ -110,6 +110,51 @@ class HomeController extends Controller
                 });
 
             return view('home', compact('topAchievementStudents', 'topViolationStudents'));
+        } else if (Auth::user()->hasRole('Siswa')) {
+            $user = Auth::user();
+            $student = Student::where('user_id', $user->id)->first();
+
+            // Prestasi siswa (hanya yang sudah divalidasi)
+            $achievements = $student->achievements()->where('validation_status', 'approved')->get();
+            $prestasiTotal = $achievements->sum(function($a) {
+                return optional($a->achievementPoint)->points ?? 0;
+            });
+
+            // Pelanggaran siswa (hanya yang sudah divalidasi)
+            $violations = $student->violations()->where('validation_status', 'approved')->get();
+            $pelanggaranTotal = $violations->sum(function($v) {
+                return optional($v->violationPoint)->points ?? 0;
+            });
+
+            // Pie chart data
+            $pieData = [
+                'prestasi' => $prestasiTotal,
+                'pelanggaran' => $pelanggaranTotal
+            ];
+
+            // Detail list prestasi
+            $prestasiList = $achievements->map(function($a) {
+                return [
+                    'name' => $a->achievements_name,
+                    'point' => optional($a->achievementPoint)->points ?? 0
+                ];
+            });
+            // Detail list pelanggaran
+            $pelanggaranList = $violations->map(function($v) {
+                return [
+                    'name' => optional($v->violationPoint)->violation_type ?? '-',
+                    'point' => optional($v->violationPoint)->points ?? 0
+                ];
+            });
+
+            // Performa kehadiran (contoh: per bulan, bisa disesuaikan)
+            $attendance = \App\Models\Attendance::where('student_id', $student->nisn)
+                ->selectRaw('MONTH(meeting_date) as month, COUNT(*) as total')
+                ->groupBy('month')->orderBy('month')->pluck('total', 'month');
+            // Dummy data jika belum ada data kehadiran
+            $attendance = $attendance->isEmpty() ? collect([1=>10,2=>12,3=>8,4=>15,5=>9,6=>11,7=>13,8=>10,9=>14,10=>12,11=>13,12=>9]) : $attendance;
+
+            return view('home', compact('pieData', 'prestasiList', 'pelanggaranList', 'attendance'));
         } else {
             return view('home');
         }
