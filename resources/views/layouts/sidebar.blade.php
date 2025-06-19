@@ -16,7 +16,7 @@
                     $isLaporPrestasi = strtolower($submenu->nama_menu) === 'lapor prestasi';
                     $isLaporPelanggaran = strtolower($submenu->nama_menu) === 'lapor pelanggaran';
                 @endphp
-                @if((!$isLaporPrestasi && !$isLaporPelanggaran) || $isHomeroomTeacher)
+                @if(!$isLaporPrestasi && (!$isLaporPelanggaran || Auth::user()->hasRole('Guru')))
                 <li class="nav-item text-sm">
                     <a href="{{ url($submenu->url) }}"
                         class="nav-link {{ Request::segment(1) == $submenu->url ? 'active' : '' }}">
@@ -47,7 +47,7 @@
                                 $isLaporPrestasi = strtolower($endmenu->nama_menu) === 'lapor prestasi';
                                 $isLaporPelanggaran = strtolower($endmenu->nama_menu) === 'lapor pelanggaran';
                             @endphp
-                            @if((!$isLaporPrestasi && !$isLaporPelanggaran) || $isHomeroomTeacher)
+                            @if(!$isLaporPrestasi && (!$isLaporPelanggaran || Auth::user()->hasRole('Guru')))
                             <li class="nav-item text-sm">
                                 <a href="{{ url($endmenu->url) }}"
                                     class="nav-link {{ Request::segment(1) == $endmenu->url ? 'active' : '' }}">
