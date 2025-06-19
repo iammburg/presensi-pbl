@@ -8,6 +8,7 @@ use Psy\Util\Json;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Attendance;
 use App\Models\Student;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -158,5 +159,39 @@ class HomeController extends Controller
         } else {
             return view('home');
         }
+    }
+
+    /**
+     * Poin Prestasi untuk siswa (role Siswa)
+     */
+    public function studentAchievements(Request $request)
+    {
+        $user = Auth::user();
+        $student = \App\Models\Student::where('user_id', $user->id)->firstOrFail();
+        $date = $request->input('date');
+        $query = $student->achievements()->with('achievementPoint')->where('validation_status', 'approved');
+        if ($date) {
+            $query->whereDate('achievement_date', $date);
+        }
+        $achievements = $query->orderBy('achievement_date', 'desc')->get();
+        $totalPoint = $achievements->sum(function($a) { return optional($a->achievementPoint)->points ?? 0; });
+        return view('student.achievements', compact('achievements', 'totalPoint', 'date', 'student'));
+    }
+
+    /**
+     * Poin Pelanggaran untuk siswa (role Siswa)
+     */
+    public function studentViolations(Request $request)
+    {
+        $user = Auth::user();
+        $student = \App\Models\Student::where('user_id', $user->id)->firstOrFail();
+        $date = $request->input('date');
+        $query = $student->violations()->with('violationPoint')->where('validation_status', 'approved');
+        if ($date) {
+            $query->whereDate('violation_date', $date);
+        }
+        $violations = $query->orderBy('violation_date', 'desc')->get();
+        $totalPoint = $violations->sum(function($v) { return optional($v->violationPoint)->points ?? 0; });
+        return view('student.violations', compact('violations', 'totalPoint', 'date', 'student'));
     }
 }
