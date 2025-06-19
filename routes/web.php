@@ -123,3 +123,7 @@ Route::get('subjects/schedule-names', [SubjectController::class, 'getScheduleNam
 Route::get('/autocomplete/siswa', [App\Http\Controllers\AchievementController::class, 'autocompleteSiswa'])->name('autocomplete.siswa');
 // Autocomplete jenis pelanggaran (violation points)
 Route::get('/autocomplete/violation-points', [App\Http\Controllers\ViolationPointController::class, 'autocomplete'])->name('autocomplete.violation-points');
+// Autocomplete kelas untuk guru (lapor pelanggaran)
+Route::get('/autocomplete/classes', [ViolationController::class, 'autocompleteClass'])->name('autocomplete.classes');
+// Autocomplete siswa berdasarkan kelas (lapor pelanggaran)
+Route::get('/autocomplete/siswa-by-class', [ViolationController::class, 'autocompleteStudentByClass'])->name('autocomplete.siswa-by-class');
