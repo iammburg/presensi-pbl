@@ -68,6 +68,22 @@ public function createForClass(Request $request, $class_id)
             ->select('students.*', 'classes.name as class_name_text', 'classes.parallel_name as class_parallel_name'); // Pilih kolom yang dibutuhkan
 
         return DataTables::of($students)
+           ->filter(function ($query) use ($request) {
+        // Cek apakah ada input pencarian dari DataTables
+        if ($request->has('search') && !empty($request->search['value'])) {
+            $searchValue = $request->search['value'];
+            
+            // Terapkan filter PENCARIAN di sini.
+            // Gunakan 'where' dengan closure untuk mengelompokkan kondisi OR
+            $query->where(function($q) use ($searchValue) {
+                $q->where('students.name', 'like', "%{$searchValue}%")
+                  ->orWhere('students.nisn', 'like', "%{$searchValue}%")
+                  ->orWhere('students.nis', 'like', "%{$searchValue}%");
+                // Anda bisa menambahkan kolom lain yang ingin dicari di sini
+                // ->orWhere('students.enter_year', 'like', "%{$searchValue}%");
+            });
+        }
+    })
             ->addIndexColumn()
             // Kolom NISN
             ->addColumn('nisn', fn($s) => $s->nisn)
