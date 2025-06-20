@@ -19,8 +19,9 @@ class HomeController extends Controller
             return $this->superadminDashboard();
         }
 
-        // Dashboard Guru (tidak diubah)
+        // Dashboard Guru
         $selectedDate = request()->date ?? Carbon::today()->toDateString();
+        $dayOfWeek = Carbon::parse($selectedDate)->dayOfWeekIso; // 1 (Senin) - 7 (Minggu)
         $userId = Auth::id();
         $teacherId = DB::table('teachers')->where('user_id', $userId)->value('nip');
 
@@ -30,6 +31,7 @@ class HomeController extends Controller
             ->join('hours', 'class_schedules.hour_id', '=', 'hours.id')
             ->join('teaching_assignments', 'class_schedules.assignment_id', '=', 'teaching_assignments.id')
             ->where('teaching_assignments.teacher_id', $teacherId)
+            ->where('class_schedules.day_of_week', $dayOfWeek)
             ->whereDate('attendances.meeting_date', $selectedDate)
             ->select(
                 'hours.slot_number',
@@ -42,17 +44,27 @@ class HomeController extends Controller
                 DB::raw("SUM(CASE WHEN LOWER(attendances.status) = 'terlambat' THEN 1 ELSE 0 END) as terlambat"),
                 DB::raw("SUM(CASE WHEN LOWER(attendances.status) IN ('abses', 'sakit', 'izin') THEN 1 ELSE 0 END) as tidak_hadir")
             )
-            ->groupBy('hours.slot_number', 'hours.start_time', 'hours.end_time', 'classes.name', 'classes.parallel_name')
+            ->groupBy(
+                'hours.slot_number',
+                'hours.start_time',
+                'hours.end_time',
+                'classes.name',
+                'classes.parallel_name'
+            )
             ->orderBy('hours.slot_number')
             ->get()
             ->map(function ($item) {
-                $item->jam_pelajaran = "Jam {$item->slot_number} (" . date('H:i', strtotime($item->start_time)) . " - " . date('H:i', strtotime($item->end_time)) . ")";
+                $item->jam_pelajaran = "Jam {$item->slot_number} (" .
+                    date('H:i', strtotime($item->start_time)) . " - " .
+                    date('H:i', strtotime($item->end_time)) . ")";
                 $item->kelas = "{$item->class_name}-{$item->parallel_name}";
                 return $item;
             });
 
         return view('home', compact('data', 'selectedDate'));
     }
+
+
 
     protected function superadminDashboard()
     {
