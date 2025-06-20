@@ -66,67 +66,99 @@ class HomeController extends Controller
 
 
 
+// HomeController.php
+
+// HomeController.php
+
+// HomeController.php
+
+// HomeController.php
+
     protected function superadminDashboard()
     {
-        // Get user statistics from database
+        // Bagian 1: Pengambilan Filter (Tidak berubah)
+        $selectedYear = request()->input('year', Carbon::now()->year);
+        $selectedMonth = request()->input('month');
+
+        $startYearRange = Carbon::now()->subYears(5)->year;
+        $endYearRange = Carbon::now()->addYear(1)->year;
+        $availableYears = range($endYearRange, $startYearRange);
+
+        // Bagian 2: Statistik Kartu (Tidak berubah)
         $userStats = [
-            'total_users' => DB::table('users')->count(),
+            'total_users' => DB::table('users')->whereYear('created_at', $selectedYear)->count(),
             'total_admins' => DB::table('model_has_roles')
-                ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-                ->where('roles.name', 'Admin Sekolah')->count(),
-            'total_teachers' => DB::table('teachers')->count(),
-            'total_students' => DB::table('students')->count(),
-            'active_users' => 0, // kolom belum tersedia
-            'inactive_users' => 0,
+                                ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+                                ->join('users', 'model_has_roles.model_id', '=', 'users.id')
+                                ->where('roles.name', 'Admin Sekolah')
+                                ->whereYear('users.created_at', $selectedYear)->count(),
+            'total_teachers' => DB::table('teachers')
+                                ->join('users', 'teachers.user_id', '=', 'users.id')
+                                ->whereYear('users.created_at', $selectedYear)->count(),
+            'total_students' => DB::table('students')
+                                ->where('enter_year', '<=', $selectedYear)
+                                ->count(),
         ];
 
-
-        // Get activity logs from database (assuming you have an activity_logs table)
-        $activityLogs = DB::table('users')
+        // Bagian 3: Log Aktivitas (Tidak berubah)
+        $activityLogsQuery = DB::table('users')
             ->join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
             ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-            ->select(
-                'users.name as user',
-                'roles.name as role',
-                DB::raw("'Melakukan aktivitas' as activity"), // Placeholder - replace with actual activity column if available
-                'users.updated_at as time'
-            )
-            ->orderBy('users.updated_at', 'desc')
-            ->limit(3)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'user' => $item->user,
-                    'role' => $item->role,
-                    'activity' => $item->activity,
-                    'time' => Carbon::parse($item->time)->format('d.m.Y - h:i A')
-                ];
-            });
+            ->select('users.name as user', 'roles.name as role', DB::raw("'Melakukan aktivitas' as activity"), 'users.updated_at as time')
+            ->whereYear('users.updated_at', $selectedYear)
+            ->when($selectedMonth, function ($query, $month) {
+                return $query->whereMonth('users.updated_at', $month);
+            })
+            ->orderBy('users.updated_at', 'desc');
 
-        // Get monthly user data for chart
-        $monthlyData = DB::table('users')
-            ->select(
-                DB::raw('MONTH(created_at) as month'),
-                DB::raw('COUNT(*) as count')
-            )
-            ->whereYear('created_at', date('Y'))
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
+        $activityLogs = $activityLogsQuery->get()->map(function ($item) {
+            return [
+                'user' => $item->user, 'role' => $item->role,
+                'activity' => $item->activity, 'time' => Carbon::parse($item->time)->format('d.m.Y - h:i A')
+            ];
+        });
+
+        // Bagian 4: Data Grafik (Perbaikan pada query 'admins')
+        $getMonthlyData = function ($queryBuilder, $dateColumn = 'created_at') use ($selectedYear) {
+            $data = $queryBuilder->select(DB::raw('MONTH('.$dateColumn.') as month'), DB::raw('COUNT(*) as count'))
+                ->whereYear($dateColumn, $selectedYear)
+                ->groupBy('month')->orderBy('month')->get();
+
+            $monthlyCounts = array_fill(0, 12, 0);
+            foreach ($data as $item) {
+                $monthlyCounts[$item->month - 1] = $item->count;
+            }
+            return $monthlyCounts;
+        };
 
         $chartData = [
             'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            'current_year' => array_fill(0, 12, 0),
+            'datasets' => [
+                'users' => $getMonthlyData(DB::table('users')),
+                // --- PERBAIKAN DI SINI ---
+                // Secara eksplisit memberitahu untuk menggunakan 'users.created_at'
+                'admins' => $getMonthlyData(
+                    DB::table('users')
+                        ->join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+                        ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+                        ->where('roles.name', 'Admin Sekolah'),
+                    'users.created_at' // Menambahkan parameter ini untuk kejelasan
+                ),
+                // --- PERBAIKAN SELESAI ---
+                'teachers' => $getMonthlyData(DB::table('teachers')
+                                ->join('users', 'teachers.user_id', '=', 'users.id'), 'users.created_at'),
+                'students' => $getMonthlyData(DB::table('students'), 'created_at'),
+            ]
         ];
 
-        foreach ($monthlyData as $data) {
-            $chartData['current_year'][$data->month - 1] = $data->count;
-        }
-
+        // Bagian 5: Kirim semua data ke view (Tidak berubah)
         return view('home', [
             'userStats' => $userStats,
             'chartData' => $chartData,
             'activityLogs' => $activityLogs,
+            'selectedYear' => $selectedYear,
+            'availableYears' => $availableYears,
+            'selectedMonth' => $selectedMonth,
         ]);
     }
 }

@@ -108,9 +108,36 @@
 {{-- Header --}}
 <div class="content-header">
     <div class="container-fluid">
-        <div class="row mb-2">
+        <div class="row mb-2 align-items-center">
             <div class="col-sm-6">
-                <h4 class="m-0">Dashboard</h4>
+                <h4 class="m-0">Dashboard Superadmin</h4>
+            </div>
+            <div class="col-sm-6">
+                {{-- Form Filter Tahun dan Bulan --}}
+                <form method="GET" action="{{ route('home') }}" class="float-sm-right">
+                    <div class="input-group">
+                        <select name="month" class="form-control form-control-sm">
+                            <option value="">Semua Bulan</option>
+                            @foreach(range(1, 12) as $month)
+                                <option value="{{ $month }}" {{ $month == $selectedMonth ? 'selected' : '' }}>
+                                    {{ \Carbon\Carbon::create()->month($month)->translatedFormat('F') }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <select name="year" class="form-control form-control-sm">
+                            @foreach($availableYears as $year)
+                                <option value="{{ $year }}" {{ $year == $selectedYear ? 'selected' : '' }}>
+                                    {{ $year }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-primary" type="submit">
+                                <i class="fas fa-search"></i> Cari
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -118,42 +145,50 @@
 
 {{-- ISI UTAMA --}}
 <div class="container-fluid">
+    
+    {{-- =============================================================== --}}
+    {{-- === BLOK STATISTIK PENGGUNA (KODE BARU DENGAN SATU TEPIAN) === --}}
+    {{-- =============================================================== --}}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="row">
+                        @php
+                            $stats = [
+                                ['label' => 'Jumlah Pengguna', 'count' => $userStats['total_users'], 'icon' => 'fa-users', 'color' => 'primary'],
+                                ['label' => 'Jumlah Admin', 'count' => $userStats['total_admins'], 'icon' => 'fa-user-shield', 'color' => 'info'],
+                                ['label' => 'Jumlah Guru', 'count' => $userStats['total_teachers'], 'icon' => 'fa-chalkboard-teacher', 'color' => 'warning'],
+                                ['label' => 'Jumlah Siswa', 'count' => $userStats['total_students'], 'icon' => 'fa-user-graduate', 'color' => 'primary'],
+                            ];
+                        @endphp
 
-    {{-- Statistik Pengguna --}}
-    <div class="row justify-content-center mb-4">
-        @php
-            $stats = [
-                ['label' => 'Jumlah Pengguna', 'count' => $userStats['total_users'], 'icon' => 'fa-users', 'bg' => 'primary'],
-                ['label' => 'Jumlah Admin', 'count' => $userStats['total_admins'], 'icon' => 'fa-user-shield', 'bg' => 'info'],
-                ['label' => 'Jumlah Guru', 'count' => $userStats['total_teachers'], 'icon' => 'fa-chalkboard-teacher', 'bg' => 'warning'],
-                ['label' => 'Jumlah Siswa', 'count' => $userStats['total_students'], 'icon' => 'fa-user-graduate', 'bg' => 'primary'],
-            ];
-        @endphp
-
-        @foreach($stats as $stat)
-            <div class="col-6 col-md-3 px-3 d-flex">
-                <div class="card text-center shadow-sm border-0 flex-fill">
-                    <div class="card-body p-3">
-                        <div class="mb-2 text-{{ $stat['bg'] }}">
-                            <i class="fas {{ $stat['icon'] }} fa-2x"></i>
-                        </div>
-                        <h5 class="fw-bold mb-1">{{ $stat['count'] }}</h5>
-                        <p class="text-muted small mb-0">{{ $stat['label'] }}</p>
+                        @foreach($stats as $stat)
+                            {{-- Setiap item statistik kini menjadi kolom di dalam satu kartu besar --}}
+                            <div class="col-6 col-md-3 text-center p-3">
+                                <div class="mb-2 text-{{ $stat['color'] }}">
+                                    <i class="fas {{ $stat['icon'] }} fa-3x"></i>
+                                </div>
+                                <h4 class="fw-bold mb-1 text-{{ $stat['color'] }}">{{ $stat['count'] }}</h4>
+                                <p class="text-muted small mb-0">{{ $stat['label'] }}</p>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
-        @endforeach
-
+        </div>
     </div>
+    {{-- =============================================================== --}}
+    {{-- =================== AKHIR BLOK STATISTIK ====================== --}}
+    {{-- =============================================================== --}}
 
 
-
-    {{-- Grafik Kinerja Pengguna --}}
+    {{-- Grafik Kinerja Pengguna (Grafik Baru dengan 4 Garis) --}}
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-3">
-                    <h6 class="fw-bold">Statistik Pengguna Tahun Ini</h6>
+                    <h6 class="fw-bold">Statistik Pengguna Baru Tahun {{ $selectedYear }}</h6>
                     <div style="height: 300px;">
                         <canvas id="userChart"></canvas>
                     </div>
@@ -169,14 +204,6 @@
                 <div class="card-body p-3">
                     <div class="d-flex justify-content-between mb-2">
                         <h6 class="fw-bold">Aktivitas Terkini</h6>
-                        <div>
-                            <select class="form-select form-select-sm d-inline w-auto me-2">
-                                <option selected>{{ date('F') }}</option>
-                            </select>
-                            <select class="form-select form-select-sm d-inline w-auto">
-                                <option selected>{{ date('Y') }}</option>
-                            </select>
-                        </div>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-bordered table-sm table-hover">
@@ -189,14 +216,18 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($activityLogs as $log)
+                                @forelse($activityLogs as $log)
                                 <tr>
                                     <td>{{ $log['user'] }}</td>
                                     <td>{{ $log['role'] }}</td>
                                     <td>{{ $log['activity'] }}</td>
                                     <td>{{ $log['time'] }}</td>
                                 </tr>
-                                @endforeach
+                                @empty
+                                <tr>
+                                    <td colspan="4" class="text-center">Tidak ada aktivitas pada periode ini.</td>
+                                </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -204,11 +235,11 @@
             </div>
         </div>
     </div>
-
 </div>
 
-{{-- ChartJS --}}
-@push('scripts')
+{{-- ChartJS (Diperbarui untuk 4 Garis Data) --}}
+@push('js')
+{{-- Tidak ada lagi CSS untuk hover --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const ctx = document.getElementById('userChart').getContext('2d');
@@ -218,10 +249,34 @@
             labels: @json($chartData['labels']),
             datasets: [
                 {
-                    label: 'Pengguna Baru',
-                    data: @json($chartData['current_year']),
-                    borderColor: '#FFC107',
+                    label: 'Pengguna',
+                    data: @json($chartData['datasets']['users']),
+                    borderColor: '#007bff', // Primary
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Admin',
+                    data: @json($chartData['datasets']['admins']),
+                    borderColor: '#17a2b8', // Info
+                    backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Guru',
+                    data: @json($chartData['datasets']['teachers']),
+                    borderColor: '#ffc107', // Warning
                     backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Siswa',
+                    data: @json($chartData['datasets']['students']),
+                    borderColor: '#28a745', // Menggunakan warna hijau (Success) agar tidak sama
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
                     tension: 0.4,
                     fill: true
                 }
@@ -232,7 +287,10 @@
             maintainAspectRatio: false,
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
                 }
             }
         }
