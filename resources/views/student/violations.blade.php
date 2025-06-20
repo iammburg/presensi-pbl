@@ -11,14 +11,14 @@
                 <button type="submit" class="btn btn-primary btn-sm">Pilih</button>
             </form>
         </div>
-        <div class="fw-bold text-white bg-primary px-3 py-2 rounded">TOTAL POIN : {{ $totalPoint }}</div>
+        <div class="fw-bold text-white bg-tertiary px-3 py-2 rounded">TOTAL POIN : {{ $totalPoint }}</div>
     </div>
     <div class="bg-light p-4 rounded shadow-sm">
         <h5 class="fw-bold mb-2">REKAP DATA PELANGGARAN</h5>
         <div class="mb-2">{{ $student->name }}</div>
         <div class="table-responsive">
             <table class="table table-bordered table-striped">
-                <thead class="bg-primary text-white">
+                <thead class="bg-tertiary text-white">
                     <tr>
                         <th>No</th>
                         <th>TANGGAL PELAPORAN</th>

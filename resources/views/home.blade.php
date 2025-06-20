@@ -146,7 +146,7 @@
                         <div class="dashboard-section mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="fw-bold">Prestasi</span>
-                                <span class="see-detail-link">Lihat Detail &gt;&gt;</span>
+                                <a href="{{ route('student.achievements') }}" class="see-detail-link">Lihat Detail &gt;&gt;</a>
                             </div>
                             @foreach($prestasiList as $item)
                                 <div class="dashboard-table-row">
@@ -158,7 +158,7 @@
                         <div class="dashboard-section">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="fw-bold">Pelanggaran</span>
-                                <span class="see-detail-link">Lihat Detail &gt;&gt;</span>
+                                <a href="{{ route('student.violations') }}" class="see-detail-link">Lihat Detail &gt;&gt;</a>
                             </div>
                             @foreach($pelanggaranList as $item)
                                 <div class="dashboard-table-row">
