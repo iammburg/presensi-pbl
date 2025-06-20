@@ -47,45 +47,65 @@ public function create(Request $request)
         'academicYears' => AcademicYear::all(),
     ]);
 }
- public function createForClass(Request $request, $class_id)
+// Versi BARU (Sudah diperbaiki)
+public function createForClass(Request $request, $class_id)
 {
-    $selectedClass = SchoolClass::with('academicYear')->find($class_id); // Eager load academicYear
+    $selectedClass = SchoolClass::with('academicYear')->find($class_id);
 
     if (!$selectedClass) {
         return redirect()->route('manage-classes.index')->with('error', 'Kelas tidak ditemukan.');
     }
 
     if ($request->ajax()) {
-        // Logika DataTables untuk siswa
-        $students = Student::with('currentAssignment.schoolClass'); //
+        // PENTING: Kita mulai dengan Query Builder, bukan collection, agar bisa di-join
+        $students = Student::query()
+            ->leftJoin('student_class_assignments', function ($join) {
+                // Join ke assignment TERBARU dari setiap siswa
+                $join->on('students.nisn', '=', 'student_class_assignments.student_id')
+                    ->whereRaw('student_class_assignments.id = (select max(id) from student_class_assignments as sca where sca.student_id = students.nisn)');
+            })
+            ->leftJoin('classes', 'student_class_assignments.class_id', '=', 'classes.id')
+            ->select('students.*', 'classes.name as class_name_text', 'classes.parallel_name as class_parallel_name'); // Pilih kolom yang dibutuhkan
 
         return DataTables::of($students)
             ->addIndexColumn()
-            ->addColumn('nisn',       fn($s) => $s->nisn) //
-            ->addColumn('nis',        fn($s) => $s->nis) //
-            ->addColumn('name',       fn($s) => $s->name) //
-            ->addColumn('gender',     fn($s) => $s->gender === 'L' ? 'Laki-laki' : 'Perempuan') //
-            ->addColumn('enter_year', fn($s) => $s->enter_year) //
-            ->addColumn('class_name', function($s) { //
-                if ($s->currentAssignment && $s->currentAssignment->schoolClass) { //
-                    $c = $s->currentAssignment->schoolClass; //
-                    return "{$c->name} {$c->parallel_name}"; //
+            // Kolom NISN
+            ->addColumn('nisn', fn($s) => $s->nisn)
+            ->orderColumn('nisn', fn($query, $direction) => $query->orderBy('students.nisn', $direction))
+            // Kolom NIS
+            ->addColumn('nis', fn($s) => $s->nis)
+            ->orderColumn('nis', fn($query, $direction) => $query->orderBy('students.nis', $direction))
+            // Kolom Nama
+            ->addColumn('name', fn($s) => $s->name)
+            ->orderColumn('name', fn($query, $direction) => $query->orderBy('students.name', $direction))
+            // Kolom Jenis Kelamin
+            ->addColumn('gender', fn($s) => $s->gender === 'L' ? 'Laki-laki' : 'Perempuan')
+            ->orderColumn('gender', fn($query, $direction) => $query->orderBy('students.gender', $direction))
+            // Kolom Tahun Masuk
+            ->addColumn('enter_year', fn($s) => $s->enter_year)
+            ->orderColumn('enter_year', fn($query, $direction) => $query->orderBy('students.enter_year', $direction))
+            // Kolom Kelas Saat Ini (Logika sorting kustom karena dari JOIN)
+            ->addColumn('class_name', function($s) {
+                if ($s->class_name_text) {
+                    return "{$s->class_name_text} {$s->class_parallel_name}";
                 }
-                return '-'; //
+                return '-';
             })
-            ->make(true); //
+            ->orderColumn('class_name', function ($query, $direction) {
+                // Urutkan berdasarkan gabungan nama kelas dan paralel dari tabel `classes`
+                $query->orderBy('classes.name', $direction)->orderBy('classes.parallel_name', $direction);
+            })
+            // Pastikan kolom 'Pilih' tidak bisa diurutkan
+            ->rawColumns(['class_name']) // Jika Anda menggunakan HTML di dalam kolom class_name, tambahkan ini
+            ->make(true);
     }
 
-    // Menggunakan view 'student_class_assignments.create'
-    // Jika nama file blade Anda adalah manage-student-class-assignments/create.blade.php,
-    // maka path view-nya adalah 'manage-student-class-assignments.create'
-    return view('student_class_assignments.create', [ // Pastikan path view ini benar
-        'academicYears'   => AcademicYear::orderBy('start_year', 'desc')->orderBy('semester', 'desc')->get(), //
-        'selectedClassId' => $class_id, //
-        'selectedClass'   => $selectedClass, //
+    return view('student_class_assignments.create', [
+        'academicYears'   => AcademicYear::orderBy('start_year', 'desc')->orderBy('semester', 'desc')->get(),
+        'selectedClassId' => $class_id,
+        'selectedClass'   => $selectedClass,
     ]);
 }
-
 
 
     public function store(Request $request)
