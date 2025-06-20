@@ -93,10 +93,10 @@
                                 <label for="photo">Foto</label>
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input @error('photo') is-invalid @enderror" id="photo" name="photo">
-                                    <label class="custom-file-label" for="photo">Pilih file</label>
+                                    <label class="custom-file-label" for="photo">Pilih file (maks 2Mb)</label>
                                 </div>
                                 @error('photo')
-                                <div class="invalid-feedback">
+                                <div class="invalid-feedback" role="alert">
                                     {{ $message }}
                                 </div>
                                 @enderror
@@ -118,11 +118,25 @@
     </div>
 @endsection
 
-@push('scripts')
-<script>
-    $('.custom-file-input').on('change', function() {
-        let fileName = $(this).val().split('\\').pop();
-        $(this).next('.custom-file-label').addClass("selected").html(fileName);
-    });
-</script>
+@push('js')
+    <script src="{{ asset('plugins/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script>
+    <script>
+        $(function() {
+            bsCustomFileInput.init();
+        });
+        $('#photo').on('change', function() {
+            const file = this.files[0];
+            if (file && file.size > 2 * 1024 * 1024) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'File terlalu besar',
+                    text: 'Ukuran file maksimal 2MB!',
+                    timer: 2500,
+                    showConfirmButton: false
+                });
+                $(this).val('');
+                $(this).next('.custom-file-label').html('Pilih file (maks 2Mb)');
+            }
+        });
+    </script>
 @endpush

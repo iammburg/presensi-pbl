@@ -11,6 +11,12 @@
     @foreach (json_decode(MenuHelper::Menu()) as $menu)
         <li class="nav-header">{{ strtoupper($menu->nama_menu) }}</li>
         @foreach ($menu->submenus as $submenu)
+            @php
+                $isLaporPrestasi = strtolower($submenu->nama_menu) === 'lapor prestasi';
+            @endphp
+            @if ($isLaporPrestasi && !$isHomeroomTeacher)
+                @continue
+            @endif
             @if (count($submenu->submenus) == '0')
                 @php
                     $isPoinPrestasi = strtolower($submenu->nama_menu) === 'poin prestasi';
@@ -29,7 +35,11 @@
                 @foreach ($submenu->submenus as $url)
                     @php
                         $urls[] = $url->url;
+                        $isLaporPrestasiSub = strtolower($url->nama_menu) === 'lapor prestasi';
                     @endphp
+                    @if ($isLaporPrestasiSub && !$isHomeroomTeacher)
+                        @continue
+                    @endif
                 @endforeach
                 <li class="nav-item text-sm {{ in_array(Request::segment(1), $urls) ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ in_array(Request::segment(1), $urls) ? 'active' : '' }}">
@@ -44,7 +54,11 @@
                             @php
                                 $isPoinPrestasi = strtolower($endmenu->nama_menu) === 'poin prestasi';
                                 $isPoinPelanggaran = strtolower($endmenu->nama_menu) === 'poin pelanggaran';
+                                $isLaporPrestasiEnd = strtolower($endmenu->nama_menu) === 'lapor prestasi';
                             @endphp
+                            @if ($isLaporPrestasiEnd && !$isHomeroomTeacher)
+                                @continue
+                            @endif
                             <li class="nav-item text-sm">
                                 <a href="{{ $isPoinPrestasi ? route('student.achievements') : ($isPoinPelanggaran ? route('student.violations') : url($endmenu->url)) }}"
                                     class="nav-link {{ (Request::url() == route('student.achievements') && $isPoinPrestasi) || (Request::url() == route('student.violations') && $isPoinPelanggaran) || Request::segment(1) == $endmenu->url ? 'active' : '' }}">
