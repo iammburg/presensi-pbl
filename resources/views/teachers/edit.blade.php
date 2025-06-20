@@ -124,9 +124,10 @@
         $(function() {
             bsCustomFileInput.init();
         });
+        const MAX_PHOTO_SIZE = 2 * 1024 * 1024; // Maximum file size in bytes (2MB)
         $('#photo').on('change', function() {
             const file = this.files[0];
-            if (file && file.size > 2 * 1024 * 1024) {
+            if (file && file.size > MAX_PHOTO_SIZE) {
                 Swal.fire({
                     icon: 'error',
                     title: 'File terlalu besar',
