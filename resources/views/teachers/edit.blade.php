@@ -93,7 +93,7 @@
                                 <label for="photo">Foto</label>
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input @error('photo') is-invalid @enderror" id="photo" name="photo">
-                                    <label class="custom-file-label" for="photo">Pilih file (maks 2Mb)</label>
+                                    <label class="custom-file-label" for="photo">Pilih file (maks 2 MB)</label>
                                 </div>
                                 @error('photo')
                                 <div class="invalid-feedback" role="alert">
