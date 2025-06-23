@@ -9,15 +9,19 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
-    .rekap-table th,
-    .rekap-table td {
+    .recap-table th,
+    .recap-table td {
         vertical-align: middle;
         text-align: center;
     }
 
-    .rekap-table th {
+    .recap-table th {
         background: #0e3b7c;
         color: #fff;
+    }
+
+    .selection {
+        width: 160px;
     }
 </style>
 @endpush
@@ -30,13 +34,13 @@
                 <h4 class="fw-bold mb-3">DETAIL RIWAYAT PRESENSI</h4>
                 <div class="card p-3 mb-4" style="border: #0e3b7c 1px solid;">
                     <form class="row gx-2 gy-2 align-items-center" method="GET" action="">
-                        <input type="hidden" name="kelas" value="{{ $selectedClass }}">
-                        <input type="hidden" name="bulan" value="{{ $selectedMonth }}">
-                        <input type="hidden" name="tahun" value="{{ $selectedYear }}">
+                        <input type="hidden" name="class" value="{{ $selectedClass }}">
+                        <input type="hidden" name="month" value="{{ $selectedMonth }}">
+                        <input type="hidden" name="year" value="{{ $selectedYear }}">
                         <div class="col-auto d-flex align-items-center">
                             <i class="fa-solid fa-calendar-days me-2"></i>
-                            <label for="tanggal" class="form-label mb-1 me-2">Tanggal: </label>
-                            <select class="form-select select2" id="tanggal" name="tanggal"
+                            <label for="date" class="form-label mb-1 me-2 mr-2">Tanggal: </label>
+                            <select class="form-select select2 selection" id="date" name="date"
                                 onchange="this.form.submit()">
                                 @foreach ($dates as $date)
                                 <option value="{{ $date }}" {{ $selectedDate == $date ? 'selected' : '' }}>
@@ -49,38 +53,65 @@
                 </div>
                 <div class="card bg-primary p-3 d-flex align-items-start justify-content-start">
                     <div class="text-white fw-bold">
-                        Rekap Kehadiran {{ optional($classes->find($selectedClass))->name }} -
-                        {{ optional($classes->find($selectedClass))->parallel_name }}
-                        ({{ strtoupper($months[$selectedMonth] ?? '') }}-{{ $selectedYear }})
+                        Rekap Kehadiran {{ optional($classes->find($selectedClass))->name }}, tanggal:
+                        {{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('d F Y') }}
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-12 d-flex align-items-center justify-content-center">
+                        <div class="col-md-6">
+                            <div class="card p-3">
+                                <h6 class="fw-bold mb-2">Persentase Kehadiran Siswa</h6>
+                                <canvas id="studentAttendanceChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card p-3">
+                                <h6 class="fw-bold mb-2">Distribusi Status Kehadiran Siswa</h6>
+                                <canvas id="studentAttendanceBarChart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="table-responsive mt-3">
-                    <table id="rekapTable" class="table table-bordered rekap-table mb-0">
+                    <table id="recapTable" class="table table-bordered recap-table mb-0">
                         <thead>
                             <tr>
                                 <th>No</th>
                                 <th>NISN</th>
                                 <th>Nama</th>
-                                <th>Waktu</th>
+                                <th>Jam Masuk</th>
                                 <th>Kehadiran</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($students as $i => $student)
+                            @foreach ($students as $i => $student)
                             @php
                             $att = $attendances[$student->nisn] ?? null;
                             $status = $att->status ?? '-';
-                            $waktu = $att ? ($att->time_in ? date('H:i:s', strtotime($att->time_in)) : '-') : '-';
-                            $badgeClass = $status === 'Hadir' ? 'text-success' : ($status === 'Absen' ? 'text-danger' :
-                            ($status ===
-                            'Sakit' ? 'text-info' : ($status === 'Izin' ? 'text-warning' : ($status === 'Terlambat' ?
-                            'text-secondary' : 'text-muted'))));
+                            $time = $att
+                            ? ($att->time_in
+                            ? date('H:i', strtotime($att->time_in))
+                            : '-')
+                            : '-';
+                            $badgeClass =
+                            $status === 'Hadir'
+                            ? 'text-success'
+                            : ($status === 'Absen'
+                            ? 'text-danger'
+                            : ($status === 'Sakit'
+                            ? 'text-info'
+                            : ($status === 'Izin'
+                            ? 'text-warning'
+                            : ($status === 'Terlambat'
+                            ? 'text-secondary'
+                            : 'text-muted'))));
                             @endphp
                             <tr>
-                                <td>{{ $i+1 }}</td>
+                                <td>{{ $i + 1 }}</td>
                                 <td>{{ $student->nisn }}</td>
                                 <td>{{ $student->name }}</td>
-                                <td>{{ $waktu }}</td>
+                                <td>{{ $time }}</td>
                                 <td class="fw-semibold {{ $badgeClass }}">{{ $status }}</td>
                             </tr>
                             @endforeach
@@ -96,23 +127,114 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     $(document).ready(function() {
-        $('#rekapTable').DataTable({
-            paging: true,
-            searching: true,
-            ordering: false,
-            info: true,
-            lengthChange: false,
-            columnDefs: [
-                { orderable: false, targets: 0 }
-            ]
+            $('#recapTable').DataTable({
+                paging: true,
+                searching: true,
+                ordering: false,
+                info: true,
+                lengthChange: false,
+                columnDefs: [{
+                    orderable: false,
+                    targets: 0
+                }]
+            });
+            $('#date').select2({
+                placeholder: "Pilih Tanggal",
+                allowClear: false,
+                width: 'resolve'
+            });
+
+            // Chart.js - Student Attendance (Pie)
+            var ctx = document.getElementById('studentAttendanceChart');
+            if (ctx) {
+                var chart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Hadir', 'Absen', 'Sakit', 'Izin', 'Terlambat'],
+                        datasets: [{
+                            data: [
+                                {{ $studentStats['Hadir'] ?? 0 }},
+                                {{ $studentStats['Absen'] ?? 0 }},
+                                {{ $studentStats['Sakit'] ?? 0 }},
+                                {{ $studentStats['Izin'] ?? 0 }},
+                                {{ $studentStats['Terlambat'] ?? 0 }}
+                            ],
+                            backgroundColor: [
+                                '#28a745', // Hadir
+                                '#dc3545', // Absen
+                                '#17a2b8', // Sakit
+                                '#ffc107', // Izin
+                                '#6c757d'  // Terlambat
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label + ': ' + context.parsed + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            // Chart.js - Student Attendance (Bar)
+            var barCtx = document.getElementById('studentAttendanceBarChart');
+            if (barCtx) {
+                var barChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Hadir', 'Absen', 'Sakit', 'Izin', 'Terlambat'],
+                        datasets: [{
+                            label: 'Persentase',
+                            data: [
+                                {{ $studentStats['Hadir'] ?? 0 }},
+                                {{ $studentStats['Absen'] ?? 0 }},
+                                {{ $studentStats['Sakit'] ?? 0 }},
+                                {{ $studentStats['Izin'] ?? 0 }},
+                                {{ $studentStats['Terlambat'] ?? 0 }}
+                            ],
+                            backgroundColor: [
+                                '#28a745', // Hadir
+                                '#dc3545', // Absen
+                                '#17a2b8', // Sakit
+                                '#ffc107', // Izin
+                                '#6c757d'  // Terlambat
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Persentase (%)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
         });
-        $('#tanggal').select2({
-            placeholder: "Pilih Tanggal",
-            allowClear: false,
-            width: 'resolve'
-        });
-    });
 </script>
 @endpush

@@ -99,7 +99,7 @@
 
                                             </form>
                                             <a href="{{ route('manage-attendances.show-by-class', $schedule->class_id) }}">
-                                                <button class="btn btn-secondary mt-2">
+                                                <button class="btn btn-success mt-2">
                                                     <i class="fas fa-eye mr-2"></i> Lihat Presensi
                                                 </button>
                                             </a>

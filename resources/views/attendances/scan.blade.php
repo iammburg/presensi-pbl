@@ -112,14 +112,13 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const scheduleIds = @json($scheduleIds);
-            // console.log('Schedule IDs:', scheduleIds);
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
             const btnScan = document.getElementById('btn-scan');
             const btnStop = document.getElementById('btn-stop');
             const ctx = canvas.getContext('2d');
             let intervalId;
-            const processedLabels = new Set(); // Set untuk melacak wajah yang sudah diproses
+            const processedStudents = new Set();
 
             navigator.mediaDevices.getUserMedia({
                     video: true
@@ -133,6 +132,7 @@
                 btnScan.disabled = true;
                 btnStop.disabled = false;
                 showToast('🚀 Menyiapkan scan...', 'info');
+                processedStudents.clear();
 
                 intervalId = setInterval(async () => {
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -148,15 +148,21 @@
                                 });
                             const scan1 = await resp1.json();
 
+
                             console.log('Flask Response:', scan1);
+
 
                             if (scan1.label) {
                                 scanMessage('✅ Wajah dikenali.', 'success');
-                            }
 
-                            if (scan1.label) {
-                                processedLabels.add(scan1.label);
-                                console.log('Dikenali oleh Flask:', scan1);
+                                // if (processedStudents.has(scan1.label)) {
+                                //     scanMessage(
+                                //         'ℹ️ Presensi siswa sudah diproses sebelumnya',
+                                //         'info');
+                                //     return;
+                                // }
+
+                                processedStudents.add(scan1.label);
 
                                 const resp2 = await fetch(
                                     "{{ route('manage-attendances.store') }}", {
@@ -175,29 +181,24 @@
                                                     10)
                                         })
                                     });
-                                // console.log('Response Laravel status:', resp2
-                                //     .status);
 
                                 const scan2 = await resp2.json();
-                                // console.log('Response Laravel body:', scan2);
 
-                                // Menampilkan pesan berdasarkan respons dari Laravel
                                 if (resp2.ok) {
                                     showToast(scan2.message, 'success');
                                 } else if (resp2.status === 409) {
                                     showToast(scan2.message, 'success');
-                                } else if (resp2.status === 500) {
-                                    showToast(scan2.message, 'danger');
                                 } else {
-                                    showToast('Terjadi kesalahan tidak terduga.',
+                                    showToast(scan2.message ||
+                                        'Terjadi kesalahan tidak terduga',
                                         'danger');
                                 }
                             } else if (scan1.method === 'no_face') {
                                 scanMessage(
                                     '📷 Wajah tidak terdeteksi, coba lagi...',
                                     'warning');
-                            } else if (!scan1.label) {
-                                scanMessage('❓ Wajah tidak dikenal.', 'danger');
+                            } else {
+                                scanMessage('❓ Wajah tidak dikenal', 'danger');
                             }
                         } catch (err) {
                             console.error(err);
@@ -216,47 +217,37 @@
             });
 
             function scanMessage(message, type = 'info') {
-                const container = document.getElementById('message-container');
                 const placeholder = document.getElementById('message-placeholder');
-                let color;
-
-                switch (type) {
-                    case 'success':
-                        color = '#1a8754';
-                        break;
-                    case 'danger':
-                        color = '#db3545';
-                        break;
-                    case 'warning':
-                        color = '#ffc107';
-                        break;
-                    default:
-                        color = '#0d6efd';
-                }
+                const colors = {
+                    success: '#1a8754',
+                    danger: '#db3545',
+                    warning: '#ffc107',
+                    info: '#0d6efd'
+                };
 
                 placeholder.style.visibility = 'visible';
-                placeholder.style.color = color;
+                placeholder.style.color = colors[type] || colors.info;
                 placeholder.textContent = message;
 
                 setTimeout(() => {
                     placeholder.style.visibility = 'hidden';
-                    placeholder.textContent = 'Placeholder';
                 }, 2000);
             }
 
             function showToast(message, type = 'info') {
                 const id = 'toast-' + Date.now();
                 const html = `
-      <div id="${id}" class="alert alert-${type} alert-dismissible fade show" role="alert">
-        ${message}
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-      </div>`;
-                document.getElementById('toast-container').insertAdjacentHTML('beforeend', html);
+                    <div id="${id}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    </div>`;
+
+                const container = document.getElementById('toast-container');
+                container.insertAdjacentHTML('beforeend', html);
+
                 setTimeout(() => {
                     const toast = document.getElementById(id);
-                    if (toast) {
-                        toast.remove();
-                    }
+                    if (toast) toast.remove();
                 }, 2000);
             }
         });

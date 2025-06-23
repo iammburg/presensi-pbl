@@ -57,8 +57,8 @@
         <div class="filter-bar mb-4">
             <form method="GET" class="row gx-3 gy-2 justify-content-end" action="">
                 <div class="col-auto d-flex align-items-center justify-content-center">
-                    <label for="kelas" class="form-label me-2 mb-0 mr-1">Kelas:</label>
-                    <select name="kelas" id="kelas" class="form-select select2" required style="min-width:160px;">
+                    <label for="class" class="form-label me-2 mb-0 mr-1">Kelas:</label>
+                    <select name="class" id="class" class="form-select select2" required style="min-width:160px;">
                         <option value="">Pilih Kelas</option>
                         @foreach ($classes as $class)
                         <option value="{{ $class->id }}" {{ $selectedClass == $class->id ? 'selected' : '' }}>
@@ -69,8 +69,8 @@
                 </div>
 
                 <div class="col-auto d-flex align-items-center justify-content-center">
-                    <label for="bulan" class="form-label me-2 mb-0 mr-1">Bulan:</label>
-                    <select name="bulan" id="bulan" class="form-select select2" required style="min-width:140px;">
+                    <label for="month" class="form-label me-2 mb-0 mr-1">Bulan:</label>
+                    <select name="month" id="month" class="form-select select2" required style="min-width:140px;">
                         <option value="">Pilih Bulan</option>
                         @foreach ($months as $num => $nama)
                         <option value="{{ $num }}" {{ $selectedMonth == $num ? 'selected' : '' }}>
@@ -82,8 +82,8 @@
 
                 {{-- Tahun --}}
                 <div class="col-auto d-flex align-items-center justify-content-center">
-                    <label for="tahun" class="form-label me-2 mb-0 mr-1">Tahun: </label>
-                    <select name="tahun" id="tahun" class="form-select select2" required style="min-width:120px;">
+                    <label for="year" class="form-label me-2 mb-0 mr-1">Tahun: </label>
+                    <select name="year" id="year" class="form-select select2" required style="min-width:120px;">
                         @foreach ($years as $yr)
                         <option value="{{ $yr }}" {{ $selectedYear == $yr ? 'selected' : '' }}>
                             {{ $yr }}
@@ -108,13 +108,13 @@
                     ({{ strtoupper($months[$selectedMonth] ?? '') }} {{ $selectedYear }})
                 </div>
                 <a
-                    href="{{ route('attendances.history-detail', ['kelas' => $selectedClass, 'bulan' => $selectedMonth, 'tahun' => $selectedYear]) }}">
+                    href="{{ route('attendances.history-detail', ['class' => $selectedClass, 'month' => $selectedMonth, 'year' => $selectedYear]) }}">
                     <button class="btn btn-primary btn-sm btn-detail">Lihat Detail</button>
                 </a>
             </div>
             <ul class="list-group list-group-flush">
                 @forelse($students as $student)
-                @php $pct = $presentase[$student->nisn] ?? 0; @endphp
+                @php $pct = $percentage[$student->nisn] ?? 0; @endphp
                 <li class="list-group-item d-flex align-items-center">
                     <div class="student-name">{{ $student->name }}</div>
                     <div class="progress-wrapper">
@@ -142,17 +142,17 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
-            $('#kelas').select2({
+            $('#class').select2({
                 placeholder: "Pilih Kelas",
                 allowClear: false,
                 width: '100%'
             });
-            $('#bulan').select2({
+            $('#month').select2({
                 placeholder: "Pilih bulan",
                 allowClear: false,
                 width: '100%'
             });
-            $('#tahun').select2({
+            $('#year').select2({
                 placeholder: "Pilih Tahun",
                 allowClear: false,
                 width: '100%'

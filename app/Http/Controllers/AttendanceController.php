@@ -126,15 +126,11 @@ class AttendanceController extends Controller
      */
     public function store(Request $request)
     {
-        // Log::info('AttendanceController@store dipanggil', $request->all());
-
         $scan = $request->validate([
             'class_schedule_id' => 'required|exists:class_schedules,id',
             'nisn'              => 'required|exists:students,nisn',
             'meeting_date'      => 'required|date',
         ]);
-
-        // Log::info('scan setelah validasi', $scan);
 
         try {
             $exists = Attendance::where('class_schedule_id', $scan['class_schedule_id'])
@@ -142,10 +138,7 @@ class AttendanceController extends Controller
                 ->where('meeting_date', $scan['meeting_date'])
                 ->exists();
 
-            // Log::info('Apakah sudah ada presensi sebelumnya?', ['exists' => $exists]);
-
             if ($exists) {
-                // Log::warning('Presensi sudah ada untuk siswa ini', $scan);
                 $student = Student::where('nisn', $scan['nisn'])->first();
                 return response()->json([
                     'success' => false,
@@ -161,12 +154,6 @@ class AttendanceController extends Controller
                 'status'            => 'Hadir',
                 'recorded_by'       => Auth::id(),
             ]);
-
-
-            // Log::info('Presensi berhasil dibuat', [
-            //     'attendance_id' => $attendance->id,
-            //     'student'       => $attendance->student->name,
-            // ]);
 
             return response()->json([
                 'success' => true,

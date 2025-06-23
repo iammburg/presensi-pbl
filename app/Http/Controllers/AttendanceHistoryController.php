@@ -7,6 +7,7 @@ use App\Models\SchoolClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Student;
+use App\Models\ClassSchedule;
 
 class AttendanceHistoryController extends Controller
 {
@@ -23,7 +24,6 @@ class AttendanceHistoryController extends Controller
      */
     public function index(Request $request)
     {
-        // Data untuk dropdown
         $classes = SchoolClass::with('academicYear')->get();
         $months  = [
             '01' => 'Januari',
@@ -44,19 +44,17 @@ class AttendanceHistoryController extends Controller
             ->orderByDesc('year')
             ->pluck('year');
 
-        // Ambil input filter
-        $selectedClass = $request->input('kelas');
-        $selectedMonth = $request->input('bulan');
-        $selectedYear  = $request->input('tahun', $years->first() ?? date('Y'));
+        $selectedClass = $request->input('class');
+        $selectedMonth = $request->input('month');
+        $selectedYear  = $request->input('year', $years->first() ?? date('Y'));
 
         $students   = collect();
-        $presentase = [];
+        $percentage = [];
         $showResult = false;
 
         if ($selectedClass && $selectedMonth && $selectedYear) {
             $showResult = true;
 
-            // Cari semua student_id yang punya record presensi di periode itu
             $studentIds = Attendance::whereYear('meeting_date', $selectedYear)
                 ->whereMonth('meeting_date', $selectedMonth)
                 ->whereHas(
@@ -67,10 +65,8 @@ class AttendanceHistoryController extends Controller
                 ->pluck('student_id')
                 ->unique();
 
-            // Ambil data siswa unik
             $students = Student::whereIn('nisn', $studentIds)->get();
 
-            // Hitung total & hadir untuk tiap siswa
             foreach ($students as $student) {
                 $baseQuery = Attendance::where('student_id', $student->nisn)
                     ->whereYear('meeting_date', $selectedYear)
@@ -86,7 +82,7 @@ class AttendanceHistoryController extends Controller
                     ->where('status', 'Hadir')
                     ->count();
 
-                $presentase[$student->nisn] = $total > 0
+                $percentage[$student->nisn] = $total > 0
                     ? round($hadir / $total * 100)
                     : 0;
             }
@@ -100,7 +96,7 @@ class AttendanceHistoryController extends Controller
             'selectedMonth',
             'selectedYear',
             'students',
-            'presentase',
+            'percentage',
             'showResult'
         ));
     }
@@ -110,11 +106,10 @@ class AttendanceHistoryController extends Controller
      */
     public function redirectToDetail(Request $request)
     {
-        // Redirect ke route detail dengan parameter filter yang sama
         return redirect()->route('attendances.history-detail', [
-            'kelas' => $request->kelas,
-            'bulan' => $request->bulan,
-            'tahun' => $request->tahun,
+            'class' => $request->class,
+            'month' => $request->month,
+            'year' => $request->year,
         ]);
     }
 
@@ -189,40 +184,72 @@ class AttendanceHistoryController extends Controller
         $years = Attendance::selectRaw('YEAR(meeting_date) as year')
             ->distinct()->orderByDesc('year')->pluck('year');
 
-        $selectedClass = $request->input('kelas');
-        $selectedMonth = $request->input('bulan');
-        $selectedYear  = $request->input('tahun');
-        $selectedDate  = $request->input('tanggal');
+        $selectedClass = $request->input('class');
+        $selectedMonth = $request->input('month');
+        $selectedYear  = $request->input('year');
+        $selectedDate  = $request->input('date');
 
         $dates = collect();
         $students = collect();
         $attendances = collect();
         $showResult = false;
+        $studentStats = [];
+        $teacherAttendance = null;
 
         if ($selectedClass && $selectedMonth && $selectedYear) {
-            // Ambil semua tanggal presensi di bulan & tahun tsb
             $dates = Attendance::whereYear('meeting_date', $selectedYear)
                 ->whereMonth('meeting_date', $selectedMonth)
                 ->whereHas('classSchedule', fn($q) => $q->where('class_id', $selectedClass))
                 ->orderBy('meeting_date')
                 ->pluck('meeting_date')->unique();
 
-            // Default tanggal: tanggal pertama di bulan tsb
             if (!$selectedDate && $dates->count() > 0) {
                 $selectedDate = $dates->first();
             }
 
             if ($selectedDate) {
                 $showResult = true;
-                // Ambil semua siswa di kelas tsb
                 $studentIds = Attendance::whereDate('meeting_date', $selectedDate)
                     ->whereHas('classSchedule', fn($q) => $q->where('class_id', $selectedClass))
                     ->pluck('student_id')->unique();
                 $students = Student::whereIn('nisn', $studentIds)->get();
-                // Ambil data presensi siswa pada tanggal tsb
                 $attendances = Attendance::whereDate('meeting_date', $selectedDate)
                     ->whereHas('classSchedule', fn($q) => $q->where('class_id', $selectedClass))
                     ->get()->keyBy('student_id');
+
+                $statusCounts = Attendance::whereDate('meeting_date', $selectedDate)
+                    ->whereHas('classSchedule', fn($q) => $q->where('class_id', $selectedClass))
+                    ->whereIn('student_id', $studentIds)
+                    ->select('status', DB::raw('count(*) as total'))
+                    ->groupBy('status')
+                    ->pluck('total', 'status')->toArray();
+                $totalStudents = count($studentIds);
+                $studentStats = [];
+                foreach (["Hadir", "Absen", "Sakit", "Izin", "Terlambat"] as $status) {
+                    $studentStats[$status] = $totalStudents > 0 ? round(($statusCounts[$status] ?? 0) / $totalStudents * 100, 2) : 0;
+                }
+
+                $classSchedule = ClassSchedule::where('class_id', $selectedClass)
+                    ->whereHas('attendances', function ($q) use ($selectedDate) {
+                        $q->whereDate('meeting_date', $selectedDate);
+                    })->first();
+                $teacherName = null;
+                $teacherStatus = null;
+                if ($classSchedule) {
+                    $teacher = $classSchedule->teacher;
+                    $teacherName = $teacher ? $teacher->name : null;
+                    $teacherAttendanceRow = Attendance::where('class_schedule_id', $classSchedule->id)
+                        ->whereDate('meeting_date', $selectedDate)
+                        ->whereNull('student_id')
+                        ->first();
+                    if ($teacherAttendanceRow) {
+                        $teacherStatus = $teacherAttendanceRow->status;
+                    }
+                }
+                $teacherAttendance = [
+                    'name' => $teacherName,
+                    'status' => $teacherStatus,
+                ];
             }
         }
 
@@ -237,7 +264,9 @@ class AttendanceHistoryController extends Controller
             'dates',
             'students',
             'attendances',
-            'showResult'
+            'showResult',
+            'studentStats',
+            'teacherAttendance',
         ));
     }
 }
