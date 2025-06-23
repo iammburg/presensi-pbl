@@ -28,7 +28,7 @@
                                 </a>
                             </div>
                         </div>
-                        <form action="{{ route('manage-students.store') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('manage-students.store') }}" method="POST" enctype="multipart/form-data" id="create-student-form" autocomplete="off">
                             @csrf
                             <div class="card-body">
                                 <div class="form-group">
@@ -132,15 +132,18 @@
                                         <input type="file" class="custom-file-input @error('photo') is-invalid @enderror" id="photo" name="photo" accept="image/*">
                                         <label class="custom-file-label" for="photo">Pilih file</label>
                                     </div>
+                                    <small class="form-text text-muted">Ukuran maksimal 2MB.</small>
                                     @error('photo')
                                         <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                     @enderror
+                                    <span id="photo-size-error" class="text-danger" style="display:none;">Ukuran foto harus kurang dari 2MB.</span>
                                 </div>
                             </div>
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-block btn-flat text-white" style="background-color: #1777E5">
-                                    <i class="fas fa-save"></i> Simpan
-                                </button>
+                                <button type="submit" class="btn btn-block btn-flat text-white"
+    style="background-color: #1777E5">
+    <i class="fas fa-save"></i> Simpan
+</button>
                             </div>
                         </form>
                     </div>
@@ -165,6 +168,28 @@
     <script>
         $(document).ready(function () {
             bsCustomFileInput.init();
+            $('#photo').on('input', function() {
+                const file = this.files[0];
+                if (file && file.size > 2 * 1024 * 1024) {
+                    $(this).addClass('is-invalid');
+                    $('#photo-size-error').show();
+                } else {
+                    $(this).removeClass('is-invalid');
+                    $('#photo-size-error').hide();
+                }
+            });
+            $('#create-student-form').on('submit', function(e) {
+                const fileInput = document.getElementById('photo');
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    if (file.size > 2 * 1024 * 1024) {
+                        $('#photo').addClass('is-invalid');
+                        $('#photo-size-error').show();
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+            });
         });
     </script>
 @endpush

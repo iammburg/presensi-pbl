@@ -29,7 +29,7 @@
                             </div>
                         </div>
                         <form action="{{ route('manage-students.update', $student->nisn) }}" method="POST"
-                            enctype="multipart/form-data">
+                            enctype="multipart/form-data" id="edit-student-form" autocomplete="off">
                             @csrf
                             @method('PUT')
                             <div class="card-body">
@@ -185,11 +185,11 @@
                                             id="photo" name="photo" accept="image/*">
                                         <label class="custom-file-label" for="photo">Pilih file</label>
                                     </div>
+                                    <small class="form-text text-muted">Ukuran maksimal 2MB.</small>
                                     @error('photo')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
+                                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                     @enderror
+                                    <span id="photo-size-error" class="text-danger" style="display:none;">Ukuran foto maksimal 2MB.</span>
                                     @if ($student->photo)
                                         <div class="mt-2">
                                             <img src="{{ asset('storage/' . $student->photo) }}" alt="Foto Siswa"
@@ -220,8 +220,30 @@
 @push('js')
     <script src="{{ asset('plugins/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             bsCustomFileInput.init();
+            $('#photo').on('input', function() {
+                const file = this.files[0];
+                if (file && file.size > 2 * 1024 * 1024) {
+                    $(this).addClass('is-invalid');
+                    $('#photo-size-error').show();
+                } else {
+                    $(this).removeClass('is-invalid');
+                    $('#photo-size-error').hide();
+                }
+            });
+            $('#edit-student-form').on('submit', function(e) {
+                const fileInput = document.getElementById('photo');
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    if (file.size > 2 * 1024 * 1024) {
+                        $('#photo').addClass('is-invalid');
+                        $('#photo-size-error').show();
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+            });
         });
     </script>
 @endpush
