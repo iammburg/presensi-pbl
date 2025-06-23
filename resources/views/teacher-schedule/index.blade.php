@@ -77,7 +77,19 @@ Jadwal Mengajar {{ $teacherName ?? 'Guru' }}
                                     @forelse($weeklySchedules as $item)
                                         <tr>
                                             <td>{{ $item['day'] }}</td>
-                                            <td>{{ $item['time'] }}</td>
+                                            <td>
+                                                @php
+                                                    // Hilangkan ":00" hanya jika di belakang jam, tapi tetap tampilkan ":mm" jika bukan 00
+                                                    $time = preg_replace_callback('/(\d{2}):(\d{2})(:00)?/', function($m) {
+                                                        if (isset($m[2]) && $m[2] === '00') {
+                                                            return $m[1] . ':00';
+                                                        } else {
+                                                            return $m[1] . ':' . $m[2];
+                                                        }
+                                                    }, $item['time']);
+                                                @endphp
+                                                {{ $time }}
+                                            </td>
                                             <td>{{ $item['subject'] }}</td>
                                             <td>{{ $item['class'] }}</td>
                                         </tr>
