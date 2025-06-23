@@ -28,6 +28,7 @@ use App\Http\Controllers\ViolationValidationController;
 use App\Http\Controllers\AttendanceHistoryController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TeacherScheduleController;
 
 // Route::get('/violation-management', [ViolationPointController::class, 'index'])->name('violation-management');
 // Route::get('/violation-management/add', [ViolationPointController::class, 'create'])->name('violation.create'); // ← INI WAJIB ADA
@@ -133,3 +134,4 @@ Route::get('/autocomplete/violation-points', [App\Http\Controllers\ViolationPoin
 Route::get('/autocomplete/classes', [ViolationController::class, 'autocompleteClass'])->name('autocomplete.classes');
 // Autocomplete siswa berdasarkan kelas (lapor pelanggaran)
 Route::get('/autocomplete/siswa-by-class', [ViolationController::class, 'autocompleteStudentByClass'])->name('autocomplete.siswa-by-class');
+Route::get('/teacher-schedule', [TeacherScheduleController::class, 'index'])->name('teacher-schedule.index');
