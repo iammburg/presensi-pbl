@@ -108,20 +108,28 @@
                                                                 style="{{ $schedule['session_type'] == 'Jam Istirahat' ? 'display: none;' : '' }}">
                                                                 <label class="form-label small mb-1">Mata Pelajaran & Guru</label>
                                                                 <div class="d-flex gap-2 align-items-center">
-                                                                    <div class="search-input flex-grow-1">
-                                                                        <input type="text"
-                                                                            class="form-control form-control-sm assignment-search"
-                                                                            placeholder="Ketik untuk mencari..."
-                                                                            autocomplete="off"
-                                                                            onkeyup="searchAssignment(this)"
-                                                                            onclick="showSearchResults(this)"
-                                                                            value="{{ isset($schedule['assignment_id']) && $schedule['assignment_id'] ? $teachingAssignments->where('id', $schedule['assignment_id'])->first()['subject_name'] ?? '' . ' - ' . $teachingAssignments->where('id', $schedule['assignment_id'])->first()['teacher_name'] ?? '' : '' }}">
-                                                                        <input type="hidden"
-                                                                            name="schedules[{{ $day }}][{{ $index }}][assignment_id]"
-                                                                            class="assignment-id"
-                                                                            value="{{ $schedule['assignment_id'] ?? '' }}">
-                                                                        <div class="search-results"></div>
-                                                                    </div>
+                                                                <input type="text"
+                                                                class="form-control form-control-sm assignment-search"
+                                                                placeholder="Ketik untuk mencari..."
+                                                                autocomplete="off"
+                                                                onkeyup="searchAssignment(this)"
+                                                                onclick="showSearchResults(this)"
+                                                                data-class-id="{{ $class->id }}"
+                                                                @php
+                                                                    $assignmentText = '';
+                                                                    if (isset($schedule['assignment_id']) && $schedule['assignment_id']) {
+                                                                        $assignment = collect($teachingAssignments)->firstWhere('id', $schedule['assignment_id']);
+                                                                        if ($assignment) {
+                                                                            $assignmentText = $assignment['subject_name'] . ' - ' . $assignment['teacher_name'];
+                                                                        }
+                                                                    }
+                                                                @endphp
+                                                                value="{{ $assignmentText }}">
+                                                            <input type="hidden"
+                                                                name="schedules[{{ $day }}][{{ $index }}][assignment_id]"
+                                                                class="assignment-id"
+                                                                value="{{ $schedule['assignment_id'] ?? '' }}">
+                                                            <div class="search-results"></div>
                                                                     <button type="button"
                                                                         class="btn btn-sm btn-outline-danger"
                                                                         onclick="this.closest('.schedule-row').remove()">
@@ -230,6 +238,139 @@
         .gap-2 {
             gap: 0.5rem !important;
         }
+        .schedule-row {
+            border: 1px solid #e9ecef;
+            border-radius: 0.375rem;
+            padding: 1rem !important;
+            margin-bottom: 1.5rem !important; 
+            background-color: #fafafa; 
+            min-height: 90px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+        }
+
+        .schedule-row .col-md-2,
+        .schedule-row .col-md-5,
+        .schedule-row .col-md-1 {
+            margin-bottom: 0.75rem;
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        .schedule-body {
+            padding: 1.5rem !important;
+        }
+
+        .schedule-row.row {
+            margin-left: -0.5rem !important;
+            margin-right: -0.5rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+        .schedule-row .form-select,
+        .schedule-row .form-control {
+            height: 31px; 
+            line-height: 1.25;
+        }
+
+        .schedule-row .form-label.small {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.375rem !important;
+            display: block;
+            min-height: 18px; 
+        }
+
+        .assignment-container .d-flex {
+            min-height: 31px;
+            align-items: stretch; 
+        }
+
+        .schedule-row .btn-sm {
+            padding: 0.375rem 0.75rem; 
+            font-size: 0.75rem;
+            line-height: 1.25;
+            height: 31px;
+        }
+
+        .search-input {
+            position: relative;
+            flex-grow: 1;
+        }
+
+        .search-results {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 0.375rem;
+            z-index: 1000;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            top: 100%;
+            left: 0;
+            margin-top: 2px;
+        }
+
+        .search-result-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        .card-body.schedule-body {
+            min-height: 120px !important; 
+            padding: 1.5rem !important; 
+        }
+        .card.mb-3.border-light.border {
+            margin-bottom: 2rem !important;
+        }
+
+        .schedule-body:empty {
+            min-height: 80px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .schedule-body:empty::after {
+            content: "Belum ada jadwal untuk hari ini";
+            color: #6c757d;
+            font-style: italic;
+            font-size: 0.875rem;
+        }
+        .gap-2 {
+            gap: 0.75rem !important;
+        }
+
+        @media (max-width: 768px) {
+            .schedule-row {
+                padding: 0.5rem;
+                margin-bottom: 0.75rem !important;
+            }
+            
+            .schedule-row .col-md-2,
+            .schedule-row .col-md-5,
+            .schedule-row .col-md-1 {
+                margin-bottom: 0.75rem;
+            }
+        }
+        .schedule-row.row.g-2.align-items-end {
+            align-items: flex-end !important;
+        }
+        .schedule-row .form-select,
+        .schedule-row .form-control,
+        .schedule-row .btn {
+            margin-top: auto; 
+        }
     </style>
 
     <script>
@@ -243,128 +384,133 @@
         }
 
         function addScheduleRow(day) {
-            const container = document.getElementById('schedule-' + day);
-            const index = container.children.length;
+    const container = document.getElementById('schedule-' + day);
+    const index = container.children.length;
+    const classId = document.getElementById('class_id').value;
 
-            const row = document.createElement('div');
-            row.className = 'row g-2 align-items-end mb-2 schedule-row';
+    const row = document.createElement('div');
+    row.className = 'row g-2 align-items-end mb-2 schedule-row';
 
-            row.innerHTML = `
-                <div class="col-md-2">
-                    <label class="form-label small mb-1">Tipe Sesi</label>
-                    <select
-                        name="schedules[${day}][${index}][session_type]"
-                        class="form-select form-select-sm session-type"
-                        onchange="filterHours(this)"
-                        required
-                    >
-                        <option value="">-- Pilih --</option>
-                        <option value="Jam Pelajaran">Jam Pelajaran</option>
-                        <option value="Jam Istirahat">Jam Istirahat</option>
-                    </select>
+    row.innerHTML = `
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Tipe Sesi</label>
+            <select
+                name="schedules[${day}][${index}][session_type]"
+                class="form-select form-select-sm session-type"
+                onchange="filterHours(this)"
+                required
+            >
+                <option value="">-- Pilih --</option>
+                <option value="Jam Pelajaran">Jam Pelajaran</option>
+                <option value="Jam Istirahat">Jam Istirahat</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Jam Mulai</label>
+            <select
+                name="schedules[${day}][${index}][start_hour_id]"
+                class="form-select form-select-sm hour-select-start"
+                onchange="updateEndHours(this); toggleSubjectTeacher(this)"
+                data-day="${day}"
+                required
+            >
+                <option value="">-- Pilih Jam Mulai --</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Jam Selesai</label>
+            <select
+                name="schedules[${day}][${index}][end_hour_id]"
+                class="form-select form-select-sm hour-select-end"
+                data-day="${day}"
+                required
+            >
+                <option value="">-- Pilih Jam Selesai --</option>
+            </select>
+        </div>
+
+        <div class="col-md-5 assignment-container">
+            <label class="form-label small mb-1">Mata Pelajaran & Guru</label>
+            <div class="d-flex gap-2 align-items-center">
+                <div class="search-input flex-grow-1">
+                    <input type="text"
+                        class="form-control form-control-sm assignment-search"
+                        placeholder="Ketik untuk mencari..."
+                        autocomplete="off"
+                        onkeyup="searchAssignment(this)"
+                        onclick="showSearchResults(this)"
+                        data-class-id="${classId}">
+                    <input type="hidden"
+                        name="schedules[${day}][${index}][assignment_id]"
+                        class="assignment-id">
+                    <div class="search-results"></div>
                 </div>
+                <button type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    onclick="this.closest('.schedule-row').remove()">
+                    Hapus
+                </button>
+            </div>
+        </div>
 
-                <div class="col-md-2">
-                    <label class="form-label small mb-1">Jam Mulai</label>
-                    <select
-                        name="schedules[${day}][${index}][start_hour_id]"
-                        class="form-select form-select-sm hour-select-start"
-                        onchange="updateEndHours(this); toggleSubjectTeacher(this)"
-                        data-day="${day}"
-                        required
-                    >
-                        <option value="">-- Pilih Jam Mulai --</option>
-                    </select>
-                </div>
+        <div class="col-md-1 text-center assignment-hidden" style="display: none;">
+            <button type="button"
+                class="btn btn-sm btn-outline-danger"
+                onclick="this.closest('.schedule-row').remove()">
+                Hapus
+            </button>
+        </div>
+    `;
 
-                <div class="col-md-2">
-                    <label class="form-label small mb-1">Jam Selesai</label>
-                    <select
-                        name="schedules[${day}][${index}][end_hour_id]"
-                        class="form-select form-select-sm hour-select-end"
-                        data-day="${day}"
-                        required
-                    >
-                        <option value="">-- Pilih Jam Selesai --</option>
-                    </select>
-                </div>
-
-                <div class="col-md-5 assignment-container">
-                    <label class="form-label small mb-1">Mata Pelajaran & Guru</label>
-                    <div class="d-flex gap-2 align-items-center">
-                        <div class="search-input flex-grow-1">
-                            <input type="text"
-                                class="form-control form-control-sm assignment-search"
-                                placeholder="Ketik untuk mencari..."
-                                autocomplete="off"
-                                onkeyup="searchAssignment(this)"
-                                onclick="showSearchResults(this)">
-                            <input type="hidden"
-                                name="schedules[${day}][${index}][assignment_id]"
-                                class="assignment-id">
-                            <div class="search-results"></div>
-                        </div>
-                        <button type="button"
-                            class="btn btn-sm btn-outline-danger"
-                            onclick="this.closest('.schedule-row').remove()">
-                            Hapus
-                        </button>
-                    </div>
-                </div>
-
-                <div class="col-md-1 text-center assignment-hidden" style="display: none;">
-                    <button type="button"
-                        class="btn btn-sm btn-outline-danger"
-                        onclick="this.closest('.schedule-row').remove()">
-                        Hapus
-                    </button>
-                </div>
-            `;
-
-            container.appendChild(row);
-        }
+    container.appendChild(row);
+}
 
         // Assignment search handlers
         function searchAssignment(input) {
-            const value = input.value.toLowerCase();
-            const resultsBox = input.parentElement.querySelector('.search-results');
-            const hiddenInput = input.parentElement.querySelector('.assignment-id');
+    const value = input.value.toLowerCase();
+    const resultsBox = input.parentElement.querySelector('.search-results');
+    const hiddenInput = input.parentElement.querySelector('.assignment-id');
+    const classId = input.dataset.classId || document.getElementById('class_id').value; // Fallback ke class_id dari select
 
-            resultsBox.innerHTML = '';
-            resultsBox.style.display = 'none';
+    resultsBox.innerHTML = '';
+    resultsBox.style.display = 'none';
 
-            if (value.length < 2) return;
+    if (value.length < 2) return;
 
+            // Filter berdasarkan pencarian dan class_id
             const filtered = teachingAssignments.filter(a =>
-                a.subject_name.toLowerCase().includes(value) ||
-                a.teacher_name.toLowerCase().includes(value)
-            );
+        (a.subject_name.toLowerCase().includes(value) ||
+         a.teacher_name.toLowerCase().includes(value)) &&
+        (classId ? a.class_id == classId : true) // Tampilkan semua jika tidak ada classId
+    );
 
-            if (filtered.length === 0) {
-                const div = document.createElement('div');
-                div.className = 'search-result-item';
-                div.style.color = '#6c757d';
-                div.style.fontStyle = 'italic';
-                div.textContent = 'Tidak ada hasil ditemukan';
-                resultsBox.appendChild(div);
-                resultsBox.style.display = 'block';
-                return;
-            }
+    if (filtered.length === 0) {
+        const div = document.createElement('div');
+        div.className = 'search-result-item';
+        div.style.color = '#6c757d';
+        div.style.fontStyle = 'italic';
+        div.textContent = 'Tidak ada hasil ditemukan';
+        resultsBox.appendChild(div);
+        resultsBox.style.display = 'block';
+        return;
+    }
 
-            filtered.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'search-result-item';
-                div.textContent = `${item.subject_name} - ${item.teacher_name}`;
-                div.onclick = () => {
-                    input.value = div.textContent;
-                    hiddenInput.value = item.id;
-                    resultsBox.style.display = 'none';
-                };
-                resultsBox.appendChild(div);
-            });
+    filtered.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'search-result-item';
+        div.textContent = `${item.subject_name} - ${item.teacher_name}`;
+        div.onclick = () => {
+            input.value = div.textContent;
+            hiddenInput.value = item.id;
+            resultsBox.style.display = 'none';
+        };
+        resultsBox.appendChild(div);
+    });
 
-            resultsBox.style.display = 'block';
-        }
+    resultsBox.style.display = 'block';
+}
 
         function showSearchResults(input) {
             const box = input.parentElement.querySelector('.search-results');
@@ -462,33 +608,87 @@
             }
         }
 
-        // Initialize existing rows
+        // Filter assignments based on selected class
+        function filterAssignmentsByClass(classId) {
+    // Update class_id pada semua input assignment yang belum memiliki nilai
+    document.querySelectorAll('.assignment-search').forEach(input => {
+        // Hanya reset jika input kosong (untuk row baru)
+        if (!input.value) {
+            input.dataset.classId = classId;
+        }
+    });
+
+    // Sembunyikan semua hasil pencarian
+    document.querySelectorAll('.search-results').forEach(el => el.style.display = 'none');
+}
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize all existing schedule rows
-            document.querySelectorAll('.session-type').forEach(select => {
-                const sessionType = select.value;
-                if (sessionType) {
-                    const row = select.closest('.schedule-row');
-                    const day = row.querySelector('.hour-select-start').dataset.day;
-                    const startSelect = row.querySelector('.hour-select-start');
-                    const endSelect = row.querySelector('.hour-select-end');
+    // Initialize class filter
+    const classSelect = document.getElementById('class_id');
+    if (classSelect.value) {
+        filterAssignmentsByClass(classSelect.value);
+    }
 
-                    // Get the current selected values
-                    const startValue = startSelect.dataset.selected || '';
-                    const endValue = endSelect.dataset.selected || '';
+    // Add event listener for class change
+    classSelect.addEventListener('change', function() {
+        // Konfirmasi jika user mengubah kelas dan ada data assignment yang sudah terisi
+        const hasAssignments = document.querySelectorAll('.assignment-search').some(input => input.value);
+        if (hasAssignments) {
+            if (confirm('Mengubah kelas akan menghapus semua mata pelajaran dan guru yang sudah dipilih. Lanjutkan?')) {
+                // Reset semua assignment
+                document.querySelectorAll('.assignment-search').forEach(input => {
+                    input.value = '';
+                    input.nextElementSibling.value = '';
+                });
+                filterAssignmentsByClass(this.value);
+            } else {
+                // Kembalikan ke nilai sebelumnya
+                this.value = this.dataset.previousValue || '';
+                return;
+            }
+        } else {
+            filterAssignmentsByClass(this.value);
+        }
+        
+        // Simpan nilai saat ini untuk rollback
+        this.dataset.previousValue = this.value;
+    });
 
-                    // Populate hour selects with current values
-                    populateHourSelect(startSelect, sessionType, day, startValue);
-                    populateHourSelect(endSelect, sessionType, day, endValue);
+    // Set initial previous value
+    classSelect.dataset.previousValue = classSelect.value;
 
-                    // Set the selected values
-                    if (startValue) startSelect.value = startValue;
-                    if (endValue) endSelect.value = endValue;
+    // Initialize semua assignment input dengan class_id yang benar
+    document.querySelectorAll('.assignment-search').forEach(input => {
+        if (!input.dataset.classId) {
+            input.dataset.classId = classSelect.value;
+        }
+    });
 
-                    // Initialize subject/teacher visibility
-                    toggleSubjectTeacher(startSelect);
-                }
-            });
-        });
+    // Initialize all existing schedule rows
+    document.querySelectorAll('.session-type').forEach(select => {
+        const sessionType = select.value;
+        if (sessionType) {
+            const row = select.closest('.schedule-row');
+            const day = row.querySelector('.hour-select-start').dataset.day;
+            const startSelect = row.querySelector('.hour-select-start');
+            const endSelect = row.querySelector('.hour-select-end');
+
+            // Get the current selected values
+            const startValue = startSelect.dataset.selected || '';
+            const endValue = endSelect.dataset.selected || '';
+
+            // Populate hour selects with current values
+            populateHourSelect(startSelect, sessionType, day, startValue);
+            populateHourSelect(endSelect, sessionType, day, endValue);
+
+            // Set the selected values
+            if (startValue) startSelect.value = startValue;
+            if (endValue) endSelect.value = endValue;
+
+            // Initialize subject/teacher visibility
+            toggleSubjectTeacher(startSelect);
+        }
+    });
+});
     </script>
 @endsection

@@ -18,15 +18,16 @@ class TeachingAssignment extends Model
 
     public function teacher()
     {
-        return $this->belongsTo(Teacher::class, 'teacher_id', 'nip');
+        return $this->belongsTo(Teacher::class, 'teacher_id');
     }
+
 
     /**
      * Get the subject that belongs to this teaching assignment.
      */
     public function subject()
     {
-        return $this->belongsTo(Subject::class);
+        return $this->belongsTo(Subject::class, 'subject_id');
     }
 
     /**

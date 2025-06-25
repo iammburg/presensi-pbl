@@ -38,7 +38,7 @@
                         <div class="col-auto">
                             <label for="class_id" class="form-label">Kelas</label>
                             <select name="class_id" id="class_id" class="form-select form-select-sm" required
-                                style="min-width: 200px;">
+                                style="min-width: 200px;" onchange="onClassChange(this)">
                                 <option value="">Pilih</option>
                                 @foreach ($classes as $class)
                                     <option value="{{ $class->id }}"
@@ -118,7 +118,31 @@
     const hoursData = @json($hoursData);
     const teachingAssignments = @json($teachingAssignments);
 
+    let selectedClassId = null;
+
+    function onClassChange(select) {
+    selectedClassId = parseInt(select.value);
+    console.log("Kelas dipilih, class_id =", selectedClassId);
+
+    // Lihat data assignment yang cocok
+    const matchingAssignments = teachingAssignments.filter(a => a.class_id === selectedClassId);
+    console.log("Assignment yang cocok:", matchingAssignments);
+
+    const searchInputs = document.querySelectorAll('.assignment-search');
+    searchInputs.forEach(input => {
+        if (input.dataset.clicked === 'true') {
+            searchAssignment(input);
+        }
+    });
+}
+
+
     function addScheduleRow(day) {
+        if (!selectedClassId) {
+            alert('Silakan pilih kelas terlebih dahulu sebelum menambah jadwal.');
+            return;
+        }
+
         const container = document.getElementById('schedule-' + day);
         const index = container.children.length;
 
@@ -156,8 +180,8 @@
 
     <div class="col-md-5 assignment-container form-group-consistent">
         <label class="form-label fw-semibold small mb-1 assignment-label">Mata Pelajaran & Guru</label>
-        <div class="search-input-group" style="gap: 0.5rem;"> <!-- tambahkan gap -->
-            <div class="search-input me-2"> <!-- beri margin end -->
+        <div class="search-input-group" style="gap: 0.5rem;">
+            <div class="search-input me-2">
                 <input type="text"
                        class="form-control form-control-sm assignment-search"
                        placeholder="Ketik untuk mencari mata pelajaran & guru..."
@@ -178,7 +202,6 @@
     </div>
 `;
 
-
         container.appendChild(row);
     }
 
@@ -186,14 +209,17 @@
         const query = input.value.toLowerCase();
         const resultsContainer = input.nextElementSibling.nextElementSibling;
 
-        if (query.length < 1 || !input.dataset.clicked) {
+        if (query.length < 1 || !input.dataset.clicked || !selectedClassId) {
             resultsContainer.style.display = 'none';
             return;
         }
 
         const filteredAssignments = teachingAssignments.filter(assignment => {
             const searchText = `${assignment.subject_name} - ${assignment.teacher_name}`.toLowerCase();
-            return searchText.includes(query);
+            return (
+                searchText.includes(query) &&
+                assignment.class_id === selectedClassId
+            );
         });
 
         if (filteredAssignments.length > 0) {
