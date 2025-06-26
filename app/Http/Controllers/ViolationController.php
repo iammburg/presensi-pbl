@@ -18,7 +18,8 @@ class ViolationController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('homeroom.teacher')->except(['index', 'show']);
+        // Ubah: Semua guru bisa create/edit, tidak hanya wali kelas
+        $this->middleware('role:Guru')->only(['create', 'store', 'edit', 'update']);
     }
 
     public function index()
@@ -27,7 +28,7 @@ class ViolationController extends Controller
         $teacher = $user->teacher;
         if ($teacher) {
             // Hanya tampilkan pelanggaran yang dilaporkan oleh guru yang login
-            $violations = Violation::with(['student', 'violationPoint', 'academicYear', 'teacher'])
+            $violations = Violation::with(['student', 'violationPoint', 'academicYear', 'teacher', 'validator'])
                 ->where('reported_by', $teacher->nip)
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
@@ -38,30 +39,29 @@ class ViolationController extends Controller
         return view('violations.index', compact('violations'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
         $teacher = Auth::user()->teacher;
-
-        // Ambil kelas yang diampu oleh guru sebagai wali kelas
-        $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
-            ->whereHas('academicYear', function($query) {
-                $query->where('is_active', true);
-            })
-            ->first();
-
-        if (!$homeroomClass) {
-            return redirect()->route('home')->with('error', 'Anda tidak memiliki kelas yang diampu sebagai wali kelas.');
-        }
-
-        // Ambil siswa dari kelas tersebut
-        $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
-            $query->where('class_id', $homeroomClass->class_id)
-                  ->where('academic_year_id', $homeroomClass->academic_year_id);
-        })->get();
-
+        // --- KODE ASLI (hanya wali kelas) ---
+        // $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
+        //     ->whereHas('academicYear', function($query) {
+        //         $query->where('is_active', true);
+        //     })
+        //     ->first();
+        // if (!$homeroomClass) {
+        //     return redirect()->route('home')->with('error', 'Anda tidak memiliki kelas yang diampu sebagai wali kelas.');
+        // }
+        // $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
+        //     $query->where('class_id', $homeroomClass->class_id)
+        //           ->where('academic_year_id', $homeroomClass->academic_year_id);
+        // })->with('currentAssignment')->get();
+        // --- END KODE ASLI ---
+        $students = collect([]); // atau []
         $violationPoints = ViolationPoint::all();
         $academicYears = AcademicYear::where('is_active', true)->get();
-
         return view('violations.create', compact('students', 'violationPoints', 'academicYears'));
     }
 
@@ -77,34 +77,29 @@ class ViolationController extends Controller
             'evidence' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'status' => 'required|in:pending,processed,completed,rejected'
         ]);
-
         DB::beginTransaction();
         try {
             $teacher = Auth::user()->teacher;
             if (!$teacher) {
                 return back()->with('error', 'Hanya guru yang dapat melaporkan pelanggaran.');
             }
-
-            // Verifikasi bahwa siswa tersebut adalah siswa dari kelas yang diampu guru
-            $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
-                ->whereHas('academicYear', function($query) {
-                    $query->where('is_active', true);
-                })
-                ->first();
-
-            if (!$homeroomClass) {
-                return back()->with('error', 'Anda tidak memiliki kelas yang diampu sebagai wali kelas.');
-            }
-
-            $isStudentInClass = StudentClassAssignment::where('student_id', $request->student_id)
-                ->where('class_id', $homeroomClass->class_id)
-                ->where('academic_year_id', $homeroomClass->academic_year_id)
-                ->exists();
-
-            if (!$isStudentInClass) {
-                return back()->with('error', 'Siswa tersebut bukan dari kelas yang Anda ampu.');
-            }
-
+            // --- KODE ASLI (hanya wali kelas) ---
+            // $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
+            //     ->whereHas('academicYear', function($query) {
+            //         $query->where('is_active', true);
+            //     })
+            //     ->first();
+            // if (!$homeroomClass) {
+            //     return back()->with('error', 'Anda tidak memiliki kelas yang diampu sebagai wali kelas.');
+            // }
+            // $isStudentInClass = StudentClassAssignment::where('student_id', $request->student_id)
+            //     ->where('class_id', $homeroomClass->class_id)
+            //     ->where('academic_year_id', $homeroomClass->academic_year_id)
+            //     ->exists();
+            // if (!$isStudentInClass) {
+            //     return back()->with('error', 'Siswa tersebut bukan dari kelas yang Anda ampu.');
+            // }
+            // --- END KODE ASLI ---
             $violation = new Violation([
                 'student_id' => $request->student_id,
                 'violation_points_id' => $request->violation_points_id,
@@ -115,14 +110,11 @@ class ViolationController extends Controller
                 'status' => $request->status,
                 'reported_by' => $teacher->nip,
             ]);
-
             if ($request->hasFile('evidence')) {
                 $path = $request->file('evidence')->store('violations/evidence', 'public');
                 $violation->evidence = $path;
             }
-
             $violation->save();
-
             DB::commit();
             return redirect()->route('violations.index')->with('success', 'Pelanggaran berhasil ditambahkan');
         } catch (\Exception $e) {
@@ -139,34 +131,33 @@ class ViolationController extends Controller
         if ($teacher && $violation->reported_by !== $teacher->nip) {
             abort(403, 'Anda tidak berhak mengakses detail pelanggaran ini.');
         }
-        $violation->load(['student', 'violationPoint', 'academicYear', 'teacher']);
+        $violation->load(['student', 'violationPoint', 'academicYear', 'teacher', 'validator']); // Tambahkan eager loading validator
         return view('violations.show', compact('violation'));
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function edit(Violation $violation)
     {
         $teacher = Auth::user()->teacher;
-
-        // Ambil kelas yang diampu oleh guru sebagai wali kelas
-        $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
-            ->whereHas('academicYear', function($query) {
-                $query->where('is_active', true);
-            })
-            ->first();
-
-        if (!$homeroomClass) {
-            return redirect()->route('home')->with('error', 'Anda tidak memiliki kelas yang diampu sebagai wali kelas.');
-        }
-
-        // Ambil siswa dari kelas tersebut
-        $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
-            $query->where('class_id', $homeroomClass->class_id)
-                  ->where('academic_year_id', $homeroomClass->academic_year_id);
-        })->get();
-
+        // --- KODE ASLI (hanya wali kelas) ---
+        // $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
+        //     ->whereHas('academicYear', function($query) {
+        //         $query->where('is_active', true);
+        //     })
+        //     ->first();
+        // if (!$homeroomClass) {
+        //     return redirect()->route('home')->with('error', 'Anda tidak memiliki kelas yang diampu sebagai wali kelas.');
+        // }
+        // $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
+        //     $query->where('class_id', $homeroomClass->class_id)
+        //           ->where('academic_year_id', $homeroomClass->academic_year_id);
+        // })->with('currentAssignment')->get();
+        // --- END KODE ASLI ---
+        $students = collect([]);
         $violationPoints = ViolationPoint::all();
         $academicYears = AcademicYear::where('is_active', true)->get();
-
         return view('violations.edit', compact('violation', 'students', 'violationPoints', 'academicYears'));
     }
 
@@ -182,34 +173,29 @@ class ViolationController extends Controller
             'evidence' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'status' => 'required|in:pending,processed,completed,rejected'
         ]);
-
         DB::beginTransaction();
         try {
             $teacher = Auth::user()->teacher;
             if (!$teacher) {
                 return back()->with('error', 'Hanya guru yang dapat mengedit pelanggaran.');
             }
-
-            // Verifikasi bahwa siswa tersebut adalah siswa dari kelas yang diampu guru
-            $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
-                ->whereHas('academicYear', function($query) {
-                    $query->where('is_active', true);
-                })
-                ->first();
-
-            if (!$homeroomClass) {
-                return back()->with('error', 'Anda tidak memiliki kelas yang diampu sebagai wali kelas.');
-            }
-
-            $isStudentInClass = StudentClassAssignment::where('student_id', $request->student_id)
-                ->where('class_id', $homeroomClass->class_id)
-                ->where('academic_year_id', $homeroomClass->academic_year_id)
-                ->exists();
-
-            if (!$isStudentInClass) {
-                return back()->with('error', 'Siswa tersebut bukan dari kelas yang Anda ampu.');
-            }
-
+            // --- KODE ASLI (hanya wali kelas) ---
+            // $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
+            //     ->whereHas('academicYear', function($query) {
+            //         $query->where('is_active', true);
+            //     })
+            //     ->first();
+            // if (!$homeroomClass) {
+            //     return back()->with('error', 'Anda tidak memiliki kelas yang diampu sebagai wali kelas.');
+            // }
+            // $isStudentInClass = StudentClassAssignment::where('student_id', $request->student_id)
+            //     ->where('class_id', $homeroomClass->class_id)
+            //     ->where('academic_year_id', $homeroomClass->academic_year_id)
+            //     ->exists();
+            // if (!$isStudentInClass) {
+            //     return back()->with('error', 'Siswa tersebut bukan dari kelas yang Anda ampu.');
+            // }
+            // --- END KODE ASLI ---
             $violation->update([
                 'student_id' => $request->student_id,
                 'violation_points_id' => $request->violation_points_id,
@@ -219,7 +205,6 @@ class ViolationController extends Controller
                 'penalty' => $request->penalty,
                 'status' => $request->status,
             ]);
-
             if ($request->hasFile('evidence')) {
                 // Hapus bukti lama jika ada
                 if ($violation->evidence) {
@@ -229,7 +214,6 @@ class ViolationController extends Controller
                 $violation->evidence = $path;
                 $violation->save();
             }
-
             DB::commit();
             return redirect()->route('violations.index')->with('success', 'Pelanggaran berhasil diperbarui');
         } catch (\Exception $e) {
@@ -252,5 +236,73 @@ class ViolationController extends Controller
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Endpoint untuk autocomplete kelas (semua kelas aktif)
+     */
+    public function autocompleteClass(Request $request)
+    {
+        // --- KODE ASLI (hanya kelas wali) ---
+        // $user = Auth::user();
+        // $teacher = $user->teacher;
+        // $term = $request->input('term');
+        // $query = \App\Models\HomeroomAssignment::with('class')
+        //     ->where('teacher_id', $teacher->nip)
+        //     ->whereHas('academicYear', function($q) {
+        //         $q->where('is_active', true);
+        //     });
+        // if ($term) {
+        //     $query->whereHas('class', function($q) use ($term) {
+        //         $q->where('name', 'like', "%{$term}%");
+        //     });
+        // }
+        // $results = $query->get();
+        // $formatted = $results->map(function($item) {
+        //     return [
+        //         'id' => $item->class_id,
+        //         'value' => $item->class->name,
+        //     ];
+        // });
+        // return response()->json($formatted);
+        // --- END KODE ASLI ---
+
+        // Versi baru: semua kelas aktif
+        $term = $request->input('term');
+        $query = \App\Models\SchoolClass::where('is_active', true);
+        if ($term) {
+            $query->where('name', 'like', "%{$term}%");
+        }
+        $results = $query->get();
+        $formatted = $results->map(function($item) {
+            return [
+                'id' => $item->id,
+                'value' => $item->name . ($item->parallel_name ? ' ' . $item->parallel_name : ''),
+            ];
+        });
+        return response()->json($formatted);
+    }
+
+    /**
+     * Endpoint untuk autocomplete siswa berdasarkan kelas
+     */
+    public function autocompleteStudentByClass(Request $request)
+    {
+        $classId = $request->input('class_id');
+        $term = $request->input('term');
+        $query = \App\Models\Student::whereHas('classAssignments', function($q) use ($classId) {
+            $q->where('class_id', $classId);
+        });
+        if ($term) {
+            $query->where('name', 'like', "%{$term}%");
+        }
+        $results = $query->limit(10)->get();
+        $formatted = $results->map(function($item) {
+            return [
+                'id' => $item->nisn,
+                'value' => $item->name,
+            ];
+        });
+        return response()->json($formatted);
     }
 }

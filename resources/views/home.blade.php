@@ -102,128 +102,160 @@
         </div>
     @else
         @if (Auth::user()->hasRole('Siswa'))
-            <div class="content-header">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h4 class="m-0">Selamat datang, {{ ucwords(auth()->user()->name) }}!</h4>
+            <style>
+                .dashboard-title {
+                    font-size: 28px;
+                    font-weight: bold;
+                    margin-bottom: 20px;
+                }
+                .pie-chart-container {
+                    width: 320px;
+                    margin: 0 auto 24px auto;
+                }
+                .dashboard-section {
+                    background: #fffaf0;
+                    border-radius: 16px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                    padding: 18px 24px 8px 24px;
+                    margin-bottom: 18px;
+                }
+                .dashboard-table-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 16px;
+                    margin-bottom: 4px;
+                }
+                .see-detail-link {
+                    color: #bfa14a;
+                    font-weight: 600;
+                    text-decoration: underline;
+                    cursor: pointer;
+                    font-size: 15px;
+                }
+            </style>
+            <div class="container-fluid py-4 px-5">
+                <h4 class="dashboard-title">DASHBOARD</h4>
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="pie-chart-container">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="dashboard-section mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold">Prestasi</span>
+                                <a href="{{ route('student.achievements') }}" class="see-detail-link">Lihat Detail &gt;&gt;</a>
+                            </div>
+                            @foreach($prestasiList as $item)
+                                <div class="dashboard-table-row">
+                                    <span>{{ $item['name'] }}</span>
+                                    <span>{{ $item['point'] }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="dashboard-section">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold">Pelanggaran</span>
+                                <a href="{{ route('student.violations') }}" class="see-detail-link">Lihat Detail &gt;&gt;</a>
+                            </div>
+                            @foreach($pelanggaranList as $item)
+                                <div class="dashboard-table-row">
+                                    <span>{{ $item['name'] }}</span>
+                                    <span>{{ $item['point'] }}</span>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
+                <div class="mt-4">
+                    <h4 class="dashboard-title">Performa Kehadiran</h4>
+                    <canvas id="kehadiranChart"></canvas>
+                </div>
             </div>
+        @endif
 
-            <div class="content">
-                <div class="container-fluid">
-
-                    {{-- Pemberitahuan --}}
-                    <div class="alert alert-info">
-                        <h6><strong>Pemberitahuan Kepada Orang Tua/Wali Murid</strong></h6>
-                        <p>
-                            Dengan hormat,<br>
-                            Kami dengan bangga menginformasikan bahwa putra/putri Bapak/Ibu telah meraih pencapaian prestasi
-                            yang membanggakan di sekolah.
-                            Sebagai bentuk apresiasi, sekolah telah menyiapkan reward yang dapat diambil oleh siswa yang
-                            bersangkutan.
-                            Silakan menghubungi guru BK untuk pengambilan hadiah.<br>
-                            Atas perhatian dan kerja samanya, kami ucapkan terima kasih.
-                        </p>
+        @if (Auth::user()->hasRole('Guru BK'))
+            <style>
+                .dashboard-title {
+                    font-size: 24px;
+                    font-weight: bold;
+                    margin-bottom: 20px;
+                }
+                .dashboard-section-title {
+                    font-size: 20px;
+                    font-weight: 600;
+                    margin-bottom: 18px;
+                    margin-top: 32px;
+                }
+                .dashboard-table-box {
+                    background: #fff8e1;
+                    border-radius: 16px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                    padding: 24px 32px 12px 32px;
+                    margin-bottom: 24px;
+                }
+                .dashboard-table-header, .dashboard-table-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 16px;
+                }
+                .dashboard-table-header {
+                    font-weight: bold;
+                    color: #222;
+                    margin-bottom: 8px;
+                }
+                .dashboard-table-row {
+                    margin-bottom: 4px;
+                }
+                .dashboard-table-row span {
+                    min-width: 120px;
+                }
+                .see-detail-link {
+                    color: #bfa14a;
+                    font-weight: 600;
+                    text-decoration: underline;
+                    cursor: pointer;
+                    font-size: 15px;
+                }
+            </style>
+            <div class="container-fluid py-4 px-5">
+                <h4 class="dashboard-title">Dashboard Guru BK</h4>
+                <div class="dashboard-section-title">Siswa dengan Poin Prestasi Tertinggi</div>
+                <div class="dashboard-table-box">
+                    <div class="dashboard-table-header">
+                        <span>Nama Siswa</span>
+                        <span>Kelas</span>
+                        <span>Total Poin</span>
+                        <span><a href="{{ route('achievements.index') }}" class="see-detail-link">Lihat detail &gt;&gt;</a></span>
                     </div>
-
-                    {{-- Layout Utama --}}
-                    <div class="row mb-4">
-
-                        {{-- Kolom Kiri --}}
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <div class="card text-white bg-success">
-                                    <div class="card-body text-center">
-                                        <h5 class="fw-bold">
-                                            <i class="fas fa-star"></i> PRESTASI
-                                        </h5>
-                                        <h1 clas="fw-bold">95</h1>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <div class="card text-white bg-danger">
-                                    <div class="card-body text-center">
-                                        <h5 class="fw-bold">
-                                            <i class="fas fa-exclamation-circle"></i> PELANGGARAN
-                                        </h5>
-                                        <h1 class="fw-bold">20</h1>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <div class="card text-white bg-warning">
-                                    <div class="card-body text-center">
-                                        <h5 class="fw-bold">
-                                            <i class="fas fa-star-half-alt"></i> TOTAL POIN
-                                        </h5>
-                                        <h1 class="fw-bold">75</h1>
-                                    </div>
-                                </div>
-                            </div>
+                    @foreach($topAchievementStudents as $item)
+                        <div class="dashboard-table-row">
+                            <span>{{ $item->name }}</span>
+                            <span>{{ $item->class_name }}</span>
+                            <span>{{ $item->total_point }}</span>
+                            <span></span>
                         </div>
-
-                        {{-- Kolom Kanan --}}
-                        <div class="col-md-8">
-                            <div class="mb-3">
-                                <label class="font-weight-bold">Progress Prestasi</label>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar bg-success" style="width: 95%;"></div>
-                                    <div class="progress-bar" style="width: 5%; background-color: #b7f7b7;"></div>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="font-weight-bold">Progress Pelanggaran</label>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar bg-danger" style="width: 20%;"></div>
-                                    <div class="progress-bar" style="width: 80%; background-color: #f7b7b7;"></div>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="font-weight-bold">Total Poin</label>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar bg-warning" style="width: 75%;"></div>
-                                    <div class="progress-bar" style="width: 25%; background-color: #ffe8a1;"></div>
-                                </div>
-                            </div>
-
-                            <div class="card shadow-sm" style="background-color: #fffaf0; border-radius: 15px;">
-                                <div class="card-body">
-                                    <h5 class="font-weight-bold text-secondary">Keterangan</h5>
-                                    <hr>
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-secondary">Poin Prestasi</span>
-                                        <span>95</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-secondary">Poin Pelanggaran</span>
-                                        <span>20</span>
-                                    </div>
-                                    <hr>
-                                    <div class="d-flex justify-content-between">
-                                        <strong>Total Poin</strong>
-                                        <strong>75</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    @endforeach
+                </div>
+                <div class="dashboard-section-title">Siswa dengan Poin Pelanggaran Tertinggi</div>
+                <div class="dashboard-table-box">
+                    <div class="dashboard-table-header">
+                        <span>Nama Siswa</span>
+                        <span>Kelas</span>
+                        <span>Total Poin</span>
+                        <span><a href="{{ route('violations.index') }}" class="see-detail-link">Lihat detail &gt;&gt;</a></span>
                     </div>
-
-                    {{-- Grafik Performa Kehadiran --}}
-                    <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h5 class="m-0">Performa Kehadiran</h5>
+                    @foreach($topViolationStudents as $item)
+                        <div class="dashboard-table-row">
+                            <span>{{ $item->name }}</span>
+                            <span>{{ $item->class_name }}</span>
+                            <span>{{ $item->total_point }}</span>
+                            <span></span>
                         </div>
-                        <div class="card-body">
-                            <canvas id="kehadiranChart"></canvas>
-                        </div>
-                    </div>
-
+                    @endforeach
                 </div>
             </div>
         @endif
@@ -308,34 +340,42 @@
         {{-- Chart.js --}}
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
-            const ctx = document.getElementById('kehadiranChart').getContext('2d');
-            const kehadiranChart = new Chart(ctx, {
+            // Pie Chart
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Prestasi', 'Pelanggaran'],
+                    datasets: [{
+                        data: [{{ $pieData['prestasi'] }}, {{ $pieData['pelanggaran'] }}],
+                        backgroundColor: ['#00c853', '#ff1744'],
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+            // Kehadiran Chart
+            const hadirCtx = document.getElementById('kehadiranChart').getContext('2d');
+            new Chart(hadirCtx, {
                 type: 'line',
                 data: {
-                    labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'],
-                    datasets: [
-                        {
-                            label: 'Minggu Ini',
-                            data: [20, 40, 60, 80, 70],
-                            borderColor: 'orange',
-                            backgroundColor: 'rgba(255,165,0,0.2)',
-                            tension: 0.4
-                        },
-                        {
-                            label: 'Minggu Lalu',
-                            data: [30, 50, 70, 90, 60],
-                            borderColor: 'red',
-                            backgroundColor: 'rgba(255,99,132,0.2)',
-                            tension: 0.4
-                        }
-                    ]
+                    labels: {!! json_encode(array_values(["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"])) !!},
+                    datasets: [{
+                        label: 'Kehadiran',
+                        data: {!! json_encode(array_values($attendance->toArray())) !!},
+                        borderColor: '#ffa726',
+                        backgroundColor: 'rgba(255,167,38,0.2)',
+                        tension: 0.4,
+                        fill: true
+                    }]
                 },
                 options: {
                     responsive: true,
                     scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                        y: { beginAtZero: true }
                     }
                 }
             });

@@ -57,7 +57,7 @@ class AchievementController extends Controller
         $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
             $query->where('class_id', $homeroomClass->class_id)
                   ->where('academic_year_id', $homeroomClass->academic_year_id);
-        })->get();
+        })->with('currentAssignment')->get();
 
         $achievementPoints = AchievementPoint::all();
         $academicYears = AcademicYear::where('is_active', true)->get();
@@ -162,7 +162,7 @@ class AchievementController extends Controller
         $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
             $query->where('class_id', $homeroomClass->class_id)
                   ->where('academic_year_id', $homeroomClass->academic_year_id);
-        })->get();
+        })->with('currentAssignment')->get();
 
         $achievementPoints = AchievementPoint::all();
         $academicYears = AcademicYear::where('is_active', true)->get();
@@ -278,7 +278,7 @@ class AchievementController extends Controller
      */
     public function autocompleteSiswa(Request $request)
     {
-        $term = $request->get('term');
+        $term = $request->get('term', '');
         $teacher = Auth::user()->teacher;
         $homeroomClass = HomeroomAssignment::where('teacher_id', $teacher->nip)
             ->whereHas('academicYear', function($query) {
@@ -288,19 +288,31 @@ class AchievementController extends Controller
 
         $students = [];
         if ($homeroomClass) {
-            $students = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
-                    $query->where('class_id', $homeroomClass->class_id)
-                          ->where('academic_year_id', $homeroomClass->academic_year_id);
-                })
-                ->where('name', 'like', '%' . $term . '%')
-                ->get(['nisn', 'name']);
+            $query = Student::whereHas('classAssignments', function($query) use ($homeroomClass) {
+                $query->where('class_id', $homeroomClass->class_id)
+                      ->where('academic_year_id', $homeroomClass->academic_year_id);
+            });
+            if ($term !== '') {
+                $query->where('name', 'like', '%' . $term . '%');
+            }
+            $students = $query->with('currentAssignment.schoolClass')->get();
         }
 
         $result = [];
         foreach ($students as $student) {
+            $className = optional(optional($student->currentAssignment)->schoolClass)->name;
+            $parallelName = optional(optional($student->currentAssignment)->schoolClass)->parallel_name;
+            $classInfo = '';
+
+            if ($className && $parallelName) {
+                $classInfo = ' - ' . $className . ' ' . $parallelName;
+            } elseif ($className) {
+                $classInfo = ' - ' . $className;
+            }
+
             $result[] = [
                 'id' => $student->nisn,
-                'value' => $student->name . ' - ' . $student->nisn
+                'value' => $student->name . $classInfo
             ];
         }
         return response()->json($result);

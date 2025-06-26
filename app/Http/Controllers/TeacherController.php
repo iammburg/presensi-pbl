@@ -8,11 +8,13 @@ use App\Imports\TeachersImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Traits\HasPermissions;
 use Yajra\DataTables\Facades\DataTables;
 use App\Exports\TeacherTemplateExport;
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class TeacherController extends Controller
 {
@@ -79,8 +81,8 @@ class TeacherController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nip' => 'required|unique:teachers,nip',
-            'dapodik_number' => 'nullable|string|max:16',
+            'nip' => 'required|unique:teachers,nip|digits:18',
+            'dapodik_number' => 'nullable|string|max:16|unique:teachers,dapodik_number',
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'phone' => 'required',
@@ -126,42 +128,57 @@ class TeacherController extends Controller
      */
     public function show(string $nip)
     {
-        $teacher = Teacher::with(['user', 'teachingAssignments.subject', 'teachingAssignments.class'])->where('nip', $nip)->firstOrFail();
+        try {
+            $teacher = Teacher::with(['user', 'teachingAssignments.subject', 'teachingAssignments.schoolClass'])->where('nip', $nip)->firstOrFail();
 
-        // Jika request AJAX, kembalikan JSON
-        if (request()->ajax()) {
-            // Ambil mata pelajaran yang diampu
-            $subjects = $teacher->teachingAssignments->map(function($assignment) {
-                return [
-                    'subject' => $assignment->subject->name,
-                    'class' => $assignment->class->name . ($assignment->class->parallel_name ? ' - ' . $assignment->class->parallel_name : '')
-                ];
-            });
+            // Jika request AJAX, kembalikan JSON
+            if (request()->ajax()) {
+                // Ambil mata pelajaran yang diampu
+                $subjects = $teacher->teachingAssignments->map(function ($assignment) {
+                    return [
+                        'subject' => $assignment->subject ? $assignment->subject->name : '-',
+                        'class' => $assignment->schoolClass ?
+                            ($assignment->schoolClass->name . ($assignment->schoolClass->parallel_name ? ' - ' . $assignment->schoolClass->parallel_name : ''))
+                            : '-'
+                    ];
+                });
 
-            // Buat status berdasarkan mata pelajaran
-            $status = 'Guru';
-            if ($teacher->user->hasRole('Guru BK')) {
-                $status = 'Guru BK';
-            } else if ($subjects->isNotEmpty()) {
-                $status = 'Guru ' . $subjects->pluck('subject')->unique()->join(', ');
+                // Buat status berdasarkan mata pelajaran
+                $status = 'Guru';
+                if ($teacher->user->hasRole('Guru BK')) {
+                    $status = 'Guru BK';
+                } else if ($subjects->isNotEmpty()) {
+                    $status = 'Guru ' . $subjects->pluck('subject')->unique()->join(', ');
+                }
+
+                return response()->json([
+                    'nip' => $teacher->nip,
+                    'dapodik_number' => $teacher->dapodik_number,
+                    'name' => $teacher->name,
+                    'email' => $teacher->user->email,
+                    'phone' => $teacher->phone,
+                    'address' => $teacher->address,
+                    'gender' => $teacher->gender,
+                    'birth_date' => $teacher->birth_date,
+                    'photo_url' => $teacher->photo ? asset('storage/' . $teacher->photo) : null,
+                    'status' => $status,
+                    // 'subjects' => $subjects
+                ]);
             }
 
-            return response()->json([
-                'nip' => $teacher->nip,
-                'dapodik_number' => $teacher->dapodik_number,
-                'name' => $teacher->name,
-                'email' => $teacher->user->email,
-                'phone' => $teacher->phone,
-                'address' => $teacher->address,
-                'gender' => $teacher->gender,
-                'birth_date' => $teacher->birth_date ? $teacher->birth_date->format('d/m/Y') : null,
-                'photo_url' => $teacher->photo ? asset('storage/' . $teacher->photo) : null,
-                'status' => $status,
-                // 'subjects' => $subjects
-            ]);
-        }
+            return view('teachers.show', compact('teacher'));
+        } catch (\Exception $e) {
+            Log::error('Error in TeacherController@show: ' . $e->getMessage());
 
-        return view('teachers.show', compact('teacher'));
+            if (request()->ajax()) {
+                return response()->json([
+                    'error' => 'Tidak dapat mengambil data guru'
+                ], 500);
+            }
+
+            return redirect()->route('manage-teachers.index')
+                ->with('error', 'Tidak dapat mengambil data guru');
+        }
     }
 
     /**
@@ -181,8 +198,10 @@ class TeacherController extends Controller
         $teacher = Teacher::with('user')->where('nip', $nip)->firstOrFail();
 
         $request->validate([
+            'nip' => 'required|digits:18|unique:teachers,nip,' . $nip . ',nip',
+            'dapodik_number' => 'nullable|string|max:16|unique:teachers,dapodik_number,' . $nip . ',nip',
             'name' => 'required',
-            'dapodik_number' => 'nullable|string|max:50',
+            'email' => 'required|email|unique:users,email,' . $teacher->user->id,
             'phone' => 'required',
             'address' => 'required',
             'gender' => 'required|in:L,P',
@@ -200,7 +219,9 @@ class TeacherController extends Controller
             $teacher->photo = $photoPath;
         }
 
+        // Update teacher data
         $teacher->update([
+            'nip' => $request->nip,
             'name' => $request->name,
             'dapodik_number' => $request->dapodik_number ? substr($request->dapodik_number, 0, 16) : null,
             'phone' => $request->phone,
@@ -209,8 +230,11 @@ class TeacherController extends Controller
             'birth_date' => $request->birth_date,
         ]);
 
-        // Update user name
-        $teacher->user->update(['name' => $request->name]);
+        // Update user data
+        $teacher->user->update([
+            'name' => $request->name,
+            'email' => $request->email
+        ]);
 
         return redirect()->route('manage-teachers.index')
             ->with('success', 'Data guru berhasil diperbarui');
@@ -249,7 +273,7 @@ class TeacherController extends Controller
 
             return redirect()->route('manage-teachers.index')
                 ->with('success', 'Data guru berhasil diimport');
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+        } catch (ValidationException $e) {
             $failures = $e->failures();
             $errors = [];
 
@@ -258,6 +282,7 @@ class TeacherController extends Controller
             }
 
             return redirect()->back()
+                ->withInput()
                 ->with('error', implode('<br>', $errors));
         } catch (\Exception $e) {
             return redirect()->back()

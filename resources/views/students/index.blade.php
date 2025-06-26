@@ -11,10 +11,6 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0" style="font-weight: 600; color: #183C70;">Kelola Data Siswa</h5>
                     @can('create_student')
-                        <!-- Tombol Pindah ke Halaman Baru -->
-                        <a href="{{ route('manage-student-class-assignments.create') }}" class="btn btn-info btn-sm mr-2">
-                            <i class="fas fa-external-link-alt"></i> Plotting Siswa Ke Kelas
-                        </a>
                         <div class="dropdown">
                             <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="tambahDataDropdown"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -343,7 +339,20 @@
                             <tr><th>Nama Orang Tua</th><td>${data.parent_name ?? '-'}</td></tr>
                             <tr><th>Email Orang Tua</th><td>${data.parent_email ?? '-'}</td></tr>
                             <tr><th>Telepon Orang Tua</th><td>${data.parent_phone ?? '-'}</td></tr>
-                            <tr><th>Tanggal Lahir</th><td>${data.birth_date ?? '-'}</td></tr>
+                            <tr>
+                                <th>Tanggal Lahir</th>
+                                <td>
+                                    ${
+                                        data.birth_date
+                                            ? new Date(data.birth_date).toLocaleDateString('id-ID', {
+                                                day: '2-digit',
+                                                month: 'long',
+                                                year: 'numeric'
+                                            })
+                                            : '-'
+                                    }
+                                </td>
+                            </tr>
                         </table>
                     </div>
                 </div>
