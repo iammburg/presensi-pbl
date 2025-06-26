@@ -99,14 +99,24 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
                 throw new \Exception('Format tanggal lahir tidak valid.');
             }
 
+            // Pastikan hanya NIS, NISN, dan no hp yang di-cast ke string
+            $nisValue = isset($row[$nisKey]) ? (string) $row[$nisKey] : '';
+            $nisnValue = isset($row[$nisnKey]) ? (string) $row[$nisnKey] : '';
+            $teleponValue = isset($row[$teleponKey]) ? (string) $row[$teleponKey] : '';
+            $namaValue = isset($row[$namaKey]) ? $row[$namaKey] : '';
+            $alamatValue = isset($row[$alamatKey]) ? $row[$alamatKey] : '';
+            $namaOrangTuaValue = isset($row[$namaOrangTuaKey]) ? $row[$namaOrangTuaKey] : '';
+            $teleponOrangTuaValue = isset($row[$teleponOrangTuaKey]) ? $row[$teleponOrangTuaKey] : '';
+            $emailOrangTuaValue = isset($row[$emailOrangTuaKey]) ? $row[$emailOrangTuaKey] : '';
+            $genderValue = isset($row[$jenisKelaminKey]) ? $row[$jenisKelaminKey] : '';
+            $tahunMasukValue = isset($row[$tahunMasukKey]) ? $row[$tahunMasukKey] : '';
+
             // Validasi NIS
-            $nisValue = (string) $row[$nisKey];
             if (strlen($nisValue) > 20 || !ctype_digit($nisValue)) {
                 throw new \Exception('NIS harus berupa angka dan panjang maksimal 20 karakter.');
             }
 
             // Validasi NISN
-            $nisnValue = (string) $row[$nisnKey];
             if (strlen($nisnValue) !== 10 || !ctype_digit($nisnValue)) {
                 throw new \Exception('NISN harus berupa 10 digit angka.');
             }
@@ -119,30 +129,31 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             return DB::transaction(function () use (
                 $row, $nisKey, $nisnKey, $namaKey, $alamatKey, $teleponKey,
                 $namaOrangTuaKey, $teleponOrangTuaKey, $emailOrangTuaKey,
-                $jenisKelaminKey, $birthDate, $tahunMasukKey
+                $jenisKelaminKey, $birthDate, $tahunMasukKey,
+                $nisValue, $nisnValue, $namaValue, $alamatValue, $teleponValue, $namaOrangTuaValue, $teleponOrangTuaValue, $emailOrangTuaValue, $genderValue, $tahunMasukValue
             ) {
                 $user = User::firstOrCreate(
-                    ['email' => strtolower($row[$emailOrangTuaKey])],
+                    ['email' => strtolower($emailOrangTuaValue)],
                     [
-                        'name' => $row[$namaKey],
-                        'password' => Hash::make($row[$nisnKey]),
+                        'name' => $namaValue,
+                        'password' => Hash::make($nisnValue),
                     ]
                 );
 
                 $user->assignRole('Siswa');
 
                 return Student::create([
-                    'nis' => $row[$nisKey],
-                    'nisn' => $row[$nisnKey],
-                    'name' => $row[$namaKey],
-                    'gender' => $row[$jenisKelaminKey],
+                    'nis' => $nisValue,
+                    'nisn' => $nisnValue,
+                    'name' => $namaValue,
+                    'gender' => $genderValue,
                     'birth_date' => $birthDate,
-                    'address' => $row[$alamatKey],
-                    'phone' => $row[$teleponKey],
-                    'parent_name' => $row[$namaOrangTuaKey],
-                    'parent_phone' => $row[$teleponOrangTuaKey],
-                    'parent_email' => $row[$emailOrangTuaKey],
-                    'enter_year' => $row[$tahunMasukKey],
+                    'address' => $alamatValue,
+                    'phone' => $teleponValue,
+                    'parent_name' => $namaOrangTuaValue,
+                    'parent_phone' => $teleponOrangTuaValue,
+                    'parent_email' => $emailOrangTuaValue,
+                    'enter_year' => $tahunMasukValue,
                     'user_id' => $user->id,
                 ]);
             });
