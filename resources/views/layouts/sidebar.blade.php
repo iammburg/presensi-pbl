@@ -62,7 +62,7 @@
                             <li class="nav-item text-sm">
                                 <a href="{{ $isPoinPrestasi ? route('student.achievements') : ($isPoinPelanggaran ? route('student.violations') : url($endmenu->url)) }}"
                                     class="nav-link {{ (Request::url() == route('student.achievements') && $isPoinPrestasi) || (Request::url() == route('student.violations') && $isPoinPelanggaran) || Request::segment(1) == $endmenu->url ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
+                                    <i class="{{ strtolower($endmenu->nama_menu) === 'manajemen jam pelajaran' ? 'fas fa-clock' : 'far fa-circle' }} nav-icon"></i>
                                     <p>{{ ucwords($endmenu->nama_menu) }}</p>
                                 </a>
                             </li>
