@@ -20,6 +20,9 @@ class ViolationController extends Controller
     {
         // Ubah: Semua guru bisa create/edit, tidak hanya wali kelas
         $this->middleware('role:Guru')->only(['create', 'store', 'edit', 'update']);
+
+        // Middleware khusus untuk allStudents yang memperbolehkan guru BK dan admin
+        $this->middleware('role:Guru BK|Admin Sekolah')->only('allStudents');
     }
 
     public function index()
@@ -304,5 +307,53 @@ class ViolationController extends Controller
             ];
         });
         return response()->json($formatted);
+    }
+
+    /**
+     * Menampilkan daftar siswa dengan pelanggaran
+     */
+    public function allStudents(Request $request)
+    {
+        // Mendapatkan filter dari request
+        $search = $request->search;
+        $classFilter = $request->class;
+
+        // Query dasar untuk mendapatkan siswa dengan pelanggaran dan join ke assignment & kelas
+        $query = Student::select('students.*')
+            ->selectRaw('COUNT(violations.id) as violations_count')
+            ->selectRaw('SUM(violation_points.points) as total_point')
+            ->join('violations', 'students.nisn', '=', 'violations.student_id')
+            ->join('violation_points', 'violations.violation_points_id', '=', 'violation_points.id')
+            // Join ke assignment terbaru (subquery)
+            ->leftJoin(DB::raw('(
+                SELECT t1.* FROM student_class_assignments t1
+                INNER JOIN (
+                    SELECT student_id, MAX(updated_at) as max_updated
+                    FROM student_class_assignments
+                    GROUP BY student_id
+                ) t2 ON t1.student_id = t2.student_id AND t1.updated_at = t2.max_updated
+            ) as latest_assignment'), 'students.nisn', '=', 'latest_assignment.student_id')
+            ->leftJoin('classes', 'latest_assignment.class_id', '=', 'classes.id')
+            ->where('violations.validation_status', 'approved')
+            ->groupBy('students.nisn', 'students.name')
+            ->orderByDesc('total_point');
+
+        // Tambahkan filter pencarian jika ada
+        if ($search) {
+            $query->where('students.name', 'like', "%{$search}%");
+        }
+
+        // Tambahkan filter kelas jika ada
+        if ($classFilter) {
+            $query->where('classes.name', $classFilter);
+        }
+
+        // Dapatkan daftar kelas unik untuk dropdown filter
+        $classes = DB::table('classes')->distinct()->pluck('name')->sort()->values();
+
+        // Eksekusi query dengan paginasi
+        $students = $query->paginate(15);
+
+        return view('violations.all_students', compact('students', 'classes'));
     }
 }

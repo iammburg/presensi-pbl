@@ -181,81 +181,156 @@
                 .dashboard-title {
                     font-size: 24px;
                     font-weight: bold;
-                    margin-bottom: 20px;
+                    margin-bottom: 30px;
+                    color: #1a3b6d;
                 }
-                .dashboard-section-title {
-                    font-size: 20px;
-                    font-weight: 600;
-                    margin-bottom: 18px;
-                    margin-top: 32px;
+                .dashboard-section {
+                    max-width: 1000px;
+                    margin: 0 auto;
                 }
-                .dashboard-table-box {
-                    background: #fff8e1;
-                    border-radius: 16px;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-                    padding: 24px 32px 12px 32px;
-                    margin-bottom: 24px;
+                .point-title {
+                    text-align: center;
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #1a3b6d;
+                    margin-bottom: 30px;
+                    margin-top: 20px;
                 }
-                .dashboard-table-header, .dashboard-table-row {
+                .pie-chart-container {
+                    margin-bottom: 40px;
+                    text-align: center;
+                }
+                .badge {
+                    font-size: 14px;
+                }
+                .badge-success {
+                    background-color: #2ecc71;
+                }
+                .badge-danger {
+                    background-color: #e74c3c;
+                }
+                .student-card {
+                    background-color: #f9f9f7;
+                    border-radius: 10px;
+                    padding: 20px;
+                    margin-bottom: 25px;
+                }
+                .student-card-header {
                     display: flex;
                     justify-content: space-between;
-                    align-items: center;
-                    font-size: 16px;
+                    padding-bottom: 10px;
+                    margin-bottom: 10px;
+                    border-bottom: 1px solid #eee;
+                    color: #555;
                 }
-                .dashboard-table-header {
-                    font-weight: bold;
-                    color: #222;
-                    margin-bottom: 8px;
+                .student-card-header a {
+                    color: #007bff;
+                    text-decoration: none;
                 }
-                .dashboard-table-row {
-                    margin-bottom: 4px;
-                }
-                .dashboard-table-row span {
-                    min-width: 120px;
-                }
-                .see-detail-link {
-                    color: #bfa14a;
-                    font-weight: 600;
+                .student-card-header a:hover {
                     text-decoration: underline;
-                    cursor: pointer;
-                    font-size: 15px;
+                }
+                .student-list {
+                    margin: 0;
+                    padding: 0;
+                    list-style-type: none;
+                }
+                .student-item {
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 8px 0;
+                }
+                .student-name {
+                    flex: 2;
+                }
+                .student-class, .student-points {
+                    flex: 1;
+                    text-align: center;
+                }
+                .point-number {
+                    display: inline-block;
+                    background-color: #e74c3c;
+                    color: white;
+                    border-radius: 50%;
+                    width: 30px;
+                    height: 30px;
+                    text-align: center;
+                    line-height: 30px;
+                }
+                .achievement .point-number {
+                    background-color: #2ecc71;
                 }
             </style>
+
             <div class="container-fluid py-4 px-5">
-                <h4 class="dashboard-title">Dashboard Guru BK</h4>
-                <div class="dashboard-section-title">Siswa dengan Poin Prestasi Tertinggi</div>
-                <div class="dashboard-table-box">
-                    <div class="dashboard-table-header">
-                        <span>Nama Siswa</span>
-                        <span>Kelas</span>
-                        <span>Total Poin</span>
-                        <span><a href="{{ route('achievements.index') }}" class="see-detail-link">Lihat detail &gt;&gt;</a></span>
-                    </div>
-                    @foreach($topAchievementStudents as $item)
-                        <div class="dashboard-table-row">
-                            <span>{{ $item->name }}</span>
-                            <span>{{ $item->class_name }}</span>
-                            <span>{{ $item->total_point }}</span>
-                            <span></span>
+                <h1 class="dashboard-title">DASHBOARD</h1>
+
+                <div class="dashboard-section">
+                    <h2 class="point-title">POINT SISWA TERBANYAK</h2>
+
+                    <div class="pie-chart-container">
+                        @php
+                            // Hitung total poin prestasi dan pelanggaran
+                            $totalAchievementPoints = $topAchievementStudents->sum('total_point') ?: 0;
+                            $totalViolationPoints = $topViolationStudents->sum('total_point') ?: 0;
+                            $totalPoints = $totalAchievementPoints + $totalViolationPoints;
+
+                            // Hitung persentase
+                            $achievementPercentage = $totalPoints > 0 ? round(($totalAchievementPoints / $totalPoints) * 100) : 70;
+                            $violationPercentage = $totalPoints > 0 ? round(($totalViolationPoints / $totalPoints) * 100) : 30;
+                        @endphp
+
+                        <div style="height: 300px; width: 300px; margin: 0 auto;">
+                            <canvas id="pointPieChart"></canvas>
                         </div>
-                    @endforeach
-                </div>
-                <div class="dashboard-section-title">Siswa dengan Poin Pelanggaran Tertinggi</div>
-                <div class="dashboard-table-box">
-                    <div class="dashboard-table-header">
-                        <span>Nama Siswa</span>
-                        <span>Kelas</span>
-                        <span>Total Poin</span>
-                        <span><a href="{{ route('violations.index') }}" class="see-detail-link">Lihat detail &gt;&gt;</a></span>
-                    </div>
-                    @foreach($topViolationStudents as $item)
-                        <div class="dashboard-table-row">
-                            <span>{{ $item->name }}</span>
-                            <span>{{ $item->class_name }}</span>
-                            <span>{{ $item->total_point }}</span>
-                            <span></span>
+
+                        <div class="text-center mt-4">
+                            <div class="d-inline-block mx-3">
+                                <span class="badge badge-success p-2">Prestasi: {{ $achievementPercentage }}%</span>
+                            </div>
+                            <div class="d-inline-block mx-3">
+                                <span class="badge badge-danger p-2">Pelanggaran: {{ $violationPercentage }}%</span>
+                            </div>
                         </div>
-                    @endforeach
+                    </div>
+
+                    <!-- Siswa dengan prestasi terbanyak -->
+                    <div class="student-card achievement">
+                        <div class="student-card-header">
+                            <div>Siswa dengan prestasi terbanyak</div>
+                            <a href="{{ route('achievements.all_students') }}">Lihat detail >></a>
+                        </div>
+                        <ul class="student-list">
+                            @foreach($topAchievementStudents as $item)
+                            <li class="student-item">
+                                <div class="student-name">{{ $item->name }}</div>
+                                <div class="student-class">{{ $item->class_name }}</div>
+                                <div class="student-points">
+                                    <span class="point-number">{{ $item->total_point }}</span>
+                                </div>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                    <!-- Siswa dengan pelanggaran terbanyak -->
+                    <div class="student-card">
+                        <div class="student-card-header">
+                            <div>Siswa dengan Pelanggaran terbanyak</div>
+                            <a href="{{ route('violations.all_students') }}">Lihat detail >></a>
+                        </div>
+                        <ul class="student-list">
+                            @foreach($topViolationStudents as $item)
+                            <li class="student-item">
+                                <div class="student-name">{{ $item->name }}</div>
+                                <div class="student-class">{{ $item->class_name }}</div>
+                                <div class="student-points">
+                                    <span class="point-number">{{ $item->total_point }}</span>
+                                </div>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
             </div>
         @endif
@@ -380,5 +455,59 @@
                 }
             });
         </script>
+    @endpush
+@endif
+
+@if (Auth::user()->hasRole('Guru BK'))
+    @push('js')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mendapatkan data dari PHP untuk pie chart
+            const achievementPercentage = {{ $achievementPercentage ?? 70 }};
+            const violationPercentage = {{ $violationPercentage ?? 30 }};
+
+            // Membuat pie chart untuk perbandingan prestasi dan pelanggaran
+            const pieCtx = document.getElementById('pointPieChart').getContext('2d');
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Prestasi', 'Pelanggaran'],
+                    datasets: [{
+                        data: [achievementPercentage, violationPercentage],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#27ae60', '#c0392b'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.parsed}%`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true
+                    }
+                }
+            });
+        });
+    </script>
     @endpush
 @endif
