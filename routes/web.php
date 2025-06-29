@@ -52,7 +52,7 @@ Route::middleware(['auth'])->group(function () {
 // =========================================================
 // Admin Sistem Routes
 // =========================================================
-Route::middleware(['auth', 'role:Admin Sistem'])->group(function () {
+Route::middleware(['auth', 'role:superadmin'])->group(function () {
     // User management
     Route::resource('manage-user', UserController::class);
 
