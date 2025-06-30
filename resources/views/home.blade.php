@@ -16,7 +16,7 @@
             .summary-card {
                 border-radius: 12px;
                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                padding: 20px;
+                padding: 10px;
                 color: white;
                 font-weight: bold;
                 font-size: 18px;
@@ -29,12 +29,12 @@
             .summary-icon {
                 background-color: white;
                 border-radius: 50%;
-                width: 50px;
-                height: 50px;
+                width: 30px;
+                height: 30px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 20px;
+                font-size: 15px;
                 color: #333;
             }
 
@@ -61,37 +61,64 @@
                     <div class="summary-card bg-primary">
                         <div class="summary-icon"><i class="fas fa-users"></i></div>
                         <div>
-                            SISWA AKTIF<br>
-                            <span style="font-size: 24px;">{{ $activeStudents }}</span>
+                            <span style="font-size: 16px;">SISWA AKTIF: </span>
+                            <br>
+                            <span style="font-size: 16px;">{{ $activeStudents }}</span>
                         </div>
                     </div>
                     <div class="summary-card bg-success">
                         <div class="summary-icon"><i class="fas fa-check"></i></div>
                         <div>
-                            HADIR<br>
-                            <span style="font-size: 24px;">{{ $present }}</span>
+                            <span style="font-size: 16px;">HADIR: </span>
+                            <br>
+                            <span style="font-size: 16px;">{{ $present }}</span>
                         </div>
                     </div>
                     <div class="summary-card bg-danger">
                         <div class="summary-icon"><i class="fas fa-times"></i></div>
                         <div>
-                            ALPHA<br>
-                            <span style="font-size: 24px;">{{ $absent }}</span>
+                            <span style="font-size: 16px;">ALPHA: </span>
+                            <br>
+                            <span style="font-size: 16px;">{{ $absent }}</span>
+                        </div>
+                    </div>
+                    <div class="summary-card bg-info text-dark">
+                        <div class="summary-icon"><i class="fas fa-home"></i></div>
+                        <div>
+                            <span style="font-size: 16px;">IZIN: </span>
+                            <br>
+                            <span style="font-size: 16px;">{{ $excused }}</span>
                         </div>
                     </div>
                     <div class="summary-card bg-warning text-dark">
-                        <div class="summary-icon"><i class="fas fa-home"></i></div>
+                        <div class="summary-icon"><i class="fas fa-clinic-medical"></i></div>
                         <div>
-                            IZIN<br>
-                            <span style="font-size: 24px;">{{ $excused }}</span>
+                            <span style="font-size: 16px;">SAKIT: </span>
+                            <br>
+                            <span style="font-size: 16px;">{{ $excused }}</span>
                         </div>
                     </div>
                 </div>
 
+
                 {{-- Grafik Presensi --}}
                 <div class="col-md-9">
                     <div class="card-container">
-                        <canvas id="attendanceChart" height="60"></canvas>
+                        <form method="GET" class="mb-3">
+                            <label for="weekFilter" class="form-label">Pilih Minggu:</label>
+                            <input type="week" name="week" id="weekFilter" class="form-control w-auto d-inline-block"
+                                value="{{ $weekIso }}">
+                            <button type="submit" class="btn btn-primary ms-2">Tampilkan</button>
+                        </form>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Jumlah Kehadiran per Kelas ({{ $startOfWeek->format('d M') }} -
+                                    {{ $endOfWeek->format('d M Y') }})</h5>
+                                <canvas id="attendanceChart" height="100"></canvas>
+                            </div>
+                        </div>
+                        {{-- <canvas id="attendanceChart" height="60"></canvas> --}}
                         <div class="legend text-center">
                             <i class="fas fa-square" style="color:#2c3e50; font-size: 14px;"></i>
                             Jumlah Presensi Siswa Setiap Kelas
@@ -108,17 +135,20 @@
                     font-weight: bold;
                     margin-bottom: 20px;
                 }
+
                 .pie-chart-container {
                     width: 320px;
                     margin: 0 auto 24px auto;
                 }
+
                 .dashboard-section {
                     background: #fffaf0;
                     border-radius: 16px;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
                     padding: 18px 24px 8px 24px;
                     margin-bottom: 18px;
                 }
+
                 .dashboard-table-row {
                     display: flex;
                     justify-content: space-between;
@@ -126,6 +156,7 @@
                     font-size: 16px;
                     margin-bottom: 4px;
                 }
+
                 .see-detail-link {
                     color: #bfa14a;
                     font-weight: 600;
@@ -146,9 +177,10 @@
                         <div class="dashboard-section mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="fw-bold">Prestasi</span>
-                                <a href="{{ route('student.achievements') }}" class="see-detail-link">Lihat Detail &gt;&gt;</a>
+                                <a href="{{ route('student.achievements') }}" class="see-detail-link">Lihat Detail
+                                    &gt;&gt;</a>
                             </div>
-                            @foreach($prestasiList as $item)
+                            @foreach ($prestasiList as $item)
                                 <div class="dashboard-table-row">
                                     <span>{{ $item['name'] }}</span>
                                     <span>{{ $item['point'] }}</span>
@@ -158,9 +190,10 @@
                         <div class="dashboard-section">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="fw-bold">Pelanggaran</span>
-                                <a href="{{ route('student.violations') }}" class="see-detail-link">Lihat Detail &gt;&gt;</a>
+                                <a href="{{ route('student.violations') }}" class="see-detail-link">Lihat Detail
+                                    &gt;&gt;</a>
                             </div>
-                            @foreach($pelanggaranList as $item)
+                            @foreach ($pelanggaranList as $item)
                                 <div class="dashboard-table-row">
                                     <span>{{ $item['name'] }}</span>
                                     <span>{{ $item['point'] }}</span>
@@ -184,10 +217,12 @@
                     margin-bottom: 30px;
                     color: #1a3b6d;
                 }
+
                 .dashboard-section {
                     max-width: 1000px;
                     margin: 0 auto;
                 }
+
                 .point-title {
                     text-align: center;
                     font-size: 24px;
@@ -196,25 +231,31 @@
                     margin-bottom: 30px;
                     margin-top: 20px;
                 }
+
                 .pie-chart-container {
                     margin-bottom: 40px;
                     text-align: center;
                 }
+
                 .badge {
                     font-size: 14px;
                 }
+
                 .badge-success {
                     background-color: #2ecc71;
                 }
+
                 .badge-danger {
                     background-color: #e74c3c;
                 }
+
                 .student-card {
                     background-color: #f9f9f7;
                     border-radius: 10px;
                     padding: 20px;
                     margin-bottom: 25px;
                 }
+
                 .student-card-header {
                     display: flex;
                     justify-content: space-between;
@@ -223,30 +264,38 @@
                     border-bottom: 1px solid #eee;
                     color: #555;
                 }
+
                 .student-card-header a {
                     color: #007bff;
                     text-decoration: none;
                 }
+
                 .student-card-header a:hover {
                     text-decoration: underline;
                 }
+
                 .student-list {
                     margin: 0;
                     padding: 0;
                     list-style-type: none;
                 }
+
                 .student-item {
                     display: flex;
                     justify-content: space-between;
                     padding: 8px 0;
                 }
+
                 .student-name {
                     flex: 2;
                 }
-                .student-class, .student-points {
+
+                .student-class,
+                .student-points {
                     flex: 1;
                     text-align: center;
                 }
+
                 .point-number {
                     display: inline-block;
                     background-color: #e74c3c;
@@ -257,6 +306,7 @@
                     text-align: center;
                     line-height: 30px;
                 }
+
                 .achievement .point-number {
                     background-color: #2ecc71;
                 }
@@ -276,8 +326,10 @@
                             $totalPoints = $totalAchievementPoints + $totalViolationPoints;
 
                             // Hitung persentase
-                            $achievementPercentage = $totalPoints > 0 ? round(($totalAchievementPoints / $totalPoints) * 100) : 70;
-                            $violationPercentage = $totalPoints > 0 ? round(($totalViolationPoints / $totalPoints) * 100) : 30;
+                            $achievementPercentage =
+                                $totalPoints > 0 ? round(($totalAchievementPoints / $totalPoints) * 100) : 70;
+                            $violationPercentage =
+                                $totalPoints > 0 ? round(($totalViolationPoints / $totalPoints) * 100) : 30;
                         @endphp
 
                         <div style="height: 300px; width: 300px; margin: 0 auto;">
@@ -301,14 +353,14 @@
                             <a href="{{ route('achievements.all_students') }}">Lihat detail >></a>
                         </div>
                         <ul class="student-list">
-                            @foreach($topAchievementStudents as $item)
-                            <li class="student-item">
-                                <div class="student-name">{{ $item->name }}</div>
-                                <div class="student-class">{{ $item->class_name }}</div>
-                                <div class="student-points">
-                                    <span class="point-number">{{ $item->total_point }}</span>
-                                </div>
-                            </li>
+                            @foreach ($topAchievementStudents as $item)
+                                <li class="student-item">
+                                    <div class="student-name">{{ $item->name }}</div>
+                                    <div class="student-class">{{ $item->class_name }}</div>
+                                    <div class="student-points">
+                                        <span class="point-number">{{ $item->total_point }}</span>
+                                    </div>
+                                </li>
                             @endforeach
                         </ul>
                     </div>
@@ -320,14 +372,14 @@
                             <a href="{{ route('violations.all_students') }}">Lihat detail >></a>
                         </div>
                         <ul class="student-list">
-                            @foreach($topViolationStudents as $item)
-                            <li class="student-item">
-                                <div class="student-name">{{ $item->name }}</div>
-                                <div class="student-class">{{ $item->class_name }}</div>
-                                <div class="student-points">
-                                    <span class="point-number">{{ $item->total_point }}</span>
-                                </div>
-                            </li>
+                            @foreach ($topViolationStudents as $item)
+                                <li class="student-item">
+                                    <div class="student-name">{{ $item->name }}</div>
+                                    <div class="student-class">{{ $item->class_name }}</div>
+                                    <div class="student-points">
+                                        <span class="point-number">{{ $item->total_point }}</span>
+                                    </div>
+                                </li>
                             @endforeach
                         </ul>
                     </div>
@@ -428,7 +480,9 @@
                 },
                 options: {
                     plugins: {
-                        legend: { position: 'bottom' }
+                        legend: {
+                            position: 'bottom'
+                        }
                     }
                 }
             });
@@ -437,7 +491,9 @@
             new Chart(hadirCtx, {
                 type: 'line',
                 data: {
-                    labels: {!! json_encode(array_values(["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"])) !!},
+                    labels: {!! json_encode(
+                        array_values(['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']),
+                    ) !!},
                     datasets: [{
                         label: 'Kehadiran',
                         data: {!! json_encode(array_values($attendance->toArray())) !!},
@@ -450,7 +506,9 @@
                 options: {
                     responsive: true,
                     scales: {
-                        y: { beginAtZero: true }
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
             });
@@ -460,54 +518,54 @@
 
 @if (Auth::user()->hasRole('Guru BK'))
     @push('js')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mendapatkan data dari PHP untuk pie chart
-            const achievementPercentage = {{ $achievementPercentage ?? 70 }};
-            const violationPercentage = {{ $violationPercentage ?? 30 }};
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Mendapatkan data dari PHP untuk pie chart
+                const achievementPercentage = {{ $achievementPercentage ?? 70 }};
+                const violationPercentage = {{ $violationPercentage ?? 30 }};
 
-            // Membuat pie chart untuk perbandingan prestasi dan pelanggaran
-            const pieCtx = document.getElementById('pointPieChart').getContext('2d');
-            new Chart(pieCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Prestasi', 'Pelanggaran'],
-                    datasets: [{
-                        data: [achievementPercentage, violationPercentage],
-                        backgroundColor: ['#2ecc71', '#e74c3c'],
-                        borderColor: ['#27ae60', '#c0392b'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: {
-                                    size: 14,
-                                    weight: 'bold'
+                // Membuat pie chart untuk perbandingan prestasi dan pelanggaran
+                const pieCtx = document.getElementById('pointPieChart').getContext('2d');
+                new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Prestasi', 'Pelanggaran'],
+                        datasets: [{
+                            data: [achievementPercentage, violationPercentage],
+                            backgroundColor: ['#2ecc71', '#e74c3c'],
+                            borderColor: ['#27ae60', '#c0392b'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.parsed}%`;
+                                    }
                                 }
                             }
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.label}: ${context.parsed}%`;
-                                }
-                            }
+                        animation: {
+                            animateRotate: true,
+                            animateScale: true
                         }
-                    },
-                    animation: {
-                        animateRotate: true,
-                        animateScale: true
                     }
-                }
+                });
             });
-        });
-    </script>
+        </script>
     @endpush
 @endif
