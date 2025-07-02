@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Informasi Akademik Sekolah Negeri Polines</title>
+    <title>Diara TimeSchool</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -75,8 +75,8 @@
                 <div class="logo-container mb-3">
                     <img src="{{ asset('assets/images/login-logo.png') }}" alt="Logo Polines" class="img-fluid">
                 </div>
-                <h3 class="text-white mb-2 school-title">Sistem Informasi Akademik</h3>
-                <h3 class="text-white school-name">Sekolah Negeri Polines</h3>
+                <h3 class="text-white mb-2 school-title">Diara TimeSchool</h3>
+                <h3 class="text-white school-name">Sistem Informasi Presensi dan Poin Siswa</h3>
             </div>
         </div>
     </div>

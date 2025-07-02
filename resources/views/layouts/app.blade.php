@@ -52,14 +52,14 @@
             <ul class="navbar-nav ml-auto ">
                 <li class="nav-item dropdown user-menu">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        <img src="{{ asset('../../dist/img/user2-160x160.jpg') }}"
-                            class="user-image img-circle elevation-2" alt="User Image">
+                        <img src="{{ asset('dist/img/account_circle.svg') }}" class="user-image img-circle elevation-2"
+                            alt="User Image">
                         <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
 
                         <li class="user-header bg-info">
-                            <img src="{{ asset('../../dist/img/user2-160x160.jpg') }}" class="img-circle elevation-3"
+                            <img src="{{ asset('dist/img/account_circle.svg') }}" class="img-circle elevation-3"
                                 alt="User Image">
                             <p>
                                 {{ Auth::user()->name }}
@@ -108,10 +108,10 @@
 
         <aside class="main-sidebar main-sidebar-custom sidebar-dark-info elevation-4">
             <a href="{{ url('/') }}" class="brand-link d-flex flex-column align-items-center text-center">
-                <img src="{{ asset('dist/img/round-logo.png') }}" alt="Logo Polines" class="brand-image mb-2"
+                <img src="{{ asset('dist/img/round-logo.png') }}" alt="Logo" class="brand-image mb-2"
                     style="opacity: .9">
                 <span class="brand-text font-weight-light">
-                    <strong>{{ env('APP_NAME', 'PBL IK-TI Polines') }}</strong>
+                    <strong>{{ env('APP_NAME') }}</strong>
                 </span>
             </a>
             <div class="sidebar">
@@ -133,11 +133,13 @@
 
         <div class="content-wrapper">
             @yield('content')
-        </div>        <footer class="main-footer">
+        </div>
+        <footer class="main-footer">
             <div class="float-right d-none d-sm-block">
                 <b>Version</b> 1.0.0
             </div>
-            <strong>&copy; {{ date('Y') }} <i>Monitera</i> - Sistem Presensi Digital</strong>
+            <strong>&copy; {{ date('Y') }} <i>Diara TimeSchool</i> - Sistem Presensi dan Poin Siswa
+                Digital</strong>
         </footer>
     </div>
 
