@@ -29,7 +29,7 @@ services:
       - "5000:5000"
     volumes:
       - ./storage/app/public/student-photos:/app/student-photos
-      - ./storage/app/public/student-photos:/app/teacher-photos
+      - ./storage/app/public/teacher-photos:/app/teacher-photos
     environment:
         STUDENT_PHOTOS_DIR: /app/student-photos
         TEACHER_PHOTOS_DIR: /app/teacher-photos
