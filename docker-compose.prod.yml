@@ -4,8 +4,8 @@ services:
   laravel:
     image: iammburg/presensi-laravel:latest
     container_name: presensi_laravel
-    ports:
-      - "8000:8000"
+    expose:
+      - "9000"
     depends_on:
       - flask
       - mysql
@@ -15,7 +15,18 @@ services:
       DB_DATABASE: presensi-pbl
       DB_USERNAME: root
       DB_PASSWORD: SiNdaruNgapainDah
-    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_laravel
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/laravel.conf:/etc/nginx/conf.d/default.conf
+      - ./public:/var/www/public
+    depends_on:
+      - laravel
 
   flask:
     image: iammburg/presensi-flask:latest
