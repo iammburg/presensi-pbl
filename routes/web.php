@@ -149,6 +149,14 @@ Route::middleware(['auth', 'role:Guru'])->group(function () {
     // Teacher schedule
     Route::get('/teacher-schedule', [TeacherScheduleController::class, 'index'])->name('teacher-schedule.index');
 
+    // Student Attendance
+    Route::resource('manage-attendances', StudentAttendanceController::class);
+    Route::get('manage-attendances/class/{class_id}', [StudentAttendanceController::class, 'showByClass'])->name('manage-attendances.show-by-class');
+    Route::post('manage-attendances/update-status', [StudentAttendanceController::class, 'updateStatus'])->name('manage-attendances.update-status');
+
+    // Attendance History
+    Route::resource('manage-attendances-history', AttendanceHistoryController::class)->only(['index', 'show']);
+
     // Achievement reporting
     Route::resource('achievements', AchievementController::class);
     Route::post('achievements/{achievement}/validate', [AchievementController::class, 'validateAchievement'])->name('achievements.validate');
