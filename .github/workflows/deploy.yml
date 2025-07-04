@@ -52,6 +52,5 @@ jobs:
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/presensi-flask:latest
             cd /home/${{ secrets.VPS_USER }}/app
-            docker-compose -f docker-compose.prod.yml stop flask || true
-            docker-compose -f docker-compose.prod.yml rm -f flask || true
+            docker ps -a --filter "name=presensi_flask" --format "{{.ID}}" | xargs -r docker rm -f || true
             docker-compose -f docker-compose.prod.yml up -d flask
