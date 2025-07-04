@@ -52,5 +52,9 @@ jobs:
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/presensi-flask:latest
             cd /home/${{ secrets.VPS_USER }}/app
-            docker ps -a --filter "name=presensi_flask" --format "{{.ID}}" | xargs -r docker rm -f || true
+
+            echo "Cleaning up old flask containers..."
+            docker ps -a --filter "name=flask" --format "{{.ID}}" | xargs -r docker rm -f || true
+
+            echo "Running updated flask container..."
             docker-compose -f docker-compose.prod.yml up -d flask
