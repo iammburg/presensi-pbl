@@ -35,7 +35,7 @@ use App\Http\Controllers\HomeController;
 Route::permanentRedirect('/', '/login');
 
 // Authentication routes
-Auth::routes();
+Auth::routes(['register' => false]);
 
 // Routes accessible to all authenticated users
 Route::middleware(['auth'])->group(function () {
@@ -174,7 +174,7 @@ Route::middleware(['auth', 'role:Guru'])->group(function () {
 // =========================================================
 // Siswa Routes
 // =========================================================
-Route::middleware(['auth', 'role:Siswa'])->group(function() {
+Route::middleware(['auth', 'role:Siswa'])->group(function () {
     // Student attendance view
     Route::get('/manage-attendance-students', [StudentAttendanceController::class, 'index']);
     Route::get('/student/attendance', [StudentAttendanceController::class, 'index'])->name('student.attendance');
