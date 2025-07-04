@@ -18,4 +18,7 @@ RUN composer install --no-interaction --prefer-dist --optimize-autoloader \
     && php artisan storage:link \
     && php artisan config:cache
 
-CMD ["php-fpm"]
+COPY .docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+CMD ["entrypoint.sh"]

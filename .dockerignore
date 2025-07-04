@@ -6,3 +6,6 @@ __pycache__/
 *.pyd
 .idea/
 *.ipynb
+node_modules
+vendor
+storage/logs
