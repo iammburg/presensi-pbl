@@ -34,17 +34,16 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            echo "Stopping old containers..."
-            docker-compose -f docker-compose.prod.yml stop laravel nginx phpmyadmin || true
-
-            echo "emoving old containers safely..."
-            docker-compose -f docker-compose.prod.yml rm -f laravel nginx phpmyadmin || true
-
-            echo "Pulling latest image for Laravel..."
-            docker pull ${{ secrets.DOCKER_USERNAME }}/presensi-laravel:latest
-
-            echo "Launching containers..."
+            echo "Navigating to app directory..."
             cd /home/${{ secrets.VPS_USER }}/app
+
+            echo "Bringing down all containers safely..."
+            docker-compose -f docker-compose.prod.yml down --remove-orphans || true
+
+            echo "Pulling latest images..."
+            docker-compose -f docker-compose.prod.yml pull || true
+
+            echo "Starting only services we care about..."
             docker-compose -f docker-compose.prod.yml up -d laravel nginx phpmyadmin
 
   deploy-flask:
@@ -59,16 +58,14 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            echo "Stopping flask container..."
-            docker-compose -f docker-compose.prod.yml stop flask || true
+            cd /home/${{ secrets.VPS_USER }}/app
 
-            echo "Removing flask container..."
+            echo "Force remove flask container safely"
             docker-compose -f docker-compose.prod.yml rm -f flask || true
 
-            echo "Pulling latest image for Flask..."
-            docker pull ${{ secrets.DOCKER_USERNAME }}/presensi-flask:latest
+            echo "Pulling latest flask image"
+            docker-compose -f docker-compose.prod.yml pull flask || true
 
-            echo "Running flask container..."
-            cd /home/${{ secrets.VPS_USER }}/app
+            echo "Running fresh flask container"
             docker-compose -f docker-compose.prod.yml up -d flask
 
