@@ -30,7 +30,10 @@ services:
     image: nginx:latest
     restart: always
     ports:
-      - "80:80"
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - laravel_public:/var/www/public
@@ -55,6 +58,9 @@ services:
     environment:
       STUDENT_PHOTOS_DIR: /app/student-photos
       TEACHER_PHOTOS_DIR: /app/teacher-photos
+    volumes:
+      - flask_student_photos:/app/student-photos
+      - flask_teacher_photos:/app/teacher-photos
     command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "app:app"]
     deploy:
       replicas: 1
@@ -101,3 +107,5 @@ services:
 volumes:
   mysql-data:
   laravel_public:
+  flask_student_photos:
+  flask_teacher_photos:
