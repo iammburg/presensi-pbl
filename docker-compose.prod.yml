@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   laravel:
-    image: iammburg/presensi-laravel:latest
+    image: iammburg/presensi-laravel:${TAG}
     volumes:
       - laravel_public:/var/www/public
       - ./laravel.env:/var/www/.env
@@ -21,7 +21,7 @@ services:
         condition: on-failure
 
   flask:
-    image: iammburg/presensi-flask:latest
+    image: iammburg/presensi-flask:${TAG}
     volumes:
       - student_photos:/app/student-photos
       - teacher_photos:/app/teacher-photos

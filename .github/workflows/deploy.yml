@@ -56,7 +56,7 @@ jobs:
         script: |
           echo "Waiting for Laravel container..."
           for i in {1..10}; do
-            ID=$(docker ps --filter 'name=presensi-pbl_laravel' -q | head -n1)
+            ID=$(docker ps --filter 'name=laravel' --filter 'name=presensi-pbl' -q | head -n1)
             if [ -n "$ID" ]; then break; fi
             echo "Waiting 5s..."
             sleep 5
@@ -66,7 +66,10 @@ jobs:
             echo "Laravel container not found."; exit 1
           fi
 
-          echo "🔧 Fixing permissions in $ID..."
+          echo "Container list (debug):"
+          docker ps --format '{{.Names}} - {{.Image}}'
+
+          echo "Fixing permissions in $ID..."
           docker exec $ID chown -R www-data:www-data storage bootstrap/cache
           docker exec $ID chmod -R 775 storage bootstrap/cache
           docker exec $ID php artisan config:cache
