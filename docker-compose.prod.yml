@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   laravel:
+    container_name: laravel
     image: iammburg/presensi-laravel:${TAG}
     environment:
       DB_HOST: mysql
@@ -12,37 +13,25 @@ services:
     volumes:
       - laravel_public:/var/www/public
       - ./laravel.env:/var/www/.env
-    deploy:
-      replicas: 1
-      update_config:
-        order: start-first
-        parallelism: 1
-        delay: 10s
-      restart_policy:
-        condition: on-failure
+    depends_on:
+      - mysql
 
   nginx:
+    container_name: nginx
     image: nginx:latest
     ports:
-      - target: 80
-        published: 80
-        protocol: tcp
-        mode: host
+      - "80:80"
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - laravel_public:/var/www/public
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
+    depends_on:
+      - laravel
 
   flask:
+    container_name: flask
     image: iammburg/presensi-flask:${TAG}
     ports:
-      - target: 5000
-        published: 5000
-        protocol: tcp
-        mode: host
+      - "5000:5000"
     volumes:
       - ./student-photos:/app/student-photos
       - ./teacher-photos:/app/teacher-photos
@@ -50,39 +39,27 @@ services:
       STUDENT_PHOTOS_DIR: /app/student-photos
       TEACHER_PHOTOS_DIR: /app/teacher-photos
     command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "app:app"]
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
 
   mysql:
+    container_name: mysql
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: SiNdaruNgapainDah
       MYSQL_DATABASE: presensi-pbl
     volumes:
       - mysql-data:/var/lib/mysql
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
 
   phpmyadmin:
+    container_name: phpmyadmin
     image: phpmyadmin/phpmyadmin
     ports:
-      - target: 8080
-        published: 8080
-        protocol: tcp
-        mode: host
+      - "8080:80"
     environment:
       PMA_HOST: mysql
       UPLOAD_LIMIT: 300M
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
+    depends_on:
+      - mysql
 
 volumes:
   mysql-data:
   laravel_public:
-  flask_photos:
