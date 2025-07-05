@@ -4,6 +4,8 @@ services:
   laravel:
     container_name: laravel
     image: iammburg/presensi-laravel:${TAG}
+    ports:
+      - "9000:9000"
     environment:
       DB_HOST: mysql
       DB_PORT: 3306
@@ -51,13 +53,12 @@ services:
 
   phpmyadmin:
     container_name: phpmyadmin
-    image: phpmyadmin/phpmyadmin
+    image: phpmyadmin:latest
     restart: always
     ports:
       - "8080:80"
     environment:
       PMA_HOST: mysql
-      PMA_ABSOLUTE_URI: http://localhost:8080/
       UPLOAD_LIMIT: 300M
       PMA_ARBITRARY: 1
     depends_on:
