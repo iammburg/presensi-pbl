@@ -5,73 +5,71 @@ on:
     branches:
       - main
 
+env:
+  TAG: ${{ github.sha }}
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v3
+    - name: Checkout source
+      uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build & push Laravel
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/presensi-laravel:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/presensi-laravel:latest
+    - name: Build & push Laravel
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/presensi-laravel:${{ github.sha }} .
+        docker push ${{ secrets.DOCKER_USERNAME }}/presensi-laravel:${{ github.sha }}
 
-      - name: Build & push Flask
-        run: |
-          docker build -f .docker/flask/Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/presensi-flask:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/presensi-flask:latest
+    - name: Build & push Flask
+      run: |
+        docker build -f .docker/flask/Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/presensi-flask:${{ github.sha }} .
+        docker push ${{ secrets.DOCKER_USERNAME }}/presensi-flask:${{ github.sha }}
 
-      - name: Deploy stack to VPS (Swarm Rolling Update)
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            cd /home/${{ secrets.VPS_USER }}/app
-            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker stack deploy -c docker-compose.prod.yml presensi-pbl
+    - name: Deploy to VPS (Swarm)
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          export TAG=${{ github.sha }}
+          cd /home/${{ secrets.VPS_USER }}/app
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          TAG=$TAG docker stack deploy -c docker-compose.prod.yml presensi-pbl
 
-      - name: Fix Laravel permissions
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            echo "Waiting for Laravel container to be ready..."
+    - name: Fix Laravel Permissions
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          echo "Waiting for Laravel container..."
+          for i in {1..10}; do
+            ID=$(docker ps --filter 'name=presensi-pbl_laravel' -q | head -n1)
+            if [ -n "$ID" ]; then break; fi
+            echo "Waiting 5s..."
+            sleep 5
+          done
 
-            # Poll sampai container aktif
-            for i in {1..10}; do
-              LARAVEL_CONTAINER=$(docker ps --filter 'name=presensi-pbl_laravel' -q | head -n 1)
-              if [ -n "$LARAVEL_CONTAINER" ]; then
-                echo "Container found: $LARAVEL_CONTAINER"
-                break
-              fi
-              echo "Not found yet, retrying in 5s..."
-              sleep 5
-            done
+          if [ -z "$ID" ]; then
+            echo "Laravel container not found."; exit 1
+          fi
 
-            if [ -z "$LARAVEL_CONTAINER" ]; then
-              echo "Laravel container not found after waiting. Exiting..."
-              exit 1
-            fi
-
-            echo "🔧 Fixing permissions in $LARAVEL_CONTAINER..."
-            docker exec $LARAVEL_CONTAINER chown -R www-data:www-data storage bootstrap/cache
-            docker exec $LARAVEL_CONTAINER chmod -R 775 storage bootstrap/cache
-            docker exec $LARAVEL_CONTAINER php artisan config:cache
-            docker exec $LARAVEL_CONTAINER php artisan route:cache
-            docker exec $LARAVEL_CONTAINER php artisan view:cache
-            docker exec $LARAVEL_CONTAINER php artisan optimize
+          echo "🔧 Fixing permissions in $ID..."
+          docker exec $ID chown -R www-data:www-data storage bootstrap/cache
+          docker exec $ID chmod -R 775 storage bootstrap/cache
+          docker exec $ID php artisan config:cache
+          docker exec $ID php artisan route:cache
+          docker exec $ID php artisan view:cache
+          docker exec $ID php artisan optimize

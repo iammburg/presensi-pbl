@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   laravel:
-    image: iammburg/presensi-laravel:latest
+    image: iammburg/presensi-laravel:${TAG}
     expose:
       - "9000"
     depends_on:
@@ -21,14 +21,13 @@ services:
       replicas: 1
       update_config:
         parallelism: 1
-        delay: 10s
+        delay: 5s
         order: start-first
       restart_policy:
         condition: on-failure
 
   nginx:
     image: nginx:latest
-    restart: always
     ports:
       - target: 80
         published: 80
@@ -43,13 +42,13 @@ services:
       replicas: 1
       update_config:
         parallelism: 1
-        delay: 10s
+        delay: 5s
         order: start-first
       restart_policy:
         condition: on-failure
 
   flask:
-    image: iammburg/presensi-flask:latest
+    image: iammburg/presensi-flask:${TAG}
     ports:
       - target: 5000
         published: 5000
@@ -59,21 +58,20 @@ services:
       STUDENT_PHOTOS_DIR: /app/student-photos
       TEACHER_PHOTOS_DIR: /app/teacher-photos
     volumes:
-      - flask_student_photos:/app/student-photos
-      - flask_teacher_photos:/app/teacher-photos
+      - student_photos:/app/student-photos
+      - teacher_photos:/app/teacher-photos
     command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "app:app"]
     deploy:
       replicas: 1
       update_config:
         parallelism: 1
-        delay: 10s
+        delay: 5s
         order: start-first
       restart_policy:
         condition: on-failure
 
   mysql:
     image: mysql:8.0
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: SiNdaruNgapainDah
       MYSQL_DATABASE: presensi-pbl
@@ -89,7 +87,6 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    restart: always
     ports:
       - "8080:80"
     environment:
@@ -107,5 +104,5 @@ services:
 volumes:
   mysql-data:
   laravel_public:
-  flask_student_photos:
-  flask_teacher_photos:
+  student_photos:
+  teacher_photos:
