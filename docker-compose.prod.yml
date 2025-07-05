@@ -48,7 +48,10 @@ services:
   flask:
     image: iammburg/presensi-flask:latest
     ports:
-      - "5000:5000"
+      - target: 5000
+        published: 5000
+        protocol: tcp
+        mode: host
     environment:
       STUDENT_PHOTOS_DIR: /app/student-photos
       TEACHER_PHOTOS_DIR: /app/teacher-photos
