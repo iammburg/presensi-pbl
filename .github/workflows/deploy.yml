@@ -47,14 +47,14 @@ jobs:
           docker-compose pull
 
           # Start new version (tanpa stop service lain)
-          docker-compose up -d --no-deps --build laravel flask
+          docker-compose up -d --build
 
           # Wait for Laravel to boot
-          echo "⏳ Menunggu Laravel aktif..."
+          echo "Menunggu Laravel aktif..."
           sleep 10
 
           LARAVEL_ID=$(docker ps -qf "name=laravel")
-          echo "🛠️ Fixing Laravel Permissions in $LARAVEL_ID..."
+          echo "Fixing Laravel Permissions in $LARAVEL_ID..."
           docker exec "$LARAVEL_ID" mkdir -p storage bootstrap/cache
           docker exec "$LARAVEL_ID" chown -R www-data:www-data storage bootstrap/cache || true
           docker exec "$LARAVEL_ID" chmod -R 775 storage bootstrap/cache || true
