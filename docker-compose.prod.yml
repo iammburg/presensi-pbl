@@ -3,7 +3,6 @@ version: '3.8'
 services:
   laravel:
     image: iammburg/presensi-laravel:latest
-    container_name: presensi_laravel
     expose:
       - "9000"
     depends_on:
@@ -18,10 +17,16 @@ services:
     volumes:
       - laravel_public:/var/www/public
       - ./laravel.env:/var/www/.env
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
 
   nginx:
     image: nginx:latest
-    container_name: nginx_laravel
     restart: always
     ports:
       - "80:80"
@@ -30,20 +35,32 @@ services:
       - laravel_public:/var/www/public
     depends_on:
       - laravel
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
 
   flask:
     image: iammburg/presensi-flask:latest
-    container_name: presensi_flask
     ports:
       - "5000:5000"
     environment:
       STUDENT_PHOTOS_DIR: /app/student-photos
       TEACHER_PHOTOS_DIR: /app/teacher-photos
     command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "app:app"]
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
 
   mysql:
     image: mysql:8.0
-    container_name: mysql_db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: SiNdaruNgapainDah
@@ -52,10 +69,14 @@ services:
       - mysql-data:/var/lib/mysql
     ports:
       - "3306:3306"
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
     restart: always
     ports:
       - "8080:80"
@@ -66,6 +87,10 @@ services:
       PMA_ARBITRARY: 1
     depends_on:
       - mysql
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
 volumes:
   mysql-data:

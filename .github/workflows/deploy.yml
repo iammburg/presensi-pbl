@@ -27,24 +27,22 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/presensi-laravel:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/presensi-laravel:latest
 
-      - name: Deploy Laravel to VPS
+      - name: Build & push Flask
+        run: |
+          cd flask-app
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/presensi-flask:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/presensi-flask:latest
+
+      - name: Deploy stack to VPS (Swarm Rolling Update)
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            echo "Navigating to app directory..."
             cd /home/${{ secrets.VPS_USER }}/app
-
-            echo "Bringing down all containers safely..."
-            docker-compose -f docker-compose.prod.yml down --remove-orphans || true
-
-            echo "Pulling latest images..."
-            docker-compose -f docker-compose.prod.yml pull || true
-
-            echo "Starting only services we care about..."
-            docker-compose -f docker-compose.prod.yml up -d laravel nginx phpmyadmin
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+            docker stack deploy -c docker-compose.prod.yml presensi-pbl
 
       - name: Fix Laravel permissions
         uses: appleboy/ssh-action@v0.1.8
@@ -54,33 +52,11 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             echo "Fixing Laravel permissions..."
-            docker exec presensi_laravel chown -R www-data:www-data storage bootstrap/cache
-            docker exec presensi_laravel chmod -R 775 storage bootstrap/cache
-            docker exec presensi_laravel php artisan config:cache
-            docker exec presensi_laravel php artisan route:cache
-            docker exec presensi_laravel php artisan view:cache
-            docker exec presensi_laravel php artisan optimize
-
-  deploy-flask:
-    runs-on: ubuntu-latest
-    needs: build-and-deploy
-    continue-on-error: true
-    steps:
-      - name: Deploy Flask to VPS
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            cd /home/${{ secrets.VPS_USER }}/app
-
-            echo "Force remove flask container safely"
-            docker-compose -f docker-compose.prod.yml rm -f flask || true
-
-            echo "Pulling latest flask image"
-            docker-compose -f docker-compose.prod.yml pull flask || true
-
-            echo "Running fresh flask container"
-            docker-compose -f docker-compose.prod.yml up -d flask
-
+            docker service ps presensi-pbl_laravel
+            LARAVEL_CONTAINER=$(docker ps --filter 'name=presensi-pbl_laravel' -q | head -n 1)
+            docker exec $LARAVEL_CONTAINER chown -R www-data:www-data storage bootstrap/cache
+            docker exec $LARAVEL_CONTAINER chmod -R 775 storage bootstrap/cache
+            docker exec $LARAVEL_CONTAINER php artisan config:cache
+            docker exec $LARAVEL_CONTAINER php artisan route:cache
+            docker exec $LARAVEL_CONTAINER php artisan view:cache
+            docker exec $LARAVEL_CONTAINER php artisan optimize
