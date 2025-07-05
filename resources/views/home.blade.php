@@ -321,7 +321,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2 align-items-center">
                         <div class="col-sm-6">
-                            <h4 class="m-0">Dashboard Superadmin</h4>
+                            <h4 class="m-0">Dashboard Super Admin</h4>
                         </div>
                         <div class="col-sm-6">
                             {{-- Form Filter Tahun dan Bulan --}}

@@ -56,7 +56,7 @@ services:
     image: phpmyadmin:latest
     restart: always
     ports:
-      - "8080:80"
+      - "8081:80"
     environment:
       PMA_HOST: mysql
       UPLOAD_LIMIT: 300M
