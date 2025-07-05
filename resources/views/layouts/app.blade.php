@@ -34,7 +34,7 @@
                     <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i
                             class="fas fa-bars"></i></a>
                 </li>
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <form class="form-inline ml-3">
                         <div class="input-group">
                             <input class="form-control form-control-navbar" type="search" placeholder="Search here"
@@ -46,7 +46,7 @@
                             </div>
                         </div>
                     </form>
-                </li>
+                </li> --}}
             </ul>
 
             <ul class="navbar-nav ml-auto ">
