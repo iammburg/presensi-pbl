@@ -43,8 +43,8 @@ jobs:
         key: ${{ secrets.VPS_SSH_KEY }}
         script: |
           cd /home/${{ secrets.VPS_USER }}/app
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          TAG=${TAG} docker stack deploy -c docker-compose.prod.yml presensi-pbl
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin }}
+          TAG=${{ github.sha }} docker stack deploy -c docker-compose.prod.yml presensi-pbl
 
     - name: Wait & Fix Laravel permissions
       uses: appleboy/ssh-action@v0.1.8
