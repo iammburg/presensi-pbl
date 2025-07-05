@@ -2,71 +2,58 @@ version: '3.8'
 
 services:
   laravel:
-    image: iammburg/presensi-laravel:${TAG}
-    expose:
-      - "9000"
-    depends_on:
-      - flask
-      - mysql
+    image: iammburg/presensi-laravel:latest
+    volumes:
+      - laravel_public:/var/www/public
+      - ./laravel.env:/var/www/.env
     environment:
       DB_HOST: mysql
       DB_PORT: 3306
       DB_DATABASE: presensi-pbl
       DB_USERNAME: root
       DB_PASSWORD: SiNdaruNgapainDah
-    volumes:
-      - laravel_public:/var/www/public
-      - ./laravel.env:/var/www/.env
     deploy:
       replicas: 1
       update_config:
-        parallelism: 1
-        delay: 5s
         order: start-first
+        delay: 5s
+      restart_policy:
+        condition: on-failure
+
+  flask:
+    image: iammburg/presensi-flask:latest
+    volumes:
+      - student_photos:/app/student-photos
+      - teacher_photos:/app/teacher-photos
+    environment:
+      STUDENT_PHOTOS_DIR: /app/student-photos
+      TEACHER_PHOTOS_DIR: /app/teacher-photos
+    ports:
+      - target: 5000
+        published: 5000
+        protocol: tcp
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
+        delay: 5s
       restart_policy:
         condition: on-failure
 
   nginx:
     image: nginx:latest
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - laravel_public:/var/www/public
     ports:
       - target: 80
         published: 80
         protocol: tcp
-        mode: host
-    volumes:
-      - ./nginx:/etc/nginx/conf.d
-      - laravel_public:/var/www/public
-    depends_on:
-      - laravel
     deploy:
       replicas: 1
       update_config:
-        parallelism: 1
-        delay: 5s
         order: start-first
-      restart_policy:
-        condition: on-failure
-
-  flask:
-    image: iammburg/presensi-flask:${TAG}
-    ports:
-      - target: 5000
-        published: 5000
-        protocol: tcp
-        mode: host
-    environment:
-      STUDENT_PHOTOS_DIR: /app/student-photos
-      TEACHER_PHOTOS_DIR: /app/teacher-photos
-    volumes:
-      - student_photos:/app/student-photos
-      - teacher_photos:/app/teacher-photos
-    command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "app:app"]
-    deploy:
-      replicas: 1
-      update_config:
-        parallelism: 1
         delay: 5s
-        order: start-first
       restart_policy:
         condition: on-failure
 
@@ -78,26 +65,23 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - target: 3306
+        published: 3306
+        protocol: tcp
     deploy:
-      replicas: 1
       placement:
         constraints:
           - node.role == manager
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    ports:
-      - "8080:80"
     environment:
       PMA_HOST: mysql
-      PMA_ABSOLUTE_URI: http://localhost:8080/
-      UPLOAD_LIMIT: 300M
-      PMA_ARBITRARY: 1
-    depends_on:
-      - mysql
+    ports:
+      - target: 80
+        published: 8080
+        protocol: tcp
     deploy:
-      replicas: 1
       restart_policy:
         condition: on-failure
 
