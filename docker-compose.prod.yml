@@ -1,59 +1,57 @@
-version: '3.8'
+version: "3.8"
 
 services:
   laravel:
     image: iammburg/presensi-laravel:${TAG}
-    volumes:
-      - laravel_public:/var/www/public
-      - ./laravel.env:/var/www/.env
     environment:
       DB_HOST: mysql
       DB_PORT: 3306
       DB_DATABASE: presensi-pbl
       DB_USERNAME: root
       DB_PASSWORD: SiNdaruNgapainDah
-    deploy:
-      replicas: 1
-      update_config:
-        order: start-first
-        delay: 5s
-      restart_policy:
-        condition: on-failure
-
-  flask:
-    image: iammburg/presensi-flask:${TAG}
     volumes:
-      - student_photos:/app/student-photos
-      - teacher_photos:/app/teacher-photos
-    environment:
-      STUDENT_PHOTOS_DIR: /app/student-photos
-      TEACHER_PHOTOS_DIR: /app/teacher-photos
-    ports:
-      - target: 5000
-        published: 5000
-        protocol: tcp
+      - laravel_public:/var/www/public
+      - ./laravel.env:/var/www/.env
     deploy:
       replicas: 1
       update_config:
         order: start-first
-        delay: 5s
+        parallelism: 1
+        delay: 10s
       restart_policy:
         condition: on-failure
 
   nginx:
     image: nginx:latest
-    volumes:
-      - ./nginx:/etc/nginx/conf.d
-      - laravel_public:/var/www/public
     ports:
       - target: 80
         published: 80
         protocol: tcp
+        mode: host
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - laravel_public:/var/www/public
     deploy:
       replicas: 1
-      update_config:
-        order: start-first
-        delay: 5s
+      restart_policy:
+        condition: on-failure
+
+  flask:
+    image: iammburg/presensi-flask:${TAG}
+    ports:
+      - target: 5000
+        published: 5000
+        protocol: tcp
+        mode: host
+    volumes:
+      - ./student-photos:/app/student-photos
+      - ./teacher-photos:/app/teacher-photos
+    environment:
+      STUDENT_PHOTOS_DIR: /app/student-photos
+      TEACHER_PHOTOS_DIR: /app/teacher-photos
+    command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "app:app"]
+    deploy:
+      replicas: 1
       restart_policy:
         condition: on-failure
 
@@ -64,10 +62,6 @@ services:
       MYSQL_DATABASE: presensi-pbl
     volumes:
       - mysql-data:/var/lib/mysql
-    ports:
-      - target: 3306
-        published: 3306
-        protocol: tcp
     deploy:
       placement:
         constraints:
@@ -75,18 +69,20 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    environment:
-      PMA_HOST: mysql
     ports:
-      - target: 80
+      - target: 8080
         published: 8080
         protocol: tcp
+        mode: host
+    environment:
+      PMA_HOST: mysql
+      UPLOAD_LIMIT: 300M
     deploy:
+      replicas: 1
       restart_policy:
         condition: on-failure
 
 volumes:
   mysql-data:
   laravel_public:
-  student_photos:
-  teacher_photos:
+  flask_photos:
