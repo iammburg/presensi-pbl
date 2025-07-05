@@ -50,9 +50,25 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            echo "Fixing Laravel permissions..."
-            docker service ps presensi-pbl_laravel
-            LARAVEL_CONTAINER=$(docker ps --filter 'name=presensi-pbl_laravel' -q | head -n 1)
+            echo "Waiting for Laravel container to be ready..."
+
+            # Poll sampai container aktif
+            for i in {1..10}; do
+              LARAVEL_CONTAINER=$(docker ps --filter 'name=presensi-pbl_laravel' -q | head -n 1)
+              if [ -n "$LARAVEL_CONTAINER" ]; then
+                echo "Container found: $LARAVEL_CONTAINER"
+                break
+              fi
+              echo "Not found yet, retrying in 5s..."
+              sleep 5
+            done
+
+            if [ -z "$LARAVEL_CONTAINER" ]; then
+              echo "Laravel container not found after waiting. Exiting..."
+              exit 1
+            fi
+
+            echo "🔧 Fixing permissions in $LARAVEL_CONTAINER..."
             docker exec $LARAVEL_CONTAINER chown -R www-data:www-data storage bootstrap/cache
             docker exec $LARAVEL_CONTAINER chmod -R 775 storage bootstrap/cache
             docker exec $LARAVEL_CONTAINER php artisan config:cache
