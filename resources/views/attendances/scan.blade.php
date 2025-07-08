@@ -142,7 +142,7 @@
 
                         try {
                             const resp1 = await fetch(
-                                'http://localhost:5000/classify', {
+                                'http://103.196.154.75:5000//classify', {
                                     method: 'POST',
                                     body: form
                                 });

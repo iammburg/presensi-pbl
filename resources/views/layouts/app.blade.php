@@ -49,21 +49,22 @@
                 </li> --}}
             </ul>
 
-            <ul class="navbar-nav ml-auto ">
+            <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown user-menu">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        <img src="{{ asset('dist/img/account_circle.svg') }}" class="user-image img-circle elevation-2"
-                            alt="User Image">
-                        <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
+                    <a href="#" class="nav-link dropdown-toggle d-flex align-items-center py-2"
+                        data-toggle="dropdown">
+                        <img src="{{ asset('dist/img/account_circle.svg') }}"
+                            class="user-image img-circle elevation-2 mr-2" alt="User Image" width="30"
+                            height="30">
+                        <span class="d-none d-md-inline font-weight-bold">{{ Auth::user()->name }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-
                         <li class="user-header bg-info">
                             <img src="{{ asset('dist/img/account_circle.svg') }}" class="img-circle elevation-3"
-                                alt="User Image">
-                            <p>
+                                alt="User Image" width="80" height="80">
+                            <p class="mb-1">
                                 {{ Auth::user()->name }}
-                                <small>Politeknik Negeri Semarang</small>
+                                <small class="d-block">Politeknik Negeri Semarang</small>
                             </p>
                         </li>
                         <li class="user-footer">
