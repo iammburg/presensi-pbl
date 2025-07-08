@@ -108,11 +108,11 @@ Route::middleware(['auth', 'role:Admin Sekolah'])->group(function () {
     Route::get('manage-schedules/{manage_schedule}/export-pdf', [ClassScheduleController::class, 'exportPdf'])->name('manage-schedules.export-pdf');
 
     // Attendance management
-    Route::get('manage-attendances/class/{class_id}', [AttendanceController::class, 'showByClass'])->name('manage-attendances.show-by-class');
-    Route::post('manage-attendances/update-status', [AttendanceController::class, 'updateStatus'])->name('manage-attendances.update-status');
-    Route::resource('manage-attendances', AttendanceController::class);
-    Route::resource('manage-attendances-history', AttendanceHistoryController::class)->only(['index', 'show']);
-    Route::get('attendances/history-detail', [AttendanceHistoryController::class, 'detail'])->name('attendances.history-detail');
+    // Route::get('manage-attendances/class/{class_id}', [AttendanceController::class, 'showByClass'])->name('manage-attendances.show-by-class');
+    // Route::post('manage-attendances/update-status', [AttendanceController::class, 'updateStatus'])->name('manage-attendances.update-status');
+    // Route::resource('manage-attendances', AttendanceController::class);
+    // Route::resource('manage-attendances-history', AttendanceHistoryController::class)->only(['index', 'show']);
+    // Route::get('attendances/history-detail', [AttendanceHistoryController::class, 'detail'])->name('attendances.history-detail');
 });
 
 // =========================================================
@@ -149,10 +149,10 @@ Route::middleware(['auth', 'role:Guru'])->group(function () {
     // Teacher schedule
     Route::get('/teacher-schedule', [TeacherScheduleController::class, 'index'])->name('teacher-schedule.index');
 
-    // Student Attendance
-    Route::resource('manage-attendances', StudentAttendanceController::class);
-    Route::get('manage-attendances/class/{class_id}', [StudentAttendanceController::class, 'showByClass'])->name('manage-attendances.show-by-class');
-    Route::post('manage-attendances/update-status', [StudentAttendanceController::class, 'updateStatus'])->name('manage-attendances.update-status');
+    // Teacher Attendance
+    Route::resource('manage-attendances', AttendanceController::class);
+    Route::get('manage-attendances/class/{class_id}', [AttendanceController::class, 'showByClass'])->name('manage-attendances.show-by-class');
+    Route::post('manage-attendances/update-status', [AttendanceController::class, 'updateStatus'])->name('manage-attendances.update-status');
 
     // Attendance History
     Route::resource('manage-attendances-history', AttendanceHistoryController::class)->only(['index', 'show']);
