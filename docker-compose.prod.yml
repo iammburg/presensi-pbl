@@ -18,7 +18,7 @@ services:
     volumes:
       - laravel_public:/var/www/public
       - ./laravel.env:/var/www/.env
-      - laravel_storage:/var/www/storage/app/public
+      - ./storage/app/public:/var/www/storage/app/public
 
   nginx:
     image: nginx:latest
@@ -74,4 +74,3 @@ services:
 volumes:
   mysql-data:
   laravel_public:
-  laravel_storage:
