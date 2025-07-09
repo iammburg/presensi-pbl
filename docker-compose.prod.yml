@@ -18,6 +18,7 @@ services:
     volumes:
       - laravel_public:/var/www/public
       - ./laravel.env:/var/www/.env
+      - laravel_storage:/var/www/storage/app/public
 
   nginx:
     image: nginx:latest
@@ -30,7 +31,6 @@ services:
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - laravel_public:/var/www/public
-      - laravel_storage:/var/www/storage/app/public
 
   flask:
     image: iammburg/presensi-flask:latest
