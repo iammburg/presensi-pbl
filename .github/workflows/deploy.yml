@@ -58,5 +58,7 @@ jobs:
           docker exec "$LARAVEL_ID" php artisan route:cache || true
           docker exec "$LARAVEL_ID" php artisan view:cache || true
           docker exec "$LARAVEL_ID" php artisan optimize || true
+          docker exec "$LARAVEL_ID" rm -f public/storage || true
+          docker exec "$LARAVEL_ID" php artisan storage:link || true
 
           echo "✅ Laravel deployment completed!"

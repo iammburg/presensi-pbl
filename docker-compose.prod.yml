@@ -30,6 +30,7 @@ services:
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - laravel_public:/var/www/public
+      - laravel_storage:/var/www/storage/app/public
 
   flask:
     image: iammburg/presensi-flask:latest
@@ -73,3 +74,4 @@ services:
 volumes:
   mysql-data:
   laravel_public:
+  laravel_storage:
