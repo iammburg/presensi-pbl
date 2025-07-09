@@ -32,7 +32,7 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
-        if (auth()->user()->hasRole('superadmin')) {
+        if (Auth::user()->hasRole('superadmin')) {
             return $this->superadminDashboard();
         }
 
