@@ -78,5 +78,7 @@ jobs:
           docker exec "$LARAVEL_ID" php artisan optimize || true
           docker exec "$LARAVEL_ID" rm -f public/storage || true
           docker exec "$LARAVEL_ID" php artisan storage:link || true
+          echo "♻️ Reload NGINX config..."
+          docker exec nginx nginx -s reload || true
 
           echo "✅ Laravel deployment completed!"
