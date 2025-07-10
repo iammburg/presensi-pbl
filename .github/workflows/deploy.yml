@@ -30,6 +30,24 @@ jobs:
         docker build -f .docker/flask/Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/presensi-flask:latest .
         docker push ${{ secrets.DOCKER_USERNAME }}/presensi-flask:latest
 
+    - name: Copy docker-compose.prod.yml to VPS
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        source: "docker-compose.prod.yml"
+        target: "/home/${{ secrets.VPS_USER }}/app"
+
+    - name: Copy laravel.conf to VPS
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        source: "nginx/laravel.conf"
+        target: "/home/${{ secrets.VPS_USER }}/app/nginx/"
+
     - name: SSH Deploy to VPS
       uses: appleboy/ssh-action@v0.1.8
       with:
@@ -58,5 +76,9 @@ jobs:
           docker exec "$LARAVEL_ID" php artisan route:cache || true
           docker exec "$LARAVEL_ID" php artisan view:cache || true
           docker exec "$LARAVEL_ID" php artisan optimize || true
+          docker exec "$LARAVEL_ID" rm -f public/storage || true
+          docker exec "$LARAVEL_ID" php artisan storage:link || true
+          echo "♻️ Reload NGINX config..."
+          docker exec nginx nginx -s reload || true
 
           echo "✅ Laravel deployment completed!"
