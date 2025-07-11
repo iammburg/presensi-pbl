@@ -30,3 +30,12 @@ flask-classifier/*env*/
 flask-classifier/*.h5
 flask-classifier/*.pt
 flask-classifier/logs/
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

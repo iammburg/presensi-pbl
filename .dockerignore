@@ -1,4 +1,5 @@
 .env
+public/storage
 __pycache__/
 *.pyc
 *.pyo
@@ -8,3 +9,24 @@ __pycache__/
 node_modules
 vendor
 storage/logs
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+
+# CI/CD
+.github/
