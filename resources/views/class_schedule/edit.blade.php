@@ -16,307 +16,357 @@
 
     <div class="content">
         <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card card-primary card-outline">
-                        <div class="card-header">
-                            <h5 class="card-title m-0">Form Edit Jadwal</h5>
-                            <div class="card-tools">
-                                <a href="{{ route('manage-schedules.index') }}" class="btn btn-tool">
-                                    <i class="fas fa-arrow-alt-circle-left"></i>
-                                </a>
+            @if (session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
+
+            <div class="card card-primary card-outline">
+                <div class="card-header">
+                    <h5 class="card-title m-0">Form Edit Jadwal</h5>
+                    <div class="card-tools">
+                        <a href="{{ route('manage-schedules.index') }}" class="btn btn-tool" title="Kembali">
+                            <i class="fas fa-arrow-alt-circle-left"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body px-4 py-3">
+                    <form method="POST" action="{{ route('manage-schedules.update', $manageSchedule->id) }}">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                <label for="class_id" class="form-label fw-semibold">Kelas</label>
+                                <select name="class_id" id="class_id" class="form-select" required
+                                    onchange="onClassChange(this)">
+                                    <option value="" selected>Pilih Kelas</option>
+                                    @foreach ($classes as $classItem)
+                                        <option value="{{ $classItem->id }}"
+                                            {{ old('class_id', $class->id) == $classItem->id ? 'selected' : '' }}>
+                                            {{ $classItem->name }} - {{ $classItem->parallel_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
 
-                        <div class="card-body px-4 py-3">
-                            @if (session('error'))
-                                <div class="alert alert-danger">{{ session('error') }}</div>
-                            @endif
+                        @php
+                            $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+                        @endphp
 
-                            <form method="POST" action="{{ route('manage-schedules.update', $manageSchedule->id) }}">
-                                @csrf
-                                @method('PUT')
-
-                                <div class="row mb-3">
-                                    <div class="col-auto">
-                                        <label for="class_id" class="form-label">Kelas</label>
-                                        <select name="class_id" id="class_id" class="form-select form-select-sm" required
-                                            style="min-width: 200px;">
-                                            <option value="">Pilih</option>
-                                            @foreach ($classes as $classItem)
-                                                <option value="{{ $classItem->id }}"
-                                                    {{ old('class_id', $class->id) == $classItem->id ? 'selected' : '' }}>
-                                                    {{ $classItem->name }} - {{ $classItem->parallel_name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                        @foreach ($days as $day)
+                            <div class="card mb-3 mb-md-4 shadow-sm">
+                                <div class="card-header bg-primary text-white py-2 py-md-3">
+                                    <h6 class="mb-0 fw-bold">{{ $day }}</h6>
                                 </div>
+                                <div class="card-body p-2 p-md-3" id="schedule-{{ $day }}">
+                                    {{-- Load existing schedules --}}
+                                    @if (isset($scheduleData[$day]) && count($scheduleData[$day]) > 0)
+                                        @foreach ($scheduleData[$day] as $index => $schedule)
+                                            <div class="row g-3 mb-3 p-3 border rounded bg-light">
+                                                <div class="col-12 col-md-6 col-lg-2">
+                                                    <label class="form-label fw-semibold small">Tipe Sesi</label>
+                                                    <select
+                                                        name="schedules[{{ $day }}][{{ $index }}][session_type]"
+                                                        class="form-select form-select-sm session-type"
+                                                        onchange="filterHours(this, '{{ $day }}')" required>
+                                                        <option value="">Pilih</option>
+                                                        <option value="Jam Pelajaran"
+                                                            {{ $schedule['session_type'] == 'Jam Pelajaran' ? 'selected' : '' }}>
+                                                            Jam Pelajaran</option>
+                                                        <option value="Jam Istirahat"
+                                                            {{ $schedule['session_type'] == 'Jam Istirahat' ? 'selected' : '' }}>
+                                                            Jam Istirahat</option>
+                                                    </select>
+                                                </div>
 
-                                @php $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']; @endphp
+                                                <div class="col-12 col-md-6 col-lg-2">
+                                                    <label class="form-label fw-semibold mt-1 small">Jam Mulai</label>
+                                                    <select
+                                                        name="schedules[{{ $day }}][{{ $index }}][start_hour_id]"
+                                                        class="form-select form-select-sm hour-select-start"
+                                                        onchange="updateEndHours(this); toggleSubjectTeacher(this)"
+                                                        data-selected="{{ $schedule['start_hour_id'] }}" required>
+                                                        <option value="">Jam ke-</option>
+                                                    </select>
+                                                </div>
 
-                                <div class="container-fluid px-2">
-                                    @foreach ($days as $day)
-                                        <div class="card mb-3 border-light border">
-                                            <div class="card-header fw-semibold py-2 px-3 text-white"
-                                                style="background-color: #1D3F72;">{{ $day }}</div>
-                                            <div class="card-body p-2 schedule-body" id="schedule-{{ $day }}">
-                                                {{-- Load existing schedules --}}
-                                                @if (isset($scheduleData[$day]))
-                                                    @foreach ($scheduleData[$day] as $index => $schedule)
-                                                        <div class="row g-2 align-items-end mb-2 schedule-row">
-                                                            <div class="col-md-2">
-                                                                <label class="form-label small mb-1">Tipe Sesi</label>
-                                                                <select
-                                                                    name="schedules[{{ $day }}][{{ $index }}][session_type]"
-                                                                    class="form-select form-select-sm session-type"
-                                                                    onchange="filterHours(this)" required>
-                                                                    <option value="">-- Pilih --</option>
-                                                                    <option value="Jam Pelajaran"
-                                                                        {{ $schedule['session_type'] == 'Jam Pelajaran' ? 'selected' : '' }}>
-                                                                        Jam Pelajaran</option>
-                                                                    <option value="Jam Istirahat"
-                                                                        {{ $schedule['session_type'] == 'Jam Istirahat' ? 'selected' : '' }}>
-                                                                        Jam Istirahat</option>
-                                                                </select>
-                                                            </div>
+                                                <div class="col-12 col-md-6 col-lg-2">
+                                                    <label class="form-label fw-semibold mt-1 small">Jam Selesai</label>
+                                                    <select
+                                                        name="schedules[{{ $day }}][{{ $index }}][end_hour_id]"
+                                                        class="form-select form-select-sm hour-select-end"
+                                                        data-selected="{{ $schedule['end_hour_id'] }}" required>
+                                                        <option value="">Jam ke-</option>
+                                                    </select>
+                                                </div>
 
-                                                            <div class="col-md-2">
-                                                                <label class="form-label small mb-1">Jam Mulai</label>
-                                                                <select
-                                                                    name="schedules[{{ $day }}][{{ $index }}][start_hour_id]"
-                                                                    class="form-select form-select-sm hour-select-start"
-                                                                    onchange="updateEndHours(this); toggleSubjectTeacher(this)"
-                                                                    data-day="{{ $day }}"
-                                                                    data-selected="{{ $schedule['start_hour_id'] }}" required>
-                                                                    <option value="">-- Pilih Jam Mulai --</option>
-                                                                </select>
-                                                            </div>
-
-                                                            <div class="col-md-2">
-                                                                <label class="form-label small mb-1">Jam Selesai</label>
-                                                                <select
-                                                                    name="schedules[{{ $day }}][{{ $index }}][end_hour_id]"
-                                                                    class="form-select form-select-sm hour-select-end"
-                                                                    data-day="{{ $day }}"
-                                                                    data-selected="{{ $schedule['end_hour_id'] }}" required>
-                                                                    <option value="">-- Pilih Jam Selesai --</option>
-                                                                </select>
-                                                            </div>
-
-                                                            <div class="col-md-5 assignment-container"
-                                                                style="{{ $schedule['session_type'] == 'Jam Istirahat' ? 'display: none;' : '' }}">
-                                                                <label class="form-label small mb-1">Mata Pelajaran & Guru</label>
-                                                                <div class="d-flex gap-2 align-items-center">
-                                                                <input type="text"
+                                                <div class="col-12 col-md-6 col-lg-5 assignment-container"
+                                                    style="{{ $schedule['session_type'] == 'Jam Istirahat' ? 'display: none;' : '' }}">
+                                                    <label class="form-label fw-semibold mt-1 small assignment-label">Mata
+                                                        Pelajaran & Guru</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <div class="search-input position-relative flex-grow-1">
+                                                            <input type="text"
                                                                 class="form-control form-control-sm assignment-search"
-                                                                placeholder="Ketik untuk mencari..."
-                                                                autocomplete="off"
-                                                                onkeyup="searchAssignment(this)"
+                                                                placeholder="Ketik untuk mencari mata pelajaran & guru..."
+                                                                autocomplete="off" onkeyup="searchAssignment(this)"
+                                                                onkeydown="if(event.key === 'Escape') hideSearchResults(this)"
                                                                 onclick="showSearchResults(this)"
-                                                                data-class-id="{{ $class->id }}"
+                                                                onfocus="showSearchResults(this)"
+                                                                onblur="setTimeout(() => hideSearchResults(this), 200)"
                                                                 @php
                                                                     $assignmentText = '';
-                                                                    if (isset($schedule['assignment_id']) && $schedule['assignment_id']) {
-                                                                        $assignment = collect($teachingAssignments)->firstWhere('id', $schedule['assignment_id']);
+                                                                    if (
+                                                                        isset($schedule['assignment_id']) &&
+                                                                        $schedule['assignment_id']
+                                                                    ) {
+                                                                        $assignment = collect(
+                                                                            $teachingAssignments,
+                                                                        )->firstWhere('id', $schedule['assignment_id']);
                                                                         if ($assignment) {
-                                                                            $assignmentText = $assignment['subject_name'] . ' - ' . $assignment['teacher_name'];
+                                                                            $assignmentText =
+                                                                                $assignment['subject_name'] .
+                                                                                ' - ' .
+                                                                                $assignment['teacher_name'];
                                                                         }
                                                                     }
-                                                                @endphp
-                                                                value="{{ $assignmentText }}">
+                                                                @endphp value="{{ $assignmentText }}">
                                                             <input type="hidden"
                                                                 name="schedules[{{ $day }}][{{ $index }}][assignment_id]"
                                                                 class="assignment-id"
                                                                 value="{{ $schedule['assignment_id'] ?? '' }}">
                                                             <div class="search-results"></div>
-                                                                    <button type="button"
-                                                                        class="btn btn-sm btn-outline-danger"
-                                                                        onclick="this.closest('.schedule-row').remove()">
-                                                                        Hapus
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="col-md-1 text-center assignment-hidden"
-                                                                style="{{ $schedule['session_type'] == 'Jam Pelajaran' ? 'display: none;' : '' }}">
-                                                                <button type="button"
-                                                                    class="btn btn-sm btn-outline-danger"
-                                                                    onclick="this.closest('.schedule-row').remove()">
-                                                                    Hapus
-                                                                </button>
-                                                            </div>
                                                         </div>
-                                                    @endforeach
-                                                @endif
-                                            </div>
-                                            <div class="card-footer bg-white text-end py-2 px-3">
-                                                <button type="button" class="btn btn-outline-primary btn-sm"
-                                                    onclick="addScheduleRow('{{ $day }}')">
-                                                    <i class="fas fa-plus"></i> Tambah
-                                                </button>
-                                            </div>
-                                        </div>
-                                    @endforeach
+                                                    </div>
+                                                </div>
 
-                                    <div class="text-center mt-4">
-                                        <button type="submit" class="btn btn-block btn-flat text-white" style="background-color: #1D3F72">
-                                            <i class="fa fa-save"></i> Update Jadwal
-                                        </button>
-                                    </div>
+                                                <div class="col-12 col-lg-1 d-flex align-items-end">
+                                                    <button type="button" class="btn btn-outline-danger btn-sm w-100 mt-3"
+                                                        onclick="removeScheduleRow(this, '{{ $day }}')"
+                                                        title="Hapus">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <div class="text-muted text-center py-3">
+                                            <i class="fas fa-calendar-plus fa-lg fa-md-2x mb-2"></i>
+                                            <p class="mb-0 small">Belum ada jadwal untuk hari {{ $day }}</p>
+                                        </div>
+                                    @endif
                                 </div>
-                            </form>
+                                <div class="card-footer bg-light text-center text-md-end py-2 px-2 px-md-3">
+                                    <button type="button" class="btn btn-primary btn-sm w-100 w-md-auto"
+                                        onclick="addScheduleRow('{{ $day }}')">
+                                        <i class="fas fa-plus me-1 mr-2"></i>Tambah
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
+
+                        <div class="text-center mt-3 mt-md-4">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 w-md-auto px-4 px-md-5">
+                                <i class="fas fa-save me-2 mr-2"></i>Update Jadwal
+                            </button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
     <style>
-        .schedule-row {
-            border: 1px solid #e9ecef;
-            border-radius: 0.375rem;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem !important;
-            background-color: transparent;
+        /* Ensure Bootstrap styles are applied properly */
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 0.75rem center !important;
+            background-size: 16px 12px !important;
+            border: 1px solid #ced4da !important;
+            border-radius: 0.375rem !important;
+            padding: 0.375rem 0.75rem !important;
+            font-size: 1rem !important;
+            line-height: 1.5 !important;
+            display: block !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            height: calc(1.5em + 0.75rem + 2px) !important;
+            font-weight: 400 !important;
+            color: #212529 !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            word-wrap: normal !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
         }
 
-        .search-input {
-            position: relative;
+        .form-select:focus {
+            border-color: #86b7fe !important;
+            outline: 0 !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
         }
 
-        .search-results {
-            display: none;
-            position: absolute;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 0.375rem;
-            z-index: 1000;
-            width: 100%;
-            max-height: 200px;
-            overflow-y: auto;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            top: 100%;
-            left: 0;
+        .form-select-sm {
+            height: calc(1.5em + 0.5rem + 2px) !important;
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.875rem !important;
+            border-radius: 0.25rem !important;
         }
 
-        .search-result-item {
-            padding: 8px 12px;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 0.875rem;
+        .form-control {
+            border: 1px solid #ced4da !important;
+            border-radius: 0.375rem !important;
+            padding: 0.375rem 0.75rem !important;
+            font-size: 1rem !important;
+            line-height: 1.5 !important;
+            display: block !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            height: calc(1.5em + 0.75rem + 2px) !important;
+            font-weight: 400 !important;
+            color: #212529 !important;
+            background-color: #fff !important;
+            background-clip: padding-box !important;
+            appearance: none !important;
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out !important;
         }
 
-        .search-result-item:hover {
-            background-color: #f8f9fa;
+        .form-control-sm {
+            height: calc(1.5em + 0.5rem + 2px) !important;
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.875rem !important;
+            border-radius: 0.25rem !important;
         }
 
-        .search-result-item:last-child {
-            border-bottom: none;
+        .form-control:focus {
+            border-color: #86b7fe !important;
+            outline: 0 !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
         }
 
-        .form-label.small {
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 0.25rem;
+        .btn {
+            border-radius: 0.375rem !important;
+            padding: 0.375rem 0.75rem !important;
+            font-size: 1rem !important;
+            line-height: 1.5 !important;
+            display: inline-block !important;
+            font-weight: 400 !important;
+            text-align: center !important;
+            text-decoration: none !important;
+            vertical-align: middle !important;
+            cursor: pointer !important;
+            border: 1px solid transparent !important;
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
         }
 
-        .card-body.schedule-body {
-            min-height: 60px;
+        .btn-primary {
+            color: #fff !important;
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
         }
 
-        .assignment-container .d-flex {
-            min-height: 31px;
+        .btn-primary:hover {
+            color: #fff !important;
+            background-color: #0b5ed7 !important;
+            border-color: #0a58ca !important;
         }
 
-        .btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
+        .btn-outline-danger {
+            color: #dc3545 !important;
+            border-color: #dc3545 !important;
+            background-color: transparent !important;
         }
 
-        .gap-2 {
-            gap: 0.5rem !important;
-        }
-        .schedule-row {
-            border: 1px solid #e9ecef;
-            border-radius: 0.375rem;
-            padding: 1rem !important;
-            margin-bottom: 1.5rem !important; 
-            background-color: #fafafa; 
-            min-height: 90px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
-        }
-
-        .schedule-row .col-md-2,
-        .schedule-row .col-md-5,
-        .schedule-row .col-md-1 {
-            margin-bottom: 0.75rem;
-            padding-left: 0.5rem !important;
-            padding-right: 0.5rem !important;
-        }
-        .schedule-body {
-            padding: 1.5rem !important;
-        }
-
-        .schedule-row.row {
-            margin-left: -0.5rem !important;
-            margin-right: -0.5rem !important;
-            margin-bottom: 1.5rem !important;
-        }
-        .schedule-row .form-select,
-        .schedule-row .form-control {
-            height: 31px; 
-            line-height: 1.25;
-        }
-
-        .schedule-row .form-label.small {
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 0.375rem !important;
-            display: block;
-            min-height: 18px; 
-        }
-
-        .assignment-container .d-flex {
-            min-height: 31px;
-            align-items: stretch; 
-        }
-
-        .schedule-row .btn-sm {
-            padding: 0.375rem 0.75rem; 
-            font-size: 0.75rem;
-            line-height: 1.25;
-            height: 31px;
+        .btn-outline-danger:hover {
+            color: #fff !important;
+            background-color: #dc3545 !important;
+            border-color: #dc3545 !important;
         }
 
         .search-input {
             position: relative;
             flex-grow: 1;
+            width: 100%;
+        }
+
+        .search-input .form-control {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Ensure assignment container has proper positioning */
+        .assignment-container {
+            position: relative;
+            z-index: 1;
+            /* Allow dropdown to overflow */
+            overflow: visible !important;
+        }
+
+        .assignment-container .input-group {
+            position: relative;
+            z-index: 1;
+            /* Allow dropdown to overflow */
+            overflow: visible !important;
         }
 
         .search-results {
             display: none;
             position: absolute;
             background-color: white;
-            border: 1px solid #ddd;
+            border: 1px solid #dee2e6;
             border-radius: 0.375rem;
-            z-index: 1000;
-            width: 100%;
+            z-index: 999999;
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
             max-height: 200px;
             overflow-y: auto;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-x: hidden;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            margin-top: 0.125rem;
             top: 100%;
             left: 0;
-            margin-top: 2px;
+            right: 0;
+            box-sizing: border-box !important;
+        }
+
+        /* Only show dropdown when explicitly set to display: block */
+        .search-results {
+            display: none !important;
+        }
+
+        .search-results[style*="display: block"] {
+            display: block !important;
+            z-index: 999999 !important;
+            visibility: visible !important;
+            position: absolute !important;
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
         }
 
         .search-result-item {
-            padding: 8px 12px;
+            padding: 0.5rem 0.75rem;
             cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #dee2e6;
+            color: #212529;
             font-size: 0.875rem;
-            line-height: 1.4;
+            line-height: 1.5;
+            transition: background-color 0.15s ease-in-out;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            z-index: 1050 !important;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .search-result-item:hover {
@@ -326,50 +376,311 @@
         .search-result-item:last-child {
             border-bottom: none;
         }
-        .card-body.schedule-body {
-            min-height: 120px !important; 
-            padding: 1.5rem !important; 
-        }
-        .card.mb-3.border-light.border {
-            margin-bottom: 2rem !important;
+
+        .search-result-item.text-muted {
+            color: #6c757d !important;
+            cursor: default;
         }
 
-        .schedule-body:empty {
-            min-height: 80px !important;
+        .search-result-item.text-muted:hover {
+            background-color: transparent;
+        }
+
+        .input-group {
+            position: relative;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-wrap: wrap;
+            align-items: stretch;
+            width: 100%;
         }
 
-        .schedule-body:empty::after {
-            content: "Belum ada jadwal untuk hari ini";
-            color: #6c757d;
-            font-style: italic;
-            font-size: 0.875rem;
-        }
-        .gap-2 {
-            gap: 0.75rem !important;
+        .input-group>.form-control {
+            position: relative;
+            flex: 1 1 auto;
+            width: 1%;
+            min-width: 0;
         }
 
-        @media (max-width: 768px) {
-            .schedule-row {
-                padding: 0.5rem;
-                margin-bottom: 0.75rem !important;
-            }
-            
-            .schedule-row .col-md-2,
-            .schedule-row .col-md-5,
-            .schedule-row .col-md-1 {
-                margin-bottom: 0.75rem;
-            }
+        /* Custom schedule row styling */
+        .row.g-3.mb-3.p-3.border.rounded.bg-light {
+            background-color: #f8f9fa !important;
+            border-color: #dee2e6 !important;
+            align-items: end !important;
+            position: relative !important;
+            z-index: 1 !important;
         }
-        .schedule-row.row.g-2.align-items-end {
+
+        .row.g-3.mb-3.p-3.border.rounded.bg-light:hover {
+            background-color: #e9ecef !important;
+        }
+
+        /* Prevent column expansion */
+        .row.g-3.mb-3.p-3.border.rounded.bg-light>[class*="col-"] {
+            flex-shrink: 0 !important;
+            max-width: 100% !important;
+            /* Remove overflow hidden to allow dropdown to show */
+        }
+
+        /* Ensure form elements don't expand beyond their containers */
+        .row.g-3.mb-3.p-3.border.rounded.bg-light .form-select,
+        .row.g-3.mb-3.p-3.border.rounded.bg-light .form-control {
+            max-width: 100% !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            flex-shrink: 1 !important;
+        }
+
+        /* Force column layout stability */
+        .row.g-3.mb-3.p-3.border.rounded.bg-light {
+            display: flex !important;
+            flex-wrap: wrap !important;
             align-items: flex-end !important;
         }
-        .schedule-row .form-select,
-        .schedule-row .form-control,
-        .schedule-row .btn {
-            margin-top: auto; 
+
+        /* Ensure columns maintain their sizes */
+        .row.g-3.mb-3.p-3.border.rounded.bg-light .col-lg-2 {
+            flex: 0 0 16.66666667% !important;
+            max-width: 16.66666667% !important;
+        }
+
+        .row.g-3.mb-3.p-3.border.rounded.bg-light .col-lg-5 {
+            flex: 0 0 41.66666667% !important;
+            max-width: 41.66666667% !important;
+        }
+
+        .row.g-3.mb-3.p-3.border.rounded.bg-light .col-lg-1 {
+            flex: 0 0 8.33333333% !important;
+            max-width: 8.33333333% !important;
+        }
+
+        /* Force horizontal layout on medium and large screens */
+        @media (min-width: 768px) {
+            .row.g-3.mb-3.p-3.border.rounded.bg-light .col-md-6 {
+                flex: 0 0 50% !important;
+                max-width: 50% !important;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .row.g-3.mb-3.p-3.border.rounded.bg-light .col-lg-2 {
+                flex: 0 0 16.66666667% !important;
+                max-width: 16.66666667% !important;
+            }
+
+            .row.g-3.mb-3.p-3.border.rounded.bg-light .col-lg-5 {
+                flex: 0 0 41.66666667% !important;
+                max-width: 41.66666667% !important;
+            }
+
+            .row.g-3.mb-3.p-3.border.rounded.bg-light .col-lg-1 {
+                flex: 0 0 8.33333333% !important;
+                max-width: 8.33333333% !important;
+            }
+        }
+
+        /* Ensure proper box sizing for all elements */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box !important;
+        }
+
+        /* Prevent flexbox issues */
+        .row.g-3.mb-3.p-3.border.rounded.bg-light>div {
+            flex-grow: 0 !important;
+            flex-shrink: 0 !important;
+        }
+
+        /* Specific fixes for different column sizes */
+        @media (min-width: 768px) {
+            .col-md-6 {
+                flex: 0 0 auto !important;
+                width: 50% !important;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .col-lg-1 {
+                flex: 0 0 auto !important;
+                width: 8.33333333% !important;
+            }
+
+            .col-lg-2 {
+                flex: 0 0 auto !important;
+                width: 16.66666667% !important;
+            }
+
+            .col-lg-3 {
+                flex: 0 0 auto !important;
+                width: 25% !important;
+            }
+
+            .col-lg-5 {
+                flex: 0 0 auto !important;
+                width: 41.66666667% !important;
+            }
+        }
+
+        /* Specific column width fixes */
+        .col-lg-2 {
+            width: 16.66666667% !important;
+            max-width: 16.66666667% !important;
+            min-width: 16.66666667% !important;
+            flex: 0 0 16.66666667% !important;
+        }
+
+        .col-lg-5 {
+            width: 41.66666667% !important;
+            max-width: 41.66666667% !important;
+            min-width: 41.66666667% !important;
+            flex: 0 0 41.66666667% !important;
+        }
+
+        .col-lg-1 {
+            width: 8.33333333% !important;
+            max-width: 8.33333333% !important;
+            min-width: 8.33333333% !important;
+            flex: 0 0 8.33333333% !important;
+        }
+
+        @media (max-width: 991.98px) {
+            .col-md-6 {
+                flex: 0 0 auto !important;
+                width: 50% !important;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .col-12 {
+                flex: 0 0 auto !important;
+                width: 100% !important;
+            }
+        }
+
+        /* Force consistent sizing regardless of content */
+        .form-select,
+        .form-control {
+            box-sizing: border-box !important;
+            min-height: calc(1.5em + 0.75rem + 2px) !important;
+        }
+
+        .form-select-sm,
+        .form-control-sm {
+            box-sizing: border-box !important;
+            min-height: calc(1.5em + 0.5rem + 2px) !important;
+        }
+
+        /* Row alignment */
+        .row {
+            --bs-gutter-x: 1.5rem !important;
+            --bs-gutter-y: 0 !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            margin-top: calc(-1 * var(--bs-gutter-y)) !important;
+            margin-right: calc(-0.5 * var(--bs-gutter-x)) !important;
+            margin-left: calc(-0.5 * var(--bs-gutter-x)) !important;
+        }
+
+        .row>* {
+            flex-shrink: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding-right: calc(var(--bs-gutter-x) * 0.5) !important;
+            padding-left: calc(var(--bs-gutter-x) * 0.5) !important;
+            margin-top: var(--bs-gutter-y) !important;
+        }
+
+        /* Final fix for select dropdown stability */
+        .form-select {
+            contain: size layout !important;
+            resize: none !important;
+            flex-basis: auto !important;
+            flex-grow: 0 !important;
+            flex-shrink: 1 !important;
+        }
+
+        /* Button alignment in column */
+        .d-flex.align-items-end {
+            min-height: 100% !important;
+        }
+
+        /* Remove any potential transforms or transitions that might cause issues */
+        .form-select,
+        .form-control {
+            transform: none !important;
+            will-change: auto !important;
+        }
+
+        /* Override any conflicting CSS that might cause vertical layout */
+        .row.g-3.mb-3.p-3.border.rounded.bg-light {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            align-items: flex-end !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 1rem !important;
+        }
+
+        /* Force horizontal layout on all screen sizes */
+        .row.g-3.mb-3.p-3.border.rounded.bg-light>div {
+            display: block !important;
+            flex: none !important;
+            width: auto !important;
+            min-width: 0 !important;
+            padding: 0 0.75rem !important;
+        }
+
+        /* Specific column widths for horizontal layout */
+        .row.g-3.mb-3.p-3.border.rounded.bg-light .col-lg-2 {
+            width: 16.66666667% !important;
+            flex: 0 0 16.66666667% !important;
+        }
+
+        .row.g-3.mb-3.p-3.border.rounded.bg-light .col-lg-5 {
+            width: 41.66666667% !important;
+            flex: 0 0 41.66666667% !important;
+        }
+
+        .row.g-3.mb-3.p-3.border.rounded.bg-light .col-lg-1 {
+            width: 8.33333333% !important;
+            flex: 0 0 8.33333333% !important;
+        }
+
+        /* Ensure proper responsive behavior */
+        @media (max-width: 991.98px) {
+            .row.g-3.mb-3.p-3.border.rounded.bg-light .col-md-6 {
+                width: 50% !important;
+                flex: 0 0 50% !important;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .row.g-3.mb-3.p-3.border.rounded.bg-light .col-12 {
+                width: 100% !important;
+                flex: 0 0 100% !important;
+            }
+        }
+
+        /* Remove any margin that might cause issues */
+        .row.g-3.mb-3.p-3.border.rounded.bg-light [class*="col-"] {
+            margin: 0 !important;
+        }
+
+        /* Ensure buttons align properly */
+        .row.g-3.mb-3.p-3.border.rounded.bg-light .d-flex.align-items-end {
+            height: 100% !important;
+            align-items: flex-end !important;
+        }
+
+        /* Force flex layout even if Bootstrap is overridden */
+        .row.g-3.mb-3.p-3.border.rounded.bg-light {
+            display: flex !important;
+            flex-wrap: wrap !important;
+        }
+
+        .row.g-3.mb-3.p-3.border.rounded.bg-light>* {
+            flex-shrink: 0 !important;
         }
     </style>
 
@@ -378,317 +689,476 @@
         const hoursData = @json($hoursData);
         const teachingAssignments = @json($teachingAssignments);
         const scheduleData = @json($scheduleData);
+        let selectedClassId = {{ $class->id }};
 
-        function getHoursForDay(day) {
-            return day === 'Jumat' ? hoursData.friday : hoursData.weekdays;
+        // Function to handle class selection change
+        function onClassChange(select) {
+            selectedClassId = parseInt(select.value);
+
+            // Clear all existing schedule rows
+            const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+            days.forEach(day => {
+                const container = document.getElementById('schedule-' + day);
+                container.innerHTML = `
+                    <div class="text-muted text-center py-3">
+                        <i class="fas fa-calendar-plus fa-lg fa-md-2x mb-2"></i>
+                        <p class="mb-0 small">Belum ada jadwal untuk hari ${day}</p>
+                    </div>
+                `;
+            });
+
+            // Update all existing search inputs to show new results
+            const searchInputs = document.querySelectorAll('.assignment-search');
+            searchInputs.forEach(input => {
+                // Clear previous selection
+                input.value = '';
+                const hiddenInput = input.nextElementSibling;
+                if (hiddenInput && hiddenInput.classList.contains('assignment-id')) {
+                    hiddenInput.value = '';
+                }
+
+                // If input is currently focused or has been clicked, update results
+                if (input.dataset.clicked === 'true' || document.activeElement === input) {
+                    showSearchResults(input);
+                }
+            });
         }
 
         function addScheduleRow(day) {
-    const container = document.getElementById('schedule-' + day);
-    const index = container.children.length;
-    const classId = document.getElementById('class_id').value;
+            if (!selectedClassId) {
+                alert('Silakan pilih kelas terlebih dahulu sebelum menambah jadwal.');
+                return;
+            }
 
-    const row = document.createElement('div');
-    row.className = 'row g-2 align-items-end mb-2 schedule-row';
+            const container = document.getElementById('schedule-' + day);
 
-    row.innerHTML = `
-        <div class="col-md-2">
-            <label class="form-label small mb-1">Tipe Sesi</label>
-            <select
-                name="schedules[${day}][${index}][session_type]"
+            // Remove empty state message if this is the first row
+            if (container.children.length === 1 && container.querySelector('.text-muted')) {
+                container.innerHTML = '';
+            }
+
+            const index = container.children.length;
+
+            const row = document.createElement('div');
+            row.className = 'row g-3 mb-3 p-3 border rounded bg-light';
+
+            row.innerHTML = `
+    <div class="col-12 col-md-6 col-lg-2">
+        <label class="form-label fw-semibold small">Tipe Sesi</label>
+        <select name="schedules[${day}][${index}][session_type]"
                 class="form-select form-select-sm session-type"
-                onchange="filterHours(this)"
-                required
-            >
-                <option value="">-- Pilih --</option>
-                <option value="Jam Pelajaran">Jam Pelajaran</option>
-                <option value="Jam Istirahat">Jam Istirahat</option>
-            </select>
-        </div>
+                onchange="filterHours(this, '${day}')" required>
+            <option value="" selected>Pilih</option>
+            <option value="Jam Pelajaran">Jam Pelajaran</option>
+            <option value="Jam Istirahat">Jam Istirahat</option>
+        </select>
+    </div>
 
-        <div class="col-md-2">
-            <label class="form-label small mb-1">Jam Mulai</label>
-            <select
-                name="schedules[${day}][${index}][start_hour_id]"
+    <div class="col-12 col-md-6 col-lg-2">
+        <label class="form-label fw-semibold mt-1 small">Jam Mulai</label>
+        <select name="schedules[${day}][${index}][start_hour_id]"
                 class="form-select form-select-sm hour-select-start"
-                onchange="updateEndHours(this); toggleSubjectTeacher(this)"
-                data-day="${day}"
-                required
-            >
-                <option value="">-- Pilih Jam Mulai --</option>
-            </select>
-        </div>
+                onchange="updateEndHours(this); toggleSubjectTeacher(this)" required>
+            <option value="" selected>Jam ke-</option>
+        </select>
+    </div>
 
-        <div class="col-md-2">
-            <label class="form-label small mb-1">Jam Selesai</label>
-            <select
-                name="schedules[${day}][${index}][end_hour_id]"
-                class="form-select form-select-sm hour-select-end"
-                data-day="${day}"
-                required
-            >
-                <option value="">-- Pilih Jam Selesai --</option>
-            </select>
-        </div>
+    <div class="col-12 col-md-6 col-lg-2">
+        <label class="form-label fw-semibold mt-1 small">Jam Selesai</label>
+        <select name="schedules[${day}][${index}][end_hour_id]"
+                class="form-select form-select-sm hour-select-end" required>
+            <option value="" selected>Jam ke-</option>
+        </select>
+    </div>
 
-        <div class="col-md-5 assignment-container">
-            <label class="form-label small mb-1">Mata Pelajaran & Guru</label>
-            <div class="d-flex gap-2 align-items-center">
-                <div class="search-input flex-grow-1">
-                    <input type="text"
-                        class="form-control form-control-sm assignment-search"
-                        placeholder="Ketik untuk mencari..."
-                        autocomplete="off"
-                        onkeyup="searchAssignment(this)"
-                        onclick="showSearchResults(this)"
-                        data-class-id="${classId}">
-                    <input type="hidden"
-                        name="schedules[${day}][${index}][assignment_id]"
-                        class="assignment-id">
-                    <div class="search-results"></div>
-                </div>
-                <button type="button"
-                    class="btn btn-sm btn-outline-danger"
-                    onclick="this.closest('.schedule-row').remove()">
-                    Hapus
-                </button>
+    <div class="col-12 col-md-6 col-lg-5 assignment-container">
+        <label class="form-label fw-semibold mt-1 small assignment-label">Mata Pelajaran & Guru</label>
+        <div class="input-group input-group-sm">
+            <div class="search-input position-relative flex-grow-1">
+                <input type="text"
+                       class="form-control form-control-sm assignment-search"
+                       placeholder="Ketik untuk mencari mata pelajaran & guru..."
+                       autocomplete="off"
+                       onkeyup="searchAssignment(this)"
+                       onkeydown="if(event.key === 'Escape') hideSearchResults(this)"
+                       onclick="showSearchResults(this)"
+                       onfocus="showSearchResults(this)"
+                       onblur="setTimeout(() => hideSearchResults(this), 200)">
+                <input type="hidden"
+                       name="schedules[${day}][${index}][assignment_id]"
+                       class="assignment-id">
+                <div class="search-results"></div>
             </div>
         </div>
+    </div>
 
-        <div class="col-md-1 text-center assignment-hidden" style="display: none;">
-            <button type="button"
-                class="btn btn-sm btn-outline-danger"
-                onclick="this.closest('.schedule-row').remove()">
-                Hapus
-            </button>
-        </div>
-    `;
+    <div class="col-12 col-lg-1 d-flex align-items-end">
+        <button type="button"
+                class="btn btn-outline-danger btn-sm w-100 mt-3"
+                onclick="removeScheduleRow(this, '${day}')"
+                title="Hapus">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+`;
 
-    container.appendChild(row);
-}
+            container.appendChild(row);
+        }
 
-        // Assignment search handlers
         function searchAssignment(input) {
-    const value = input.value.toLowerCase();
-    const resultsBox = input.parentElement.querySelector('.search-results');
-    const hiddenInput = input.parentElement.querySelector('.assignment-id');
-    const classId = input.dataset.classId || document.getElementById('class_id').value; // Fallback ke class_id dari select
+            const query = input.value.toLowerCase();
+            const resultsContainer = input.nextElementSibling.nextElementSibling;
 
-    resultsBox.innerHTML = '';
-    resultsBox.style.display = 'none';
+            // Hide dropdown if no query or class not selected
+            if (query.length < 1 || !selectedClassId) {
+                resultsContainer.style.display = 'none';
+                input.dataset.clicked = 'false';
+                return;
+            }
 
-    if (value.length < 2) return;
+            // Set dynamic positioning to avoid overlap
+            positionDropdown(input, resultsContainer);
 
-            // Filter berdasarkan pencarian dan class_id
-            const filtered = teachingAssignments.filter(a =>
-        (a.subject_name.toLowerCase().includes(value) ||
-         a.teacher_name.toLowerCase().includes(value)) &&
-        (classId ? a.class_id == classId : true) // Tampilkan semua jika tidak ada classId
-    );
+            const filteredAssignments = teachingAssignments.filter(assignment => {
+                const searchText = `${assignment.subject_name} - ${assignment.teacher_name}`.toLowerCase();
+                return (
+                    searchText.includes(query) &&
+                    assignment.class_id === selectedClassId
+                );
+            });
 
-    if (filtered.length === 0) {
-        const div = document.createElement('div');
-        div.className = 'search-result-item';
-        div.style.color = '#6c757d';
-        div.style.fontStyle = 'italic';
-        div.textContent = 'Tidak ada hasil ditemukan';
-        resultsBox.appendChild(div);
-        resultsBox.style.display = 'block';
-        return;
-    }
+            if (filteredAssignments.length > 0) {
+                resultsContainer.innerHTML = filteredAssignments.map(assignment =>
+                    `<div class="search-result-item"
+                      onmousedown="selectAssignment(this, ${assignment.id}, '${assignment.subject_name} - ${assignment.teacher_name}')">
+                    ${assignment.subject_name} - ${assignment.teacher_name}
+                 </div>`
+                ).join('');
+                resultsContainer.style.display = 'block';
+                resultsContainer.style.zIndex = '999999';
+            } else {
+                resultsContainer.innerHTML = '<div class="search-result-item text-muted">Tidak ada hasil ditemukan</div>';
+                resultsContainer.style.display = 'block';
+                resultsContainer.style.zIndex = '999999';
+            }
+        }
 
-    filtered.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'search-result-item';
-        div.textContent = `${item.subject_name} - ${item.teacher_name}`;
-        div.onclick = () => {
-            input.value = div.textContent;
-            hiddenInput.value = item.id;
-            resultsBox.style.display = 'none';
-        };
-        resultsBox.appendChild(div);
-    });
+        function selectAssignment(element, assignmentId, assignmentText) {
+            const searchInput = element.closest('.search-input').querySelector('.assignment-search');
+            const hiddenInput = element.closest('.search-input').querySelector('.assignment-id');
+            const resultsContainer = element.closest('.search-input').querySelector('.search-results');
 
-    resultsBox.style.display = 'block';
-}
+            searchInput.value = assignmentText;
+            hiddenInput.value = assignmentId;
+            resultsContainer.style.display = 'none';
+            searchInput.dataset.clicked = 'false';
+
+            // Remove focus from input to prevent immediate re-opening
+            searchInput.blur();
+        }
+
+        function hideSearchResults(input) {
+            const resultsContainer = input.nextElementSibling.nextElementSibling;
+            resultsContainer.style.display = 'none';
+            input.dataset.clicked = 'false';
+
+            // Reset z-index of parent row
+            const parentRow = input.closest('.row.g-3.mb-3.p-3.border.rounded.bg-light');
+            if (parentRow) {
+                parentRow.style.zIndex = '1';
+            }
+        }
 
         function showSearchResults(input) {
-            const box = input.parentElement.querySelector('.search-results');
-            if (box && box.innerHTML.trim() !== '') {
-                box.style.display = 'block';
+            // Only show if class is selected and input is focused
+            if (!selectedClassId) {
+                return;
+            }
+
+            input.dataset.clicked = 'true';
+
+            // Show all available assignments if no query yet
+            if (input.value.length === 0) {
+                const resultsContainer = input.nextElementSibling.nextElementSibling;
+
+                // Set dynamic positioning to avoid overlap
+                positionDropdown(input, resultsContainer);
+
+                const allAssignments = teachingAssignments.filter(assignment =>
+                    assignment.class_id === selectedClassId
+                );
+
+                if (allAssignments.length > 0) {
+                    resultsContainer.innerHTML = allAssignments.map(assignment =>
+                        `<div class="search-result-item"
+                          onmousedown="selectAssignment(this, ${assignment.id}, '${assignment.subject_name} - ${assignment.teacher_name}')">
+                        ${assignment.subject_name} - ${assignment.teacher_name}
+                     </div>`
+                    ).join('');
+                    resultsContainer.style.display = 'block';
+                    resultsContainer.style.zIndex = '999999';
+                } else {
+                    resultsContainer.innerHTML =
+                        '<div class="search-result-item text-muted">Tidak ada mata pelajaran tersedia</div>';
+                    resultsContainer.style.display = 'block';
+                    resultsContainer.style.zIndex = '999999';
+                }
+            } else if (input.value.length > 0) {
+                searchAssignment(input);
             }
         }
 
-        // Close search results when clicking outside
-        document.addEventListener('click', function (e) {
-            if (!e.target.closest('.search-input')) {
-                document.querySelectorAll('.search-results').forEach(el => el.style.display = 'none');
+        function positionDropdown(input, dropdown) {
+            // Get input position and dimensions
+            const inputRect = input.getBoundingClientRect();
+            const inputWidth = input.offsetWidth;
+            const dropdownHeight = 200; // max-height from CSS
+            const viewportHeight = window.innerHeight;
+
+            // Set dropdown width to match input exactly
+            dropdown.style.width = inputWidth + 'px';
+            dropdown.style.minWidth = inputWidth + 'px';
+            dropdown.style.maxWidth = inputWidth + 'px';
+
+            // Check if there's enough space below
+            const spaceBelow = viewportHeight - inputRect.bottom;
+            const spaceAbove = inputRect.top;
+
+            if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+                // Show dropdown above input
+                dropdown.style.top = 'auto';
+                dropdown.style.bottom = '100%';
+                dropdown.style.marginTop = '0';
+                dropdown.style.marginBottom = '0.125rem';
+            } else {
+                // Show dropdown below input (default)
+                dropdown.style.top = '100%';
+                dropdown.style.bottom = 'auto';
+                dropdown.style.marginTop = '0.125rem';
+                dropdown.style.marginBottom = '0';
             }
-        });
+
+            // Ensure highest z-index and absolute positioning
+            dropdown.style.zIndex = '999999';
+            dropdown.style.position = 'absolute';
+            dropdown.style.left = '0';
+            dropdown.style.right = '0';
+        }
+
+        function getHoursForDay(day) {
+            if (['Senin', 'Selasa', 'Rabu', 'Kamis'].includes(day)) {
+                return hoursData.weekdays || [];
+            } else if (day === 'Jumat') {
+                return hoursData.friday || [];
+            }
+            return [];
+        }
 
         function populateHourSelect(select, sessionType, day, selectedValue = '') {
-            const hours = getHoursForDay(day);
-            const filtered = hours.filter(h => h.session_type === sessionType);
+            const dayHours = getHoursForDay(day);
 
+            // Check if dayHours is valid
+            if (!dayHours || !Array.isArray(dayHours)) {
+                console.error('Invalid dayHours data:', dayHours);
+                select.innerHTML = '<option value="">Jam ke-</option>';
+                return;
+            }
+
+            // Filter berdasarkan session type
+            const filtered = dayHours.filter(h => h.session_type === sessionType);
+
+            // Create options
             const options = filtered.map(h =>
-                `<option value="${h.id}" data-type="${h.session_type}" data-start="${h.start_time}" data-end="${h.end_time}" data-slot="${h.slot_number}" ${selectedValue == h.id ? 'selected' : ''}>Jam ke-${h.slot_number}</option>`
+                `<option value="${h.id}" data-type="${h.session_type}" data-start="${h.start_time}" data-end="${h.end_time}" data-slot="${h.slot_number}" ${selectedValue == h.id ? 'selected' : ''}>
+                Jam ke-${h.slot_number} (${h.start_time} - ${h.end_time})
+            </option>`
             ).join('');
 
-            select.innerHTML = `<option value="">-- Pilih Jam Mulai --</option>` + options;
+            select.innerHTML = `<option value="">Jam ke-</option>` + options;
         }
 
-        function filterHours(select) {
+        function filterHours(select, day) {
             const sessionType = select.value;
-            const row = select.closest('.schedule-row');
-            const day = row.querySelector('.hour-select-start').dataset.day;
+            const row = select.closest('.row');
 
             const startSelect = row.querySelector('.hour-select-start');
             const endSelect = row.querySelector('.hour-select-end');
 
-            // Clear previous selections
-            startSelect.value = '';
-            endSelect.value = '';
+            // Clear end select first
+            endSelect.innerHTML = '<option value="">Jam ke-</option>';
 
-            populateHourSelect(startSelect, sessionType, day);
-            populateHourSelect(endSelect, sessionType, day);
+            if (sessionType) {
+                // Populate both start and end selects
+                populateHourSelect(startSelect, sessionType, day);
+                populateHourSelect(endSelect, sessionType, day);
+            } else {
+                // Clear both selects if no session type selected
+                startSelect.innerHTML = '<option value="">Jam ke-</option>';
+                endSelect.innerHTML = '<option value="">Jam ke-</option>';
+            }
 
             toggleSubjectTeacher(startSelect);
         }
 
         function updateEndHours(startSelect) {
-            const row = startSelect.closest('.schedule-row');
+            const row = startSelect.closest('.row');
             const endSelect = row.querySelector('.hour-select-end');
-            const day = startSelect.dataset.day;
-            const sessionType = row.querySelector('.session-type').value;
+            const sessionTypeSelect = row.querySelector('.session-type');
 
-            if (!startSelect.value || !sessionType) return;
+            if (!startSelect.value || !sessionTypeSelect.value) {
+                endSelect.innerHTML = '<option value="">Jam ke-</option>';
+                return;
+            }
 
-            const hours = getHoursForDay(day);
             const startHourId = parseInt(startSelect.value);
-            const startHour = hours.find(h => h.id === startHourId);
+            const sessionType = sessionTypeSelect.value;
+            const container = startSelect.closest('[id^="schedule-"]');
+            const day = container.id.replace('schedule-', '');
 
-            if (!startHour) return;
+            const dayHours = getHoursForDay(day);
 
-            // Filter hours that are >= start hour and same session type
-            const availableEndHours = hours.filter(h =>
-                h.session_type === sessionType && h.id >= startHourId
+            // Filter jam yang tersedia untuk jam selesai (>= jam mulai dan session type sama)
+            const availableHours = dayHours.filter(h =>
+                h.session_type === sessionType &&
+                parseInt(h.id) >= startHourId
             );
 
-            const options = availableEndHours.map(h =>
-                `<option value="${h.id}" data-type="${h.session_type}">Jam ke-${h.slot_number}</option>`
+            const options = availableHours.map(h =>
+                `<option value="${h.id}" data-slot="${h.slot_number}">
+                Jam ke-${h.slot_number} (${h.start_time} - ${h.end_time})
+            </option>`
             ).join('');
 
-            endSelect.innerHTML = `<option value="">-- Pilih Jam Selesai --</option>` + options;
-
-            // Auto-select start hour as minimum end hour
-            endSelect.value = startHourId;
+            endSelect.innerHTML = `<option value="">Jam ke-</option>` + options;
         }
 
         function toggleSubjectTeacher(select) {
-            const row = select.closest('.schedule-row');
+            const row = select.closest('.row');
             const sessionTypeSelect = row.querySelector('.session-type');
-            const assignmentDiv = row.querySelector('.assignment-container');
-            const assignmentHiddenDiv = row.querySelector('.assignment-hidden');
-            const assignmentInput = row.querySelector('.assignment-search');
-            const assignmentHiddenInput = row.querySelector('.assignment-id');
+            const assignmentContainer = row.querySelector('.assignment-container');
+            const assignmentSearch = row.querySelector('.assignment-search');
+            const assignmentId = row.querySelector('.assignment-id');
 
             const sessionType = sessionTypeSelect.value;
             const isBreak = (sessionType === 'Jam Istirahat');
 
             if (isBreak) {
-                assignmentDiv.style.display = 'none';
-                assignmentHiddenDiv.style.display = '';
-                assignmentInput.removeAttribute('required');
-                assignmentInput.value = '';
-                assignmentHiddenInput.value = '';
+                assignmentContainer.style.display = 'none';
+                assignmentSearch.removeAttribute('required');
+                assignmentSearch.value = '';
+                assignmentId.value = '';
             } else {
-                assignmentDiv.style.display = '';
-                assignmentHiddenDiv.style.display = 'none';
-                assignmentInput.setAttribute('required', 'required');
+                assignmentContainer.style.display = '';
+                assignmentSearch.setAttribute('required', 'required');
             }
         }
 
-        // Filter assignments based on selected class
-        function filterAssignmentsByClass(classId) {
-    // Update class_id pada semua input assignment yang belum memiliki nilai
-    document.querySelectorAll('.assignment-search').forEach(input => {
-        // Hanya reset jika input kosong (untuk row baru)
-        if (!input.value) {
-            input.dataset.classId = classId;
+        function removeScheduleRow(button, day) {
+            const row = button.closest('.row');
+            const container = document.getElementById('schedule-' + day);
+
+            row.remove();
+
+            // If no more rows, show empty state message
+            if (container.children.length === 0) {
+                container.innerHTML = `
+                    <div class="text-muted text-center py-3">
+                        <i class="fas fa-calendar-plus fa-lg fa-md-2x mb-2"></i>
+                        <p class="mb-0 small">Belum ada jadwal untuk hari ${day}</p>
+                    </div>
+                `;
+            }
         }
-    });
 
-    // Sembunyikan semua hasil pencarian
-    document.querySelectorAll('.search-results').forEach(el => el.style.display = 'none');
-}
-
-        document.addEventListener('DOMContentLoaded', function() {
-    // Initialize class filter
-    const classSelect = document.getElementById('class_id');
-    if (classSelect.value) {
-        filterAssignmentsByClass(classSelect.value);
-    }
-
-    // Add event listener for class change
-    classSelect.addEventListener('change', function() {
-        // Konfirmasi jika user mengubah kelas dan ada data assignment yang sudah terisi
-        const hasAssignments = document.querySelectorAll('.assignment-search').some(input => input.value);
-        if (hasAssignments) {
-            if (confirm('Mengubah kelas akan menghapus semua mata pelajaran dan guru yang sudah dipilih. Lanjutkan?')) {
-                // Reset semua assignment
-                document.querySelectorAll('.assignment-search').forEach(input => {
-                    input.value = '';
-                    input.nextElementSibling.value = '';
+        document.addEventListener('click', function(e) {
+            // Close dropdown if clicking outside of search input or dropdown
+            if (!e.target.closest('.search-input') && !e.target.closest('.search-results')) {
+                const allResults = document.querySelectorAll('.search-results');
+                allResults.forEach(result => {
+                    result.style.display = 'none';
+                    // Reset z-index of parent rows
+                    const parentRow = result.closest('.row.g-3.mb-3.p-3.border.rounded.bg-light');
+                    if (parentRow) {
+                        parentRow.style.zIndex = '1';
+                    }
                 });
-                filterAssignmentsByClass(this.value);
-            } else {
-                // Kembalikan ke nilai sebelumnya
-                this.value = this.dataset.previousValue || '';
-                return;
+                const allSearchInputs = document.querySelectorAll('.assignment-search');
+                allSearchInputs.forEach(input => {
+                    input.dataset.clicked = 'false';
+                });
             }
-        } else {
-            filterAssignmentsByClass(this.value);
-        }
-        
-        // Simpan nilai saat ini untuk rollback
-        this.dataset.previousValue = this.value;
-    });
+        });
 
-    // Set initial previous value
-    classSelect.dataset.previousValue = classSelect.value;
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all existing schedule rows
+            document.querySelectorAll('.session-type').forEach(select => {
+                const sessionType = select.value;
+                if (sessionType) {
+                    const row = select.closest('.row');
+                    const container = select.closest('[id^="schedule-"]');
+                    const day = container.id.replace('schedule-', '');
 
-    // Initialize semua assignment input dengan class_id yang benar
-    document.querySelectorAll('.assignment-search').forEach(input => {
-        if (!input.dataset.classId) {
-            input.dataset.classId = classSelect.value;
-        }
-    });
+                    const startSelect = row.querySelector('.hour-select-start');
+                    const endSelect = row.querySelector('.hour-select-end');
 
-    // Initialize all existing schedule rows
-    document.querySelectorAll('.session-type').forEach(select => {
-        const sessionType = select.value;
-        if (sessionType) {
-            const row = select.closest('.schedule-row');
-            const day = row.querySelector('.hour-select-start').dataset.day;
-            const startSelect = row.querySelector('.hour-select-start');
-            const endSelect = row.querySelector('.hour-select-end');
+                    // Get the current selected values
+                    const startValue = startSelect.dataset.selected || '';
+                    const endValue = endSelect.dataset.selected || '';
 
-            // Get the current selected values
-            const startValue = startSelect.dataset.selected || '';
-            const endValue = endSelect.dataset.selected || '';
+                    // Populate hour selects with current values
+                    populateHourSelect(startSelect, sessionType, day, startValue);
+                    populateHourSelect(endSelect, sessionType, day, endValue);
 
-            // Populate hour selects with current values
-            populateHourSelect(startSelect, sessionType, day, startValue);
-            populateHourSelect(endSelect, sessionType, day, endValue);
+                    // Initialize subject/teacher visibility
+                    toggleSubjectTeacher(startSelect);
+                }
+            });
 
-            // Set the selected values
-            if (startValue) startSelect.value = startValue;
-            if (endValue) endSelect.value = endValue;
+            // Ensure all search inputs have proper event handlers
+            const searchInputs = document.querySelectorAll('.assignment-search');
+            searchInputs.forEach(input => {
+                input.dataset.clicked = 'false';
 
-            // Initialize subject/teacher visibility
-            toggleSubjectTeacher(startSelect);
-        }
-    });
-});
+                // Add focus event to boost z-index
+                input.addEventListener('focus', function() {
+                    const parentRow = this.closest('.row.g-3.mb-3.p-3.border.rounded.bg-light');
+                    if (parentRow) {
+                        parentRow.style.zIndex = '999998';
+                    }
+                });
+
+                // Add blur event to reset z-index and hide dropdown
+                input.addEventListener('blur', function() {
+                    setTimeout(() => {
+                        const resultsContainer = this.nextElementSibling.nextElementSibling;
+                        // Hide dropdown if not being interacted with
+                        if (!resultsContainer.matches(':hover') && document
+                            .activeElement !== this) {
+                            resultsContainer.style.display = 'none';
+                            this.dataset.clicked = 'false';
+
+                            const parentRow = this.closest(
+                                '.row.g-3.mb-3.p-3.border.rounded.bg-light');
+                            if (parentRow) {
+                                parentRow.style.zIndex = '1';
+                            }
+                        }
+                    }, 150);
+                });
+            });
+
+            // Add window resize listener to reposition visible dropdowns
+            window.addEventListener('resize', function() {
+                const visibleDropdowns = document.querySelectorAll(
+                    '.search-results[style*="display: block"]');
+                visibleDropdowns.forEach(dropdown => {
+                    const input = dropdown.previousElementSibling.previousElementSibling;
+                    if (input && input.classList.contains('assignment-search')) {
+                        positionDropdown(input, dropdown);
+                    }
+                });
+            });
+        });
     </script>
 @endsection

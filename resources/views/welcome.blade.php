@@ -19,16 +19,16 @@ License: https://freebootstrap.net/license
     <!-- End Google Font-->
 
     <!-- ======= Styles =======-->
-    <link href="{{ asset('landing-page/assets/vendors/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('landing-page/assets/vendors/bootstrap-icons/font/bootstrap-icons.min.css') }}"
+    <link href="{{ asset('assets/landing-page/assets/vendors/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/landing-page/assets/vendors/bootstrap-icons/font/bootstrap-icons.min.css') }}"
         rel="stylesheet">
-    <link href="{{ asset('landing-page/assets/vendors/glightbox/glightbox.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('landing-page/assets/vendors/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('landing-page/assets/vendors/aos/aos.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/landing-page/assets/vendors/glightbox/glightbox.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/landing-page/assets/vendors/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/landing-page/assets/vendors/aos/aos.css') }}" rel="stylesheet">
     <!-- End Styles-->
 
     <!-- ======= Theme Style =======-->
-    <link href="{{ asset('landing-page/assets/css/style.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/landing-page/assets/css/style.css') }}" rel="stylesheet">
     <!-- End Theme Style-->
 
     <!-- ======= Custom Colors & Modern Animations =======-->
@@ -46,7 +46,11 @@ License: https://freebootstrap.net/license
         }
 
         /* Modern Typography */
-        .navbar-brand, .hero-title, h1, h2, h3 {
+        .navbar-brand,
+        .hero-title,
+        h1,
+        h2,
+        h3 {
             color: var(--primary-dark) !important;
             font-weight: 700;
         }
@@ -138,7 +142,8 @@ License: https://freebootstrap.net/license
         }
 
         /* Modern Buttons */
-        .btn-primary, .btn {
+        .btn-primary,
+        .btn {
             background: var(--primary-dark) !important;
             border: none !important;
             padding: 12px 28px;
@@ -151,7 +156,8 @@ License: https://freebootstrap.net/license
             color: white !important;
         }
 
-        .btn-primary:hover, .btn:hover {
+        .btn-primary:hover,
+        .btn:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-medium);
             background: #0f2a4a !important;
@@ -179,7 +185,7 @@ License: https://freebootstrap.net/license
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: all 0.5s ease;
         }
 
@@ -237,7 +243,8 @@ License: https://freebootstrap.net/license
         }
 
         /* Modern Icons & Elements */
-        .icon, .step-number {
+        .icon,
+        .step-number {
             background: var(--primary-dark) !important;
             color: var(--white) !important;
             width: 70px;
@@ -344,7 +351,7 @@ License: https://freebootstrap.net/license
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
         }
 
         .floating-icon {
@@ -658,13 +665,27 @@ License: https://freebootstrap.net/license
 
         /* Animations */
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(2deg); }
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(2deg);
+            }
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
         }
     </style>
 
@@ -691,7 +712,7 @@ License: https://freebootstrap.net/license
                     <div class="brand-container">
                         <!-- Replace 'logo.png' with your actual logo file name -->
                         <img src="{{ asset('assets/images/logo.png') }}" alt="Diara TimeSchool Logo" class="brand-logo"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <!-- Fallback icon if logo doesn't load -->
                         <div class="brand-icon-fallback" style="display: none;">
                             <i class="bi bi-mortarboard-fill"></i>
@@ -713,15 +734,18 @@ License: https://freebootstrap.net/license
                             <a class="logo-link" id="fbs__net-navbarsLabel" href="#home">
                                 <div class="offcanvas-brand">
                                     <!-- Replace 'logo.png' with your actual logo file name -->
-                                    <img src="{{ asset('assets/images/logo.png') }}" alt="Diara TimeSchool Logo" class="offcanvas-brand-logo"
-                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <img src="{{ asset('assets/images/logo.png') }}" alt="Diara TimeSchool Logo"
+                                        class="offcanvas-brand-logo"
+                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                     <!-- Fallback icon if logo doesn't load -->
                                     <div class="offcanvas-brand-icon-fallback" style="display: none;">
                                         <i class="bi bi-mortarboard-fill"></i>
                                     </div>
                                     <div>
-                                        <h5 class="mb-0" style="color: var(--primary-dark); font-weight: 700;">Diara TimeSchool</h5>
-                                        <small style="color: var(--primary-light); font-weight: 600;">SMART ATTENDANCE</small>
+                                        <h5 class="mb-0" style="color: var(--primary-dark); font-weight: 700;">Diara
+                                            TimeSchool</h5>
+                                        <small style="color: var(--primary-light); font-weight: 600;">SMART
+                                            ATTENDANCE</small>
                                     </div>
                                 </div>
                             </a>
@@ -794,9 +818,11 @@ License: https://freebootstrap.net/license
                                     </div>
                                     <p class="hero-description mb-4 mb-lg-5" data-aos="fade-up" data-aos-delay="200">
                                         Sistem presensi wajah & pemantauan poin terintegrasi untuk sekolah modern.
-                                        Kelola absensi, prestasi, dan pelanggaran siswa dalam satu platform yang mudah dan aman.
+                                        Kelola absensi, prestasi, dan pelanggaran siswa dalam satu platform yang mudah
+                                        dan aman.
                                     </p>
-                                    <div class="cta d-flex gap-3 mb-4 mb-lg-5" data-aos="fade-up" data-aos-delay="300">
+                                    <div class="cta d-flex gap-3 mb-4 mb-lg-5" data-aos="fade-up"
+                                        data-aos-delay="300">
                                         <a class="btn" href="{{ url('/login') }}">
                                             <i class="bi bi-box-arrow-in-right me-2"></i>Login Sekarang
                                         </a>
@@ -825,12 +851,14 @@ License: https://freebootstrap.net/license
                                     <i class="bi bi-camera-video floating-icon"></i>
                                     <!-- Floating Elements -->
                                     <div class="position-absolute top-0 start-0 p-3">
-                                        <div class="badge bg-white text-primary px-3 py-2" style="animation: float 3s ease-in-out infinite;">
+                                        <div class="badge bg-white text-primary px-3 py-2"
+                                            style="animation: float 3s ease-in-out infinite;">
                                             <i class="bi bi-check-circle-fill me-1"></i>99% Akurasi
                                         </div>
                                     </div>
                                     <div class="position-absolute bottom-0 end-0 p-3">
-                                        <div class="badge bg-white text-primary px-3 py-2" style="animation: float 4s ease-in-out infinite;">
+                                        <div class="badge bg-white text-primary px-3 py-2"
+                                            style="animation: float 4s ease-in-out infinite;">
                                             <i class="bi bi-lightning-fill me-1"></i>Real-time
                                         </div>
                                     </div>
@@ -865,7 +893,8 @@ License: https://freebootstrap.net/license
                                 </div>
                                 <h3 class="text-center">Presensi Wajah</h3>
                                 <p class="text-muted text-center mb-4">
-                                    Absensi otomatis dengan teknologi AI recognition. Deteksi wajah akurat dalam hitungan detik,
+                                    Absensi otomatis dengan teknologi AI recognition. Deteksi wajah akurat dalam
+                                    hitungan detik,
                                     tidak perlu kartu atau fingerprint.
                                 </p>
                                 <div class="feature-list">
@@ -962,7 +991,8 @@ License: https://freebootstrap.net/license
                                     <i class="bi bi-person-badge"></i>
                                 </div>
                                 <h3 class="fs-5 mb-3">Scan Wajah</h3>
-                                <p class="text-muted">Siswa melakukan presensi dengan scan wajah di kamera sekolah. Proses cepat hanya 2 detik.</p>
+                                <p class="text-muted">Siswa melakukan presensi dengan scan wajah di kamera sekolah.
+                                    Proses cepat hanya 2 detik.</p>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
@@ -972,7 +1002,8 @@ License: https://freebootstrap.net/license
                                     <i class="bi bi-cpu"></i>
                                 </div>
                                 <h3 class="fs-5 mb-3">AI Verification</h3>
-                                <p class="text-muted">Sistem AI memverifikasi identitas dan mencatat kehadiran secara otomatis dan akurat.</p>
+                                <p class="text-muted">Sistem AI memverifikasi identitas dan mencatat kehadiran secara
+                                    otomatis dan akurat.</p>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="400">
@@ -982,7 +1013,8 @@ License: https://freebootstrap.net/license
                                     <i class="bi bi-pencil-square"></i>
                                 </div>
                                 <h3 class="fs-5 mb-3">Input Data</h3>
-                                <p class="text-muted">Guru mencatat prestasi atau pelanggaran dengan mudah melalui aplikasi mobile/web.</p>
+                                <p class="text-muted">Guru mencatat prestasi atau pelanggaran dengan mudah melalui
+                                    aplikasi mobile/web.</p>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="600">
@@ -992,7 +1024,8 @@ License: https://freebootstrap.net/license
                                     <i class="bi bi-arrow-repeat"></i>
                                 </div>
                                 <h3 class="fs-5 mb-3">Auto Update</h3>
-                                <p class="text-muted">Data tersinkronisasi real-time ke dashboard semua pengguna dengan notifikasi otomatis.</p>
+                                <p class="text-muted">Data tersinkronisasi real-time ke dashboard semua pengguna dengan
+                                    notifikasi otomatis.</p>
                             </div>
                         </div>
                     </div>
@@ -1000,10 +1033,12 @@ License: https://freebootstrap.net/license
                         <div class="col-md-8 mx-auto text-center" data-aos="fade-up" data-aos-delay="800">
                             <div class="result-box">
                                 <div class="d-flex align-items-center justify-content-center mb-3">
-                                    <i class="bi bi-bullseye" style="font-size: 2rem; color: var(--primary-bright);"></i>
+                                    <i class="bi bi-bullseye"
+                                        style="font-size: 2rem; color: var(--primary-bright);"></i>
                                     <h4 class="ms-3 mb-0">Hasil Akhir</h4>
                                 </div>
-                                <p class="mb-0">Orang tua dapat memantau secara real-time, guru dapat fokus mengajar, dan admin sekolah memiliki data akurat untuk evaluasi.</p>
+                                <p class="mb-0">Orang tua dapat memantau secara real-time, guru dapat fokus mengajar,
+                                    dan admin sekolah memiliki data akurat untuk evaluasi.</p>
                             </div>
                         </div>
                     </div>
@@ -1065,7 +1100,8 @@ License: https://freebootstrap.net/license
                                     </div>
                                 </div>
                                 <blockquote class="mb-4">
-                                    "Notifikasi real-time sangat membantu! Saya langsung tahu kalau anak terlambat atau dapat prestasi.
+                                    "Notifikasi real-time sangat membantu! Saya langsung tahu kalau anak terlambat atau
+                                    dapat prestasi.
                                     Komunikasi dengan sekolah jadi lebih transparan."
                                 </blockquote>
                                 <div class="testimonial-author d-flex gap-3 align-items-center">
@@ -1091,7 +1127,8 @@ License: https://freebootstrap.net/license
                                     </div>
                                 </div>
                                 <blockquote class="mb-4">
-                                    "Dashboard analitik sangat membantu evaluasi semester. Data akurat, laporan otomatis,
+                                    "Dashboard analitik sangat membantu evaluasi semester. Data akurat, laporan
+                                    otomatis,
                                     dan bisa akses dimana saja. Efisiensi kerja meningkat drastis!"
                                 </blockquote>
                                 <div class="testimonial-author d-flex gap-3 align-items-center">
@@ -1122,7 +1159,8 @@ License: https://freebootstrap.net/license
                             Pertanyaan yang Sering Diajukan
                         </h2>
                         <p data-aos="fade-up" data-aos-delay="200">
-                            Temukan jawaban atas pertanyaan umum seputar implementasi sistem presensi pintar di sekolah Anda
+                            Temukan jawaban atas pertanyaan umum seputar implementasi sistem presensi pintar di sekolah
+                            Anda
                         </p>
                     </div>
                     <div class="row">
@@ -1134,16 +1172,21 @@ License: https://freebootstrap.net/license
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
                                                 data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
                                                 aria-controls="panelsStayOpen-collapseOne">
-                                                <i class="bi bi-camera-fill me-2" style="color: var(--primary-dark);"></i>
+                                                <i class="bi bi-camera-fill me-2"
+                                                    style="color: var(--primary-dark);"></i>
                                                 Apakah sistem presensi wajah aman untuk siswa?
                                             </button>
                                         </h2>
                                         <div class="accordion-collapse collapse show" id="panelsStayOpen-collapseOne">
                                             <div class="accordion-body">
-                                                Sangat aman! Sistem kami menggunakan teknologi AI yang tidak menyimpan foto wajah secara utuh,
-                                                melainkan mengonversi menjadi data matematis terenkripsi. Data siswa dilindungi sesuai standar
-                                                keamanan internasional dan hanya dapat diakses oleh pihak yang berwenang di sekolah.
-                                                Sistem juga dilengkapi fitur anti-spoofing untuk mencegah manipulasi menggunakan foto atau video.
+                                                Sangat aman! Sistem kami menggunakan teknologi AI yang tidak menyimpan
+                                                foto wajah secara utuh,
+                                                melainkan mengonversi menjadi data matematis terenkripsi. Data siswa
+                                                dilindungi sesuai standar
+                                                keamanan internasional dan hanya dapat diakses oleh pihak yang berwenang
+                                                di sekolah.
+                                                Sistem juga dilengkapi fitur anti-spoofing untuk mencegah manipulasi
+                                                menggunakan foto atau video.
                                             </div>
                                         </div>
                                     </div>
@@ -1152,16 +1195,21 @@ License: https://freebootstrap.net/license
                                             <button class="accordion-button collapsed" type="button"
                                                 data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo"
                                                 aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
-                                                <i class="bi bi-gear-fill me-2" style="color: var(--primary-dark);"></i>
+                                                <i class="bi bi-gear-fill me-2"
+                                                    style="color: var(--primary-dark);"></i>
                                                 Berapa lama waktu implementasi sistem di sekolah?
                                             </button>
                                         </h2>
                                         <div class="accordion-collapse collapse" id="panelsStayOpen-collapseTwo">
                                             <div class="accordion-body">
-                                                Implementasi lengkap biasanya memerlukan 2-4 minggu, tergantung ukuran sekolah.
-                                                Prosesnya meliputi: instalasi perangkat keras (1-2 hari), setup software dan database (3-5 hari),
-                                                pelatihan guru dan staff (2-3 hari), serta pendampingan selama 1 minggu pertama.
-                                                Tim teknis kami akan memastikan semua berjalan lancar sebelum sistem fully operational.
+                                                Implementasi lengkap biasanya memerlukan 2-4 minggu, tergantung ukuran
+                                                sekolah.
+                                                Prosesnya meliputi: instalasi perangkat keras (1-2 hari), setup software
+                                                dan database (3-5 hari),
+                                                pelatihan guru dan staff (2-3 hari), serta pendampingan selama 1 minggu
+                                                pertama.
+                                                Tim teknis kami akan memastikan semua berjalan lancar sebelum sistem
+                                                fully operational.
                                             </div>
                                         </div>
                                     </div>
@@ -1171,16 +1219,19 @@ License: https://freebootstrap.net/license
                                                 data-bs-toggle="collapse"
                                                 data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false"
                                                 aria-controls="panelsStayOpen-collapseThree">
-                                                <i class="bi bi-phone-fill me-2" style="color: var(--primary-dark);"></i>
+                                                <i class="bi bi-phone-fill me-2"
+                                                    style="color: var(--primary-dark);"></i>
                                                 Apakah orang tua siswa bisa mengakses informasi presensi?
                                             </button>
                                         </h2>
                                         <div class="accordion-collapse collapse" id="panelsStayOpen-collapseThree">
                                             <div class="accordion-body">
                                                 Ya! Orang tua mendapat akses khusus melalui web.
-                                                Mereka dapat melihat: kehadiran harian anak, rekap bulanan, poin prestasi/pelanggaran,
+                                                Mereka dapat melihat: kehadiran harian anak, rekap bulanan, poin
+                                                prestasi/pelanggaran,
                                                 dan menerima notifikasi real-time saat anak tiba/pulang sekolah.
-                                                Akses dibatasi hanya untuk data anak sendiri demi menjaga privasi siswa lain.
+                                                Akses dibatasi hanya untuk data anak sendiri demi menjaga privasi siswa
+                                                lain.
                                             </div>
                                         </div>
                                     </div>
@@ -1190,16 +1241,21 @@ License: https://freebootstrap.net/license
                                                 data-bs-toggle="collapse"
                                                 data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="false"
                                                 aria-controls="panelsStayOpen-collapseFour">
-                                                <i class="bi bi-people-fill me-2" style="color: var(--primary-dark);"></i>
+                                                <i class="bi bi-people-fill me-2"
+                                                    style="color: var(--primary-dark);"></i>
                                                 Apakah guru perlu pelatihan khusus untuk mengoperasikan sistem?
                                             </button>
                                         </h2>
                                         <div class="accordion-collapse collapse" id="panelsStayOpen-collapseFour">
                                             <div class="accordion-body">
-                                                Sistem dirancang user-friendly sehingga mudah dipelajari! Pelatihan dasar hanya butuh 2-3 jam
-                                                untuk guru dan staff. Kami menyediakan: workshop hands-on, video tutorial interaktif,
-                                                user manual berbahasa Indonesia, dan pendampingan langsung 1 minggu pertama.
-                                                Interface intuitif seperti aplikasi smartphone yang sudah familiar bagi semua kalangan.
+                                                Sistem dirancang user-friendly sehingga mudah dipelajari! Pelatihan
+                                                dasar hanya butuh 2-3 jam
+                                                untuk guru dan staff. Kami menyediakan: workshop hands-on, video
+                                                tutorial interaktif,
+                                                user manual berbahasa Indonesia, dan pendampingan langsung 1 minggu
+                                                pertama.
+                                                Interface intuitif seperti aplikasi smartphone yang sudah familiar bagi
+                                                semua kalangan.
                                             </div>
                                         </div>
                                     </div>
@@ -1209,16 +1265,20 @@ License: https://freebootstrap.net/license
                                                 data-bs-toggle="collapse"
                                                 data-bs-target="#panelsStayOpen-collapseFive" aria-expanded="false"
                                                 aria-controls="panelsStayOpen-collapseFive">
-                                                <i class="bi bi-graph-up me-2" style="color: var(--primary-dark);"></i>
+                                                <i class="bi bi-graph-up me-2"
+                                                    style="color: var(--primary-dark);"></i>
                                                 Bagaimana sistem membantu meningkatkan kedisiplinan siswa?
                                             </button>
                                         </h2>
                                         <div class="accordion-collapse collapse" id="panelsStayOpen-collapseFive">
                                             <div class="accordion-body">
-                                                Sistem poin terintegrasi memberikan feedback instan kepada siswa tentang perilaku mereka.
-                                                Prestasi mendapat poin positif, pelanggaran dikurangi poin dengan kategori yang jelas.
+                                                Sistem poin terintegrasi memberikan feedback instan kepada siswa tentang
+                                                perilaku mereka.
+                                                Prestasi mendapat poin positif, pelanggaran dikurangi poin dengan
+                                                kategori yang jelas.
                                                 Dashboard personal memotivasi siswa untuk berkompetisi positif.
-                                                Laporan berkala ke orang tua menciptakan sinergi pengawasan rumah-sekolah yang efektif
+                                                Laporan berkala ke orang tua menciptakan sinergi pengawasan
+                                                rumah-sekolah yang efektif
                                                 untuk membentuk karakter disiplin jangka panjang.
                                             </div>
                                         </div>
@@ -1286,19 +1346,20 @@ License: https://freebootstrap.net/license
                         <div class="col-md-6">
                             <div class="form-wrapper p-4" data-aos="fade-up" data-aos-delay="300">
                                 <div class="d-flex align-items-center mb-4">
-                                    <i class="bi bi-chat-dots-fill" style="font-size: 1.5rem; color: var(--primary-bright);"></i>
+                                    <i class="bi bi-chat-dots-fill"
+                                        style="font-size: 1.5rem; color: var(--primary-bright);"></i>
                                     <h4 class="ms-3 mb-0">Kirim Pesan</h4>
                                 </div>
                                 <form id="contactForm">
                                     <div class="mb-3">
                                         <label class="form-label" for="name">Nama Sekolah *</label>
-                                        <input class="form-control" id="name" type="text" name="name" required=""
-                                               placeholder="Contoh: SMA Negeri 1 Jakarta">
+                                        <input class="form-control" id="name" type="text" name="name"
+                                            required="" placeholder="Contoh: SMA Negeri 1 Jakarta">
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label" for="email">Email *</label>
-                                        <input class="form-control" id="email" type="email" name="email" required=""
-                                               placeholder="admin@sekolah.sch.id">
+                                        <input class="form-control" id="email" type="email" name="email"
+                                            required="" placeholder="admin@sekolah.sch.id">
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label" for="subject">Subjek</label>
@@ -1313,7 +1374,7 @@ License: https://freebootstrap.net/license
                                     <div class="mb-4">
                                         <label class="form-label" for="message">Pesan *</label>
                                         <textarea class="form-control" id="message" name="message" rows="4" required=""
-                                                  placeholder="Ceritakan kebutuhan sekolah Anda..."></textarea>
+                                            placeholder="Ceritakan kebutuhan sekolah Anda..."></textarea>
                                     </div>
                                     <button class="btn btn-primary w-100 fw-semibold" type="submit">
                                         <i class="bi bi-send"></i>
@@ -1335,14 +1396,17 @@ License: https://freebootstrap.net/license
                 <div class="row mb-5 pb-4">
                     <div class="col-md-8">
                         <div class="d-flex align-items-center mb-3">
-                            <i class="bi bi-rocket-takeoff-fill me-3" style="font-size: 1.5rem; color: var(--primary-light);"></i>
+                            <i class="bi bi-rocket-takeoff-fill me-3"
+                                style="font-size: 1.5rem; color: var(--primary-light);"></i>
                             <h3 class="fs-4 text-white mb-0">Bergabung dengan Revolusi Pendidikan Digital</h3>
                         </div>
-                        <p class="text-white-50 mb-4">Dapatkan update terbaru tentang fitur-fitur inovatif dan tips optimalisasi manajemen sekolah</p>
+                        <p class="text-white-50 mb-4">Dapatkan update terbaru tentang fitur-fitur inovatif dan tips
+                            optimalisasi manajemen sekolah</p>
                     </div>
                     <div class="col-md-4">
                         <form class="d-flex gap-2">
-                            <input class="form-control" type="email" placeholder="Email sekolah Anda" required="">
+                            <input class="form-control" type="email" placeholder="Email sekolah Anda"
+                                required="">
                             <button class="btn btn-primary" type="submit">
                                 <i class="bi bi-arrow-right"></i>
                             </button>
@@ -1353,8 +1417,9 @@ License: https://freebootstrap.net/license
                     <div class="col-md-4 mb-4">
                         <div class="d-flex align-items-center mb-3">
                             <!-- Replace 'logo.png' with your actual logo file name -->
-                            <img src="{{ asset('assets/images/logo.png') }}" alt="Diara TimeSchool Logo" class="footer-logo"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+                            <img src="{{ asset('assets/images/logo.png') }}" alt="Diara TimeSchool Logo"
+                                class="footer-logo"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
                             <!-- Fallback icon if logo doesn't load -->
                             <div class="footer-icon-fallback" style="display: none;">
                                 <i class="bi bi-mortarboard-fill"></i>
@@ -1362,7 +1427,8 @@ License: https://freebootstrap.net/license
                             <h4 class="text-white mb-0">Diara TimeSchool</h4>
                         </div>
                         <p class="text-white-50 mb-4">
-                            Platform manajemen sekolah terdepan dengan teknologi AI untuk presensi wajah dan monitoring siswa real-time.
+                            Platform manajemen sekolah terdepan dengan teknologi AI untuk presensi wajah dan monitoring
+                            siswa real-time.
                         </p>
                         <div class="d-flex gap-3">
                             <a href="#" class="text-white-50 hover-primary">
@@ -1385,34 +1451,35 @@ License: https://freebootstrap.net/license
                                 <h5 class="mb-3 text-white">Fitur Unggulan</h5>
                                 <ul class="list-unstyled">
                                     <li class="mb-2"><a href="#fitur" class="text-white-50 text-decoration-none">
-                                        <i class="bi bi-camera-fill me-2"></i>Presensi Wajah AI
-                                    </a></li>
+                                            <i class="bi bi-camera-fill me-2"></i>Presensi Wajah AI
+                                        </a></li>
                                     <li class="mb-2"><a href="#fitur" class="text-white-50 text-decoration-none">
-                                        <i class="bi bi-clipboard-check me-2"></i>Pencatatan Digital
-                                    </a></li>
+                                            <i class="bi bi-clipboard-check me-2"></i>Pencatatan Digital
+                                        </a></li>
                                     <li class="mb-2"><a href="#fitur" class="text-white-50 text-decoration-none">
-                                        <i class="bi bi-graph-up me-2"></i>Dashboard Analytics
-                                    </a></li>
-                                    <li class="mb-2"><a href="#cara-kerja" class="text-white-50 text-decoration-none">
-                                        <i class="bi bi-gear-fill me-2"></i>Cara Kerja
-                                    </a></li>
+                                            <i class="bi bi-graph-up me-2"></i>Dashboard Analytics
+                                        </a></li>
+                                    <li class="mb-2"><a href="#cara-kerja"
+                                            class="text-white-50 text-decoration-none">
+                                            <i class="bi bi-gear-fill me-2"></i>Cara Kerja
+                                        </a></li>
                                 </ul>
                             </div>
                             <div class="col-md-4">
                                 <h5 class="mb-3 text-white">Dukungan</h5>
                                 <ul class="list-unstyled">
                                     <li class="mb-2"><a href="#kontak" class="text-white-50 text-decoration-none">
-                                        <i class="bi bi-telephone me-2"></i>Hubungi Kami
-                                    </a></li>
+                                            <i class="bi bi-telephone me-2"></i>Hubungi Kami
+                                        </a></li>
                                     <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">
-                                        <i class="bi bi-book me-2"></i>Panduan Pengguna
-                                    </a></li>
+                                            <i class="bi bi-book me-2"></i>Panduan Pengguna
+                                        </a></li>
                                     <li class="mb-2"><a href="#faq" class="text-white-50 text-decoration-none">
-                                        <i class="bi bi-question-circle me-2"></i>FAQ
-                                    </a></li>
+                                            <i class="bi bi-question-circle me-2"></i>FAQ
+                                        </a></li>
                                     <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">
-                                        <i class="bi bi-play-circle me-2"></i>Tutorial Video
-                                    </a></li>
+                                            <i class="bi bi-play-circle me-2"></i>Tutorial Video
+                                        </a></li>
                                 </ul>
                             </div>
                             <div class="col-md-4">
@@ -1439,7 +1506,10 @@ License: https://freebootstrap.net/license
                 <div class="row align-items-center pt-3">
                     <div class="col-md-8 text-center text-md-start">
                         <span class="text-white-50">
-                            &copy; <script>document.write(new Date().getFullYear());</script>
+                            &copy;
+                            <script>
+                                document.write(new Date().getFullYear());
+                            </script>
                             Diara TimeSchool. Semua hak dilindungi. ❤️ Dibuat untuk kemajuan pendidikan Indonesia
                         </span>
                     </div>
@@ -1460,16 +1530,16 @@ License: https://freebootstrap.net/license
     <!-- End Back to top-->
 
     <!-- ======= Javascripts =======-->
-    <script src="{{ asset('landing-page/assets/vendors/bootstrap/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('landing-page/assets/vendors/gsap/gsap.min.js') }}"></script>
-    <script src="{{ asset('landing-page/assets/vendors/imagesloaded/imagesloaded.pkgd.min.js') }}"></script>
-    <script src="{{ asset('landing-page/assets/vendors/isotope/isotope.pkgd.min.js') }}"></script>
-    <script src="{{ asset('landing-page/assets/vendors/glightbox/glightbox.min.js') }}"></script>
-    <script src="{{ asset('landing-page/assets/vendors/swiper/swiper-bundle.min.js') }}"></script>
-    <script src="{{ asset('landing-page/assets/vendors/aos/aos.js') }}"></script>
-    <script src="{{ asset('landing-page/assets/vendors/purecounter/purecounter.js') }}"></script>
-    <script src="{{ asset('landing-page/assets/js/custom.js') }}"></script>
-    <script src="{{ asset('landing-page/assets/js/send_email.js') }}"></script>
+    <script src="{{ asset('assets/landing-page/assets/vendors/bootstrap/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/landing-page/assets/vendors/gsap/gsap.min.js') }}"></script>
+    <script src="{{ asset('assets/landing-page/assets/vendors/imagesloaded/imagesloaded.pkgd.min.js') }}"></script>
+    <script src="{{ asset('assets/landing-page/assets/vendors/isotope/isotope.pkgd.min.js') }}"></script>
+    <script src="{{ asset('assets/landing-page/assets/vendors/glightbox/glightbox.min.js') }}"></script>
+    <script src="{{ asset('assets/landing-page/assets/vendors/swiper/swiper-bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/landing-page/assets/vendors/aos/aos.js') }}"></script>
+    <script src="{{ asset('assets/landing-page/assets/vendors/purecounter/purecounter.js') }}"></script>
+    <script src="{{ asset('assets/landing-page/assets/js/custom.js') }}"></script>
+    <script src="{{ asset('assets/landing-page/assets/js/send_email.js') }}"></script>
 
     <!-- Custom Animations Script -->
     <script>

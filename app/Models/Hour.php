@@ -14,6 +14,7 @@ class Hour extends Model
         'slot_number',
         'start_time',
         'end_time',
+        'is_friday',
     ];
 
     public function classSchedules()
