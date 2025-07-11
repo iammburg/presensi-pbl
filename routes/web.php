@@ -30,9 +30,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TeacherScheduleController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\WelcomeController;
 
-// Redirect root to login
-Route::permanentRedirect('/', '/login');
+// Root URL to welcome view
+Route::get('/', function () {
+    return view('welcome');
+});
 
 // Authentication routes
 Auth::routes(['register' => false]);
