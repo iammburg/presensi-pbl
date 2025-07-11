@@ -1,5 +1,4 @@
 .env
-public/storage
 __pycache__/
 *.pyc
 *.pyo
