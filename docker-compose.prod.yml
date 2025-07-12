@@ -29,6 +29,7 @@ services:
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - ./storage/app/public:/var/www/storage/app/public
+      - ./public:/var/www/public
 
   flask:
     image: iammburg/presensi-flask:latest
