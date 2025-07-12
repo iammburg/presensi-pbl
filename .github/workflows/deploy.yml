@@ -104,3 +104,4 @@ jobs:
           docker exec nginx nginx -s reload || true
 
           echo "✅ Laravel deployment completed!"
+          echo "CIHUYYY"
