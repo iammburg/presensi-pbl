@@ -76,14 +76,15 @@ jobs:
           docker-compose -f docker-compose.prod.yml pull
           docker-compose -f docker-compose.prod.yml up -d --build
 
-          echo "⏳ Menunggu Laravel aktif..."
+          echo "⏳ Menunggu Laravel container siap..."
           timeout=60
           elapsed=0
-          while ! docker exec laravel_container_name_or_id php artisan --version 2>/dev/null; do
+          while ! docker exec laravel php artisan --version 2>/dev/null; do
+            echo "⏳ Menunggu... (${elapsed}s)"
             sleep 2
             elapsed=$((elapsed+2))
             if [ "$elapsed" -ge "$timeout" ]; then
-              echo "❌ Laravel container did not become ready in $timeout seconds."
+              echo "❌ Laravel container tidak siap setelah $timeout detik."
               exit 1
             fi
           done
