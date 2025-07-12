@@ -19,16 +19,15 @@ License: https://freebootstrap.net/license
     <!-- End Google Font-->
 
     <!-- ======= Styles =======-->
-    <link href="{{ asset('assets/landing-page/assets/vendors/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/landing-page/assets/vendors/bootstrap-icons/font/bootstrap-icons.min.css') }}"
-        rel="stylesheet">
-    <link href="{{ asset('assets/landing-page/assets/vendors/glightbox/glightbox.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/landing-page/assets/vendors/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/landing-page/assets/vendors/aos/aos.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/vendors/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/vendors/bootstrap-icons/font/bootstrap-icons.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/vendors/glightbox/glightbox.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/vendors/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/vendors/aos/aos.css') }}" rel="stylesheet">
     <!-- End Styles-->
 
     <!-- ======= Theme Style =======-->
-    <link href="{{ asset('assets/landing-page/assets/css/style.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
     <!-- End Theme Style-->
 
     <!-- ======= Custom Colors & Modern Animations =======-->
@@ -1530,16 +1529,16 @@ License: https://freebootstrap.net/license
     <!-- End Back to top-->
 
     <!-- ======= Javascripts =======-->
-    <script src="{{ asset('assets/landing-page/assets/vendors/bootstrap/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/landing-page/assets/vendors/gsap/gsap.min.js') }}"></script>
-    <script src="{{ asset('assets/landing-page/assets/vendors/imagesloaded/imagesloaded.pkgd.min.js') }}"></script>
-    <script src="{{ asset('assets/landing-page/assets/vendors/isotope/isotope.pkgd.min.js') }}"></script>
-    <script src="{{ asset('assets/landing-page/assets/vendors/glightbox/glightbox.min.js') }}"></script>
-    <script src="{{ asset('assets/landing-page/assets/vendors/swiper/swiper-bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/landing-page/assets/vendors/aos/aos.js') }}"></script>
-    <script src="{{ asset('assets/landing-page/assets/vendors/purecounter/purecounter.js') }}"></script>
-    <script src="{{ asset('assets/landing-page/assets/js/custom.js') }}"></script>
-    <script src="{{ asset('assets/landing-page/assets/js/send_email.js') }}"></script>
+    <script src="{{ asset('assets/vendors/bootstrap/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/gsap/gsap.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/imagesloaded/imagesloaded.pkgd.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/isotope/isotope.pkgd.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/glightbox/glightbox.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/swiper/swiper-bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/aos/aos.js') }}"></script>
+    <script src="{{ asset('assets/vendors/purecounter/purecounter.js') }}"></script>
+    <script src="{{ asset('assets/js/custom.js') }}"></script>
+    <script src="{{ asset('assets/js/send_email.js') }}"></script>
 
     <!-- Custom Animations Script -->
     <script>
