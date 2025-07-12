@@ -12,20 +12,10 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# Copy composer files first for better Docker layer caching
-COPY composer.json composer.lock ./
-
-# Install PHP dependencies
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
-
-# Copy the rest of the application
 COPY . .
 
-# Remove any remaining .DS_Store files
-RUN find . -name ".DS_Store" -type f -delete
-
-# Final Laravel optimizations
-RUN php artisan storage:link \
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader \
+    && php artisan storage:link \
     && php artisan config:cache
 
 COPY .docker/entrypoint.sh /usr/local/bin/entrypoint.sh
