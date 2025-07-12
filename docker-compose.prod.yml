@@ -16,7 +16,6 @@ services:
       DB_USERNAME: root
       DB_PASSWORD: SiNdaruNgapainDah
     volumes:
-      - ./public:/var/www/public
       - ./laravel.env:/var/www/.env
       - ./storage/app/public:/var/www/storage/app/public
 
@@ -30,7 +29,6 @@ services:
       - laravel
     volumes:
       - ./nginx:/etc/nginx/conf.d
-      - ./public:/var/www/public
       - ./storage/app/public:/var/www/storage/app/public
 
   flask:
