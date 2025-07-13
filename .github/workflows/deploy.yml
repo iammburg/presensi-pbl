@@ -20,22 +20,15 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Check if style.css exists before build
-      run: |
-        echo "List public/assets/css"
-        ls -lah public/assets/css || echo "⚠️ Folder tidak ada!"
-        echo "Preview isi style.css"
-        cat public/assets/css/style.css || echo "⚠️ style.css TIDAK ADA!"
-
     - name: Build & Push Laravel
       run: |
         docker build --no-cache -t ${{ secrets.DOCKER_USERNAME }}/presensi-laravel:latest .
         docker push ${{ secrets.DOCKER_USERNAME }}/presensi-laravel:latest
 
-    - name: Check if style.css is in container
+    - name: Check Laravel Assets in Container
       run: |
-        docker run --rm ${{ secrets.DOCKER_USERNAME }}/presensi-laravel:latest ls -lah /var/www/public/assets/css || echo "❌ Folder css tidak ada"
-        docker run --rm ${{ secrets.DOCKER_USERNAME }}/presensi-laravel:latest cat /var/www/public/assets/css/style.css || echo "❌ style.css tidak ada di container"
+        docker run --rm ${{ secrets.DOCKER_USERNAME }}/presensi-laravel:latest ls -lah /var/www/public/assets/css || echo "❌ CSS folder tidak ada"
+        docker run --rm ${{ secrets.DOCKER_USERNAME }}/presensi-laravel:latest cat /var/www/public/assets/css/style.css || echo "❌ style.css tidak ada"
 
     - name: Build & Push Flask
       run: |
@@ -68,7 +61,6 @@ jobs:
         key: ${{ secrets.VPS_SSH_KEY }}
         script: |
           cd ~/app
-
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
           echo "TAG=latest" > .env
@@ -91,17 +83,25 @@ jobs:
 
           LARAVEL_ID=$(docker ps -qf "name=laravel")
           echo "🔧 Fixing Laravel Permissions in $LARAVEL_ID..."
-          docker exec "$LARAVEL_ID" mkdir -p storage bootstrap/cache
-          docker exec "$LARAVEL_ID" chown -R www-data:www-data storage bootstrap/cache || true
-          docker exec "$LARAVEL_ID" chmod -R 775 storage bootstrap/cache || true
-          docker exec "$LARAVEL_ID" php artisan config:cache || true
-          docker exec "$LARAVEL_ID" php artisan route:cache || true
-          docker exec "$LARAVEL_ID" php artisan view:cache || true
-          docker exec "$LARAVEL_ID" php artisan optimize || true
-          docker exec "$LARAVEL_ID" rm -f public/storage || true
-          docker exec "$LARAVEL_ID" php artisan storage:link || true
-          echo "♻️ Reload NGINX config..."
+
+          docker exec "$LARAVEL_ID" bash -c '
+            mkdir -p \
+              storage/framework/cache/data \
+              storage/framework/sessions \
+              storage/framework/views \
+              storage/logs \
+              bootstrap/cache && \
+            chown -R www-data:www-data storage bootstrap/cache && \
+            chmod -R 775 storage bootstrap/cache
+          '
+
+          echo "📦 Migrating Laravel database..."
+          docker exec "$LARAVEL_ID" php artisan migrate --force
+
+          echo "🧹 Clearing Laravel caches..."
+          docker exec "$LARAVEL_ID" php artisan optimize:clear || true
+
+          echo "♻️ Reloading NGINX config..."
           docker exec nginx nginx -s reload || true
 
           echo "✅ Laravel deployment completed!"
-          echo "CIHUYYY"
