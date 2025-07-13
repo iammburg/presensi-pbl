@@ -44,14 +44,14 @@ jobs:
         source: "docker-compose.prod.yml"
         target: "/home/${{ secrets.VPS_USER }}/app"
 
-    - name: Copy updated NGINX configs to VPS
+    - name: Copy updated NGINX config folder to VPS
       uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_SSH_KEY }}
-        source: "nginx/*"
-        target: "/home/${{ secrets.VPS_USER }}/app/nginx/"
+        source: "nginx/laravel.conf"
+        target: "/home/${{ secrets.VPS_USER }}/app/nginx/laravel.conf"
 
     - name: SSH Deploy to VPS
       uses: appleboy/ssh-action@v0.1.8
