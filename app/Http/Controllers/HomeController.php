@@ -134,6 +134,9 @@ class HomeController extends Controller
         } else if (Auth::user()->hasRole('Siswa')) {
             $user = Auth::user();
             $student = Student::where('user_id', $user->id)->first();
+            if (!$student) {
+                abort(404, 'Data siswa tidak ditemukan atau belum terhubung ke akun Anda.');
+            }
 
             // Prestasi siswa (hanya yang sudah divalidasi)
             $achievements = $student->achievements()->where('validation_status', 'approved')->get();
