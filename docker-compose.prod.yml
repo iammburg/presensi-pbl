@@ -16,7 +16,7 @@ services:
       DB_USERNAME: root
       DB_PASSWORD: SiNdaruNgapainDah
     volumes:
-      - laravel-public:/var/www/public             # ✅ Shared volume
+      - laravel-public:/var/www/public
       - ./laravel.env:/var/www/.env
       - ./storage/app/public:/var/www/storage/app/public
 
@@ -29,7 +29,7 @@ services:
       - laravel
     volumes:
       - ./nginx:/etc/nginx/conf.d
-      - laravel-public:/var/www/public             # ✅ Share dari Laravel
+      - laravel-public:/var/www/public
       - ./storage/app/public:/var/www/storage/app/public
 
   flask:
@@ -73,4 +73,4 @@ services:
 
 volumes:
   mysql-data:
-  laravel-public:        # ✅ Volume Laravel Public
+  laravel-public:
