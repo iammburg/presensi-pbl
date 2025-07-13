@@ -44,15 +44,15 @@ jobs:
         source: "docker-compose.prod.yml"
         target: "/home/${{ secrets.VPS_USER }}/app"
 
-    - name: Copy laravel.conf to VPS
+    - name: Copy NGINX Config to VPS (bind mount)
       uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_SSH_KEY }}
         source: "nginx/laravel.conf"
-        target: "/home/${{ secrets.VPS_USER }}/app/nginx/"
-        # Pastikan direktori target sudah ada di VPS sebelum copy
+        target: "/home/${{ secrets.VPS_USER }}/app/nginx/laravel.conf"
+        # ✅ Ensure file copied to bind-mounted folder used in compose
 
     - name: SSH Deploy to VPS
       uses: appleboy/ssh-action@v0.1.8
@@ -63,6 +63,7 @@ jobs:
         script: |
           set -e
           cd ~/app
+
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
           echo "TAG=latest" > .env
@@ -94,7 +95,8 @@ jobs:
           docker exec "$LARAVEL_ID" php artisan optimize || true
           docker exec "$LARAVEL_ID" rm -f public/storage || true
           docker exec "$LARAVEL_ID" php artisan storage:link || true
-          echo "♻️ Reload NGINX config..."
-          docker exec nginx nginx -s reload || true
+
+          echo "♻️ Reloading NGINX to apply new config..."
+          docker exec nginx nginx -s reload || docker restart nginx
 
           echo "✅ Laravel deployment completed!"

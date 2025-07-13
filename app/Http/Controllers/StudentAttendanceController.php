@@ -14,9 +14,10 @@ class StudentAttendanceController extends Controller
             ->latest('meeting_date')
             ->paginate(10);
 
+        if (!$attendances) {
+            return redirect()->back()->with('error', 'Tidak ada data presensi yang tercatat.');
+        }
+
         return view('student-attendance.index', ['attendances' => $attendances]);
-
     }
-
-    
 }
