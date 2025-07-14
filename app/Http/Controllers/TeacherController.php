@@ -295,6 +295,32 @@ class TeacherController extends Controller
         return Excel::download(new TeacherTemplateExport, 'template_import_guru.xlsx');
     }
 
+    public function search(Request $request)
+    {
+        $term = $request->input('q');
+        $page = $request->input('page', 1);
+        $limit = 10;
+
+        $query = Teacher::query()
+            ->when($term, function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                ->orWhere('nip', 'like', "%{$term}%");
+            });
+
+        $count = $query->count();
+
+        $teachers = $query
+            ->offset(($page - 1) * $limit)
+            ->limit($limit)
+            ->get(['nip', 'name']);
+
+        return response()->json([
+            'data' => $teachers,
+            'has_more' => ($page * $limit) < $count,
+        ]);
+    }
+
+
     /**
      * Jadikan Guru BK
      */
