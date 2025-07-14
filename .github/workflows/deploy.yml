@@ -52,7 +52,7 @@ jobs:
         key: ${{ secrets.VPS_SSH_KEY }}
         script: |
           echo "==== File laravel.conf di VPS ===="
-          cat ~/app/nginx/laravel.conf || echo "❌ FILE TIDAK ADA"
+          cat ~/app/nginx/laravel.conf || echo "❌ File laravel.conf tidak ditemukan"
 
     - name: Copy entire NGINX folder to VPS (safe + overwrite)
       uses: appleboy/scp-action@v0.1.4
