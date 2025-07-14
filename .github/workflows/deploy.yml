@@ -44,26 +44,25 @@ jobs:
         source: "docker-compose.prod.yml"
         target: "/home/${{ secrets.VPS_USER }}/app"
 
-    - name: SSH Check laravel.conf
-      uses: appleboy/ssh-action@v0.1.8
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        script: |
-          echo "==== File laravel.conf di VPS ===="
-          cat ~/app/nginx/laravel.conf || echo "❌ File laravel.conf tidak ditemukan"
-
     - name: Copy entire NGINX folder to VPS (safe + overwrite)
       uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_SSH_KEY }}
-        source: "nginx/*"
+        source: "nginx/laravel.conf"
         target: "/home/${{ secrets.VPS_USER }}/app/nginx/"
         overwrite: true
-        strip_components: 0
+
+    - name: SSH Check final nginx config path
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          echo "==== /app/nginx/laravel.conf ===="
+          cat ~/app/nginx/laravel.conf || echo "❌ laravel.conf NOT FOUND"
 
     - name: SSH Deploy to VPS
       uses: appleboy/ssh-action@v0.1.8
