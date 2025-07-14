@@ -44,7 +44,7 @@ jobs:
         source: "docker-compose.prod.yml"
         target: "/home/${{ secrets.VPS_USER }}/app"
 
-    - name: Copy updated NGINX config folder to VPS
+    - name: Copy updated NGINX config to VPS
       uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.VPS_HOST }}
