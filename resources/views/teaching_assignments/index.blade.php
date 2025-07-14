@@ -98,13 +98,18 @@
                                                 <div class="dropdown-menu">
                                                     <a class="dropdown-item"
                                                        href="{{ route('manage-teacher-subject-assignments.edit', $assignment->id) }}">Edit</a>
-                                                    <form action="{{ route('manage-teacher-subject-assignments.destroy', $assignment->id) }}"
-                                                          method="POST"
-                                                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                                    <form id="delete-form-{{ $assignment->id }}"
+                                                        action="{{ route('manage-teacher-subject-assignments.destroy', $assignment->id) }}"
+                                                        method="POST" style="display: inline;">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="dropdown-item text-danger">Hapus</button>
+                                                        <button type="button"
+                                                                class="dropdown-item text-danger"
+                                                                onclick="confirmDelete({{ $assignment->id }})">
+                                                            Hapus
+                                                        </button>
                                                     </form>
+
                                                 </div>
                                             </div>
                                         </td>
@@ -129,6 +134,8 @@
 <script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
 <script src="{{ asset('plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
 <script src="{{ asset('plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 <script>
     $(function () {
@@ -140,5 +147,21 @@
             }
         });
     });
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'Yakin ingin menghapus?',
+            text: "Data ini akan dihapus permanen.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, hapus',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        });
+    }
 </script>
 @endpush

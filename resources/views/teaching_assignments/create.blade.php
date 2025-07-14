@@ -357,7 +357,7 @@ $(document).ready(function() {
         placeholder: "Pilih satu atau beberapa kelas",
         allowClear: true,
         width: '100%',
-        closeOnSelect: false // Jangan tutup dropdown setelah memilih item
+        closeOnSelect: true // Jangan tutup dropdown setelah memilih item
     });
 });
 </script>
