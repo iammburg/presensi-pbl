@@ -10,24 +10,11 @@ from torchvision import transforms
 app = Flask(__name__)
 CORS(app)
 
-
-# STUDENT_PHOTOS_DIR = os.path.abspath(
-#     os.path.join(os.path.dirname(__file__), "../storage/app/public/student-photos")
-# )
-
 STUDENT_PHOTOS_DIR = os.environ.get("STUDENT_PHOTOS_DIR", "/app/student-photos")
 
-# if not os.path.exists(STUDENT_PHOTOS_DIR):
-#     app.logger.error("Directory %s does not exist.", STUDENT_PHOTOS_DIR)
-# else:
-#     app.logger.info("Directory %s exists.", STUDENT_PHOTOS_DIR)
-
-# app.logger.info("STUDENT_PHOTOS_DIR resolved to: %s", STUDENT_PHOTOS_DIR)
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-mtcnn = MTCNN(image_size=160, margin=0, keep_all=False, device=device)
-resnet = InceptionResnetV1(pretrained="vggface2").eval().to(device)
-
+mtcnn = None
+resnet = None
 db_embeddings = {}
 CACHE_LOCK = threading.Lock()
 REFRESH_INTERVAL = 300
@@ -37,7 +24,6 @@ augmentations = transforms.Compose(
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.RandomRotation(degrees=10),
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
-        # bisa tambah Gaussian blur, noise, dsb
     ]
 )
 
@@ -87,7 +73,18 @@ def refresher():
         time.sleep(REFRESH_INTERVAL)
 
 
-threading.Thread(target=refresher, daemon=True).start()
+@app.before_first_request
+def initialize_model_and_cache():
+    global mtcnn, resnet
+    if mtcnn is None or resnet is None:
+        app.logger.info("🔧 Initializing model and embeddings...")
+        mtcnn = MTCNN(image_size=160, margin=0, keep_all=False, device=device)
+        resnet = InceptionResnetV1(pretrained="vggface2").eval().to(device)
+
+        load_db_embeddings()
+        thread = threading.Thread(target=refresher, daemon=True)
+        thread.start()
+        app.logger.info("📦 Embedding refresher thread started.")
 
 
 def get_input_embedding(file_bytes):
@@ -158,19 +155,20 @@ def classify():
         app.logger.warning("No face detected in the image.")
         return jsonify({"label": None, "confidence": 0.0, "method": "no_face"}), 200
 
-    app.logger.info(f"Embedding generated: {emb[:5]}... (truncated for logging)")
+    app.logger.info(f"Embedding generated: {emb[:5]}... (truncated)")
 
     nisn, conf = match_face(emb, threshold=0.60)
     app.logger.info(
         f"Match result: nisn={nisn}, confidence={conf}, total_db={len(db_embeddings)}"
     )
-    if nisn:
-        method = "cosine"
-    else:
-        method = "unknown"
-    return jsonify({"label": nisn, "confidence": conf or 0.0, "method": method}), 200
 
-
-if __name__ == "__main__":
-    load_db_embeddings()
-    app.run(host="0.0.0.0", port=5000)
+    return (
+        jsonify(
+            {
+                "label": nisn,
+                "confidence": conf or 0.0,
+                "method": "cosine" if nisn else "unknown",
+            }
+        ),
+        200,
+    )
