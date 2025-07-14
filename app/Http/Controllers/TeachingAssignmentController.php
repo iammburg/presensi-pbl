@@ -19,9 +19,6 @@ class TeachingAssignmentController extends Controller
         $this->middleware('permission:delete_teacher_subject_assignment', ['only' => ['destroy']]);
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $teachingAssignments = TeachingAssignment::with([
@@ -34,9 +31,6 @@ class TeachingAssignmentController extends Controller
         return view('teaching_assignments.index', compact('teachingAssignments'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $academicYears = AcademicYear::where('is_active', 1)->get();
@@ -52,36 +46,54 @@ class TeachingAssignmentController extends Controller
         ));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        /*         dd($request->all()); */
         $validated = $request->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
-            'class_id'         => 'required|exists:classes,id',
+            'class_id'         => 'required|array|min:1',
+            'class_id.*'       => 'required|exists:classes,id',
             'subject_id'       => 'required|exists:subjects,id',
             'teacher_id'       => 'required|exists:teachers,nip',
         ]);
 
-        TeachingAssignment::create($validated);
+        $duplicateClasses = [];
+
+        foreach ($validated['class_id'] as $classId) {
+            $exists = TeachingAssignment::where('academic_year_id', $validated['academic_year_id'])
+                ->where('class_id', $classId)
+                ->where('subject_id', $validated['subject_id'])
+                ->where('teacher_id', $validated['teacher_id'])
+                ->exists();
+
+            if ($exists) {
+                $duplicateClasses[] = $classId;
+                continue;
+            }
+
+            TeachingAssignment::create([
+                'academic_year_id' => $validated['academic_year_id'],
+                'class_id'         => $classId,
+                'subject_id'       => $validated['subject_id'],
+                'teacher_id'       => $validated['teacher_id'],
+            ]);
+        }
+
+        if (count($duplicateClasses) === count($validated['class_id'])) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Semua data penugasan sudah ada dan tidak disimpan.');
+        }
 
         return redirect()->route('manage-teacher-subject-assignments.index')
             ->with('success', 'Penugasan berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
+
     public function show(TeachingAssignment $teacherAssignment)
     {
         return view('teaching_assignments.show', compact('teacherAssignment'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(TeachingAssignment $teacherAssignment)
     {
         $academicYears = AcademicYear::where('is_active', 1)->get();
@@ -98,27 +110,37 @@ class TeachingAssignmentController extends Controller
         ));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, TeachingAssignment $teacherAssignment)
     {
-        $validated = $request->validate([
-            'academic_year_id' => 'required|exists:academic_years,id',
-            'class_id'         => 'required|exists:classes,id',
-            'subject_id'       => 'required|exists:subjects,id',
-            'teacher_id'       => 'required|exists:teachers,nip',
-        ]);
+    $validated = $request->validate([
+        'academic_year_id' => 'required|exists:academic_years,id',
+        'class_id'         => 'required|exists:classes,id',
+        'subject_id'       => 'required|exists:subjects,id',
+        'teacher_id'       => 'required|exists:teachers,nip',
+    ]);
 
-        $teacherAssignment->update($validated);
+    // Cek duplikat (selain ID yang sedang diedit)
+    $exists = TeachingAssignment::where('academic_year_id', $validated['academic_year_id'])
+        ->where('class_id', $validated['class_id'])
+        ->where('subject_id', $validated['subject_id'])
+        ->where('teacher_id', $validated['teacher_id'])
+        ->where('id', '!=', $teacherAssignment->id) // exclude current
+        ->exists();
 
-        return redirect()->route('manage-teacher-subject-assignments.index')
-            ->with('success', 'Penugasan berhasil diperbarui.');
+    if ($exists) {
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Data penugasan dengan kombinasi yang sama sudah ada.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    $teacherAssignment->update($validated);
+
+    return redirect()->route('manage-teacher-subject-assignments.index')
+        ->with('success', 'Penugasan berhasil diperbarui.');
+    }
+
+
+
     public function destroy(TeachingAssignment $teacherAssignment)
     {
         $teacherAssignment->delete();
