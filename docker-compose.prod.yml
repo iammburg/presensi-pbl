@@ -28,7 +28,7 @@ services:
     depends_on:
       - laravel
     volumes:
-      - ./nginx:/etc/nginx/conf.d
+      - ./laravel.conf:/etc/nginx/conf.d
       - laravel-public:/var/www/public
       - ./storage/app/public:/var/www/storage/app/public
 
