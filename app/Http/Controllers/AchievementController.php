@@ -18,7 +18,10 @@ class AchievementController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('homeroom.teacher')->except(['index', 'show']);
+        $this->middleware('homeroom.teacher')->except(['index', 'show', 'allStudents']);
+
+        // Middleware khusus untuk allStudents yang memperbolehkan guru BK dan admin
+        $this->middleware('role:Guru BK|Admin Sekolah')->only('allStudents');
     }
 
     public function index()
@@ -316,5 +319,53 @@ class AchievementController extends Controller
             ];
         }
         return response()->json($result);
+    }
+
+    /**
+     * Menampilkan daftar semua siswa dengan prestasi
+     */
+    public function allStudents(Request $request)
+    {
+        // Mendapatkan filter dari request
+        $search = $request->search;
+        $classFilter = $request->class;
+
+        // Query dasar untuk mendapatkan siswa dengan prestasi dan join ke assignment & kelas
+        $query = Student::select('students.*')
+            ->selectRaw('COUNT(achievements.id) as achievements_count')
+            ->selectRaw('SUM(achievement_points.points) as total_point')
+            ->join('achievements', 'students.nisn', '=', 'achievements.student_id')
+            ->join('achievement_points', 'achievements.achievement_points_id', '=', 'achievement_points.id')
+            // Join ke assignment terbaru (subquery)
+            ->leftJoin(DB::raw('(
+                SELECT t1.* FROM student_class_assignments t1
+                INNER JOIN (
+                    SELECT student_id, MAX(updated_at) as max_updated
+                    FROM student_class_assignments
+                    GROUP BY student_id
+                ) t2 ON t1.student_id = t2.student_id AND t1.updated_at = t2.max_updated
+            ) as latest_assignment'), 'students.nisn', '=', 'latest_assignment.student_id')
+            ->leftJoin('classes', 'latest_assignment.class_id', '=', 'classes.id')
+            ->where('achievements.validation_status', 'approved')
+            ->groupBy('students.nisn', 'students.name')
+            ->orderByDesc('total_point');
+
+        // Tambahkan filter pencarian jika ada
+        if ($search) {
+            $query->where('students.name', 'like', "%{$search}%");
+        }
+
+        // Tambahkan filter kelas jika ada
+        if ($classFilter) {
+            $query->where('classes.name', $classFilter);
+        }
+
+        // Dapatkan daftar kelas unik untuk dropdown filter
+        $classes = DB::table('classes')->distinct()->pluck('name')->sort()->values();
+
+        // Eksekusi query dengan paginasi
+        $students = $query->paginate(15);
+
+        return view('achievements.all_students', compact('students', 'classes'));
     }
 }

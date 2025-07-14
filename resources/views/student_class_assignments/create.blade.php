@@ -25,6 +25,13 @@
         }
         .table thead th {
             text-align: center;
+            vertical-align: middle;
+        }
+        .dt-center-flex-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
         }
         .table thead th:nth-child(4), /* Kolom Nama */
         .table tbody td:nth-child(4) {
@@ -55,22 +62,32 @@
     background-color: #ffffff;
 }
 
-/* 5. Metode positioning absolut untuk checkbox tetap kita gunakan */
+/* 5. Metode positioning absolut untuk checkbox yang lebih reliable */
 #studentsTable > tbody > tr > td.checkbox-cell {
     position: relative;
     padding: 0 !important; /* Kolom checkbox tidak perlu padding */
+    width: 60px !important; /* Pastikan lebar kolom konsisten */
+    height: 42px !important; /* Pastikan tinggi kolom konsisten */
+    text-align: center;
+    vertical-align: middle;
 }
 .checkbox-container {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
 }
 .checkbox-container .form-check-input {
     margin: 0;
     width: 18px;
     height: 18px;
     cursor: pointer;
+    position: relative;
 }
         /* Panel Kontrol */
         /* Hapus style lama untuk .confirmation-card dan .control-group, ganti dengan ini */
@@ -121,7 +138,7 @@
 .control-item__content { flex-grow: 1; }
 .control-item__label { font-size: 0.8rem; color: #6c757d; margin-bottom: 0.1rem; text-transform: uppercase; letter-spacing: 0.5px; }
 .control-item__value { font-size: 1.1rem; font-weight: 600; color: #212529; transition: color 0.2s ease-in-out; }
-.control-item__sub-label { font-size: 0.8rem; color: #6c757d; margin-top: -2px; 
+.control-item__sub-label { font-size: 0.8rem; color: #6c757d; margin-top: -2px;
 /* Tombol konfirmasi agar lebih serasi */
 }
 
@@ -360,7 +377,12 @@
                 processing: true,
                 serverSide: true,
                 responsive: true,
-                ajax: ajaxUrl,
+                ajax: {
+                    url: ajaxUrl,
+                    error: function(xhr, error, thrown) {
+                        console.error('Error DataTables:', error, thrown);
+                    }
+                },
                 columns: [
                     { data: 'DT_RowIndex', name: 'DT_RowIndex', className: 'text-center', orderable: false, searchable: false, width: '50px' },
                     { data: 'nisn', name: 'nisn', className: 'text-center', width: '100px' },
@@ -375,16 +397,20 @@
                                 return data && data !== '-' ? `<span class="badge-has-class">${data}</span>` : `<span class="badge-no-class">Belum Ada Kelas</span>`;
                             }
                             return data;
-                        }
+                        },
+                        orderable: false // Kolom kelas saat ini tidak bisa diurutkan karena merupakan data yang diproses
                     },
                     {
-                        data: 'nisn', title: 'Pilih', orderable: false, searchable: false, className: 'checkbox-cell', headerClassName: 'dt-center-flex-header', width: '60px',
+                        data: 'nisn', title: 'Pilih', orderable: false, searchable: false, className: 'checkbox-cell text-center', headerClassName: 'dt-center-flex-header', width: '60px',
                         render: function(data) {
                            return `<div class="checkbox-container"><input type="checkbox" class="row-select form-check-input" value="${data}"></div>`;
+                        },
+                        createdCell: function(td, cellData, rowData, row, col) {
+                            $(td).css('height', '42px');
                         }
                     }
                 ],
-                order: [ [6, 'asc'], [3, 'asc'] ],
+                order: [ [3, 'asc'] ], // Default sorting by name
                 language: {
                     processing: '<i class="fa fa-spinner fa-spin fa-2x fa-fw"></i><span class="sr-only">Loading...</span>',
                     search: "Cari Siswa:",
@@ -415,7 +441,7 @@
                 } else {
                     $('#info-box-selected').removeClass('is-active');
                 }
-                
+
                 // Fungsi untuk mengaktifkan/menonaktifkan tombol konfirmasi tetap dipanggil
                 updateConfirmButton();
             }
@@ -470,7 +496,7 @@
                     Swal.fire('Peringatan', 'Pilih minimal satu siswa untuk dipindahkan!', 'warning');
                     return;
                 }
-                
+
                 Swal.fire({
                     title: 'Konfirmasi Penempatan',
                     html: `<div style="text-align: left; padding: 10px;">

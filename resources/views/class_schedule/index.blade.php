@@ -85,12 +85,12 @@
                                                         class="btn btn-sm btn-warning">
                                                         <i class="fas fa-edit"></i> Edit
                                                     </a>
-                                                    <form action="{{ route('manage-schedules.destroy', $schedule->id) }}"
-                                                        method="POST" class="d-inline-block"
-                                                        onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                                    <form id="delete-form-{{ $schedule->id }}" action="{{ route('manage-schedules.destroy', $schedule->id) }}"
+                                                        method="POST" class="d-inline-block">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                        <button type="button" class="btn btn-sm btn-danger"
+                                                            onclick="confirmDelete({{ $schedule->id }})">
                                                             <i class="fas fa-trash-alt"></i> Hapus
                                                         </button>
                                                     </form>
@@ -125,7 +125,7 @@
     <script src="{{ asset('plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
 
     <script>
-        $(function() {
+        $(function () {
             $('#scheduleTable').DataTable({
                 responsive: true,
                 autoWidth: false,
@@ -134,5 +134,26 @@
                 }
             });
         });
+    </script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Yakin ingin menghapus?',
+                text: "Data yang dihapus tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
+        }
     </script>
 @endpush

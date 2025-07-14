@@ -11,9 +11,11 @@ app = Flask(__name__)
 CORS(app)
 
 
-STUDENT_PHOTOS_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "../storage/app/public/student-photos")
-)
+# STUDENT_PHOTOS_DIR = os.path.abspath(
+#     os.path.join(os.path.dirname(__file__), "../storage/app/public/student-photos")
+# )
+
+STUDENT_PHOTOS_DIR = os.environ.get("STUDENT_PHOTOS_DIR", "/app/student-photos")
 
 # if not os.path.exists(STUDENT_PHOTOS_DIR):
 #     app.logger.error("Directory %s does not exist.", STUDENT_PHOTOS_DIR)

@@ -99,16 +99,21 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
                 throw new \Exception('Format tanggal lahir tidak valid');
             }
 
+            // Konversi otomatis ke string untuk nip, dapodik_number, dan phone
+            $nipValue = isset($row[$nipKey]) ? (string)$row[$nipKey] : '';
+            $dapodikValue = ($dapodikKey && isset($row[$dapodikKey])) ? (string)$row[$dapodikKey] : null;
+            $phoneValue = isset($row[$teleponKey]) ? (string)$row[$teleponKey] : '';
+
             // Format NIP
-            $nip = $this->formatNIP($row[$nipKey]);
+            $nip = $this->formatNIP($nipValue);
 
             // Mulai transaksi database
-            return DB::transaction(function () use ($row, $nip, $namaKey, $emailKey, $teleponKey, $alamatKey, $gender, $birthDate, $dapodikKey) {
+            return DB::transaction(function () use ($row, $nip, $namaKey, $emailKey, $alamatKey, $gender, $birthDate, $dapodikKey, $dapodikValue, $phoneValue) {
                 // Buat user account
                 $user = User::create([
                     'name' => $row[$namaKey],
                     'email' => $row[$emailKey],
-                    'password' => Hash::make($nip . date('dmY', strtotime($birthDate))) // Password berisi NIP(1234567890) dan tanggal lahir(1990-01-01): 1234567890010111990
+                    'password' => Hash::make("guru123") // Password default
                 ]);
 
                 try {
@@ -121,9 +126,9 @@ class TeachersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
                 // Buat data guru
                 $teacher = new Teacher([
                     'nip' => $nip,
-                    'dapodik_number' => $dapodikKey ? substr($row[$dapodikKey], 0, 16) : null,
+                    'dapodik_number' => $dapodikValue ? substr($dapodikValue, 0, 16) : null,
                     'name' => $row[$namaKey],
-                    'phone' => $row[$teleponKey],
+                    'phone' => $phoneValue,
                     'address' => $row[$alamatKey],
                     'gender' => $gender,
                     'birth_date' => $birthDate,

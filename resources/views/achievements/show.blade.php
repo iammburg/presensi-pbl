@@ -57,7 +57,34 @@
                                     @if($achievement->evidence)
                                     <tr>
                                         <th>Bukti</th>
-                                        <td><a href="{{ asset('storage/' . $achievement->evidence) }}" target="_blank" class="btn btn-info btn-sm">Lihat Bukti</a></td>
+                                        <td>
+                                            <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#evidenceModal-{{ $achievement->id }}">Lihat Bukti</button>
+                                            <!-- Modal Bukti Prestasi -->
+                                            <div class="modal fade" id="evidenceModal-{{ $achievement->id }}" tabindex="-1" role="dialog" aria-labelledby="evidenceModalLabel-{{ $achievement->id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="evidenceModalLabel-{{ $achievement->id }}">Bukti Prestasi</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body text-center">
+                                                            <div class="mb-3"></div>
+                                                            <div class="evidence-container" style="max-height: 70vh; overflow: auto;">
+                                                                <img src="{{ asset('storage/' . $achievement->evidence) }}" alt="Bukti Prestasi" class="img-fluid" style="max-height:60vh; opacity:0; transition:opacity 0.2s;" />
+                                                            </div>
+                                                            <div class="mt-3"></div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <a href="{{ asset('storage/' . $achievement->evidence) }}" target="_blank" class="btn btn-primary">Buka di Tab Baru</a>
+                                                            <a href="{{ asset('storage/' . $achievement->evidence) }}" download class="btn btn-success">Download</a>
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
                                     </tr>
                                     @endif
                                 </table>
@@ -159,4 +186,48 @@
         </div>
     </div>
 </div>
+@push('js')
+<script>
+$(document).ready(function() {
+    // Handle modal bukti prestasi
+    $('[id^="evidenceModal-"]').on('show.bs.modal', function() {
+        var modal = $(this);
+        var img = modal.find('img');
+        // Show loading state
+        modal.find('.evidence-container').append('<div class="loading-overlay text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Memuat gambar...</div>');
+        // Hide loading when image loaded
+        img.on('load', function() {
+            modal.find('.loading-overlay').fadeOut(300, function() { $(this).remove(); });
+            $(this).css('opacity', '1');
+        });
+    });
+    // Handle image click untuk zoom
+    $('[id^="evidenceModal-"] img').on('click', function() {
+        var src = $(this).attr('src');
+        var alt = $(this).attr('alt');
+        // Create zoom modal
+        var zoomModal = `
+            <div class="modal fade" id="zoomModal" tabindex="-1" role="dialog" style="z-index: 1060;">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body text-center p-0">
+                            <img src="${src}" alt="${alt}" class="img-fluid" style="cursor:zoom-out; max-height:80vh;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        // Remove existing zoom modal
+        $('#zoomModal').remove();
+        // Add new zoom modal
+        $('body').append(zoomModal);
+        $('#zoomModal').modal('show');
+        // Remove modal when closed
+        $('#zoomModal').on('hidden.bs.modal', function() { $(this).remove(); });
+        // Close zoom on image click
+        $('#zoomModal img').on('click', function() { $('#zoomModal').modal('hide'); });
+    });
+});
+</script>
+@endpush
 @endsection

@@ -3,55 +3,74 @@
 @section('title', 'Manajemen Data Siswa')
 
 @section('content')
-    <div class="container-fluid px-4" style="font-family: 'Roboto', sans-serif">
-        <h1 class="mt-4" style="font-weight: bold; font-size: 2rem; color: #183C70;">Manajemen Data Siswa</h1>
-
-        <div class="card shadow-sm mt-4">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0" style="font-weight: 600; color: #183C70;">Kelola Data Siswa</h5>
-                    @can('create_student')
-                        <div class="dropdown">
-                            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="tambahDataDropdown"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-plus"></i> Tambah Data
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-right shadow-lg rounded border-0" style="min-width: 230px;"
-                                aria-labelledby="tambahDataDropdown">
-                                <a class="dropdown-item d-flex align-items-center py-2"
-                                    href="{{ route('manage-students.create') }}">
-                                    <i class="fas fa-keyboard text-primary mr-3"></i> <span>Isi Manual</span>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center py-2" href="#" id="importExcel">
-                                    <i class="fas fa-file-excel text-success mr-3"></i> <span>Import Excel</span>
-                                </a>
-                                <div class="dropdown-divider my-1"></div>
-                                <a class="dropdown-item d-flex align-items-center py-2"
-                                    href="{{ route('manage-students.template') }}">
-                                    <i class="fas fa-download text-info mr-3"></i> <span>Download Template Excel</span>
-                                </a>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="m-0" style="font-weight: 400;">MANAJEMEN DATA SISWA</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        {{-- Tambahkan breadcrumb jika diperlukan --}}
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-primary card-outline" style="border-top: 3px solid #009cf3;">
+                        <div class="card-header d-flex align-items-center">
+                            <span class="card-title m-0 flex-grow-1" style="font-weight: 400;">Kelola Data Siswa</span>
+                            <div class="card-tools ms-auto">
+                                @can('create_student')
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="tambahDataDropdown"
+                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-plus"></i> Tambah Data
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right shadow-lg rounded border-0" style="min-width: 230px;"
+                                            aria-labelledby="tambahDataDropdown">
+                                            <a class="dropdown-item d-flex align-items-center py-2"
+                                                href="{{ route('manage-students.create') }}">
+                                                <i class="fas fa-keyboard text-primary mr-3"></i> <span>Isi Manual</span>
+                                            </a>
+                                            <a class="dropdown-item d-flex align-items-center py-2" href="#" id="importExcel">
+                                                <i class="fas fa-file-excel text-success mr-3"></i> <span>Import Excel</span>
+                                            </a>
+                                            <div class="dropdown-divider my-1"></div>
+                                            <a class="dropdown-item d-flex align-items-center py-2"
+                                                href="{{ route('manage-students.template') }}">
+                                                <i class="fas fa-download text-info mr-3"></i> <span>Download Template Excel</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endcan
                             </div>
                         </div>
-                    @endcan
-                </div>
-
-                <div class="table-responsive rounded">
-                    <table id="studentsTable" class="table table-bordered table-sm"
-                        style="border-radius: 5px; overflow: hidden; font-size: 0.85rem;">
-                        <thead style="background-color: #009cf3; color: white">
-                            <tr>
-                                <th>No.</th>
-                                <th>NISN</th>
-                                <th>NIS</th> {{-- Tambahan --}}
-                                <th>Nama</th>
-                                <th>Alamat</th>
-                                <th>Telepon</th>
-                                <th>Jenis Kelamin</th>
-                                <th>Tahun Masuk</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                    </table>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="studentsTable" class="table table-bordered table-striped">
+                                    <thead class="bg-tertiary text-white" style="border-top: none !important;">
+                                        <tr>
+                                            <th>No.</th>
+                                            <th>NISN</th>
+                                            <th>NIS</th>
+                                            <th>Nama</th>
+                                            <th>Alamat</th>
+                                            <th>Telepon</th>
+                                            <th>Jenis Kelamin</th>
+                                            <th>Tahun Masuk</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    {{-- tbody tetap diisi oleh DataTables --}}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -110,123 +129,68 @@
     <link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
+        body, .dataTables_wrapper, .dataTables_wrapper label, .dataTables_wrapper input, .dataTables_wrapper select, .dataTables_info, .dataTables_length, .dataTables_filter, .dataTables_paginate, .paginate_button {
+            font-family: 'Roboto', Arial, sans-serif !important;
+            font-size: 1rem !important;
         }
-
-        .table thead th,
-        .table tbody td {
-            vertical-align: middle;
-            text-align: left;
+        .content-header h4, .card-title, h3, h4, h5 {
+            color: #222 !important;
+            font-family: 'Roboto', Arial, sans-serif !important;
+            font-weight: 400 !important;
+            letter-spacing: 0.01em;
         }
-
-        .table-sm th,
-        .table-sm td {
-            padding: 0.3rem;
+        #studentsTable thead th {
+            font-weight: 700;
+            font-size: 1rem;
         }
-
-        .btn-primary {
-            background-color: #1777e5;
-            border: none;
+        #studentsTable thead {
+            border-top: none !important;
         }
-
-        .btn-primary:hover {
-            background-color: #1266c4;
+        #studentsTable tbody td {
+            font-size: 1rem;
+            color: #495057;
         }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            padding: 0.2rem 0.4rem;
-            margin-left: 2px;
-            background-color: #f4f4f4;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            color: #1777e5 !important;
-            font-size: 0.75rem;
+        .dataTables_wrapper .dataTables_length label,
+        .dataTables_wrapper .dataTables_filter label {
+            color: #222 !important;
+            font-weight: 400;
         }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background-color: #1777e5 !important;
-            color: white !important;
-            border: 1px solid #1777e5;
-            font-size: 0.75rem;
+        .dataTables_wrapper .dataTables_info {
+            color: #222 !important;
         }
-
-        .dataTables_wrapper .dataTables_paginate {
-            margin-top: 0.5rem;
-            display: flex;
-            justify-content: end;
-            align-items: center;
-            font-size: 0.75rem;
+        .dataTables_wrapper .paginate_button {
+            color: #222 !important;
         }
-
-        .dataTables_info {
-            color: #1777e5;
-            font-size: 0.90rem;
-            margin-top: 0.5rem;
+        .dataTables_wrapper .paginate_button.current {
+            background: #009cf3 !important;
+            color: #fff !important;
         }
-
-        .dropdown-menu {
-            min-width: 100px;
-            z-index: 1050 !important;
+        /* Tambahan agar hover dropdown identik dengan teachers */
+        .dropdown-menu a.dropdown-item {
+            font-size: 0.95rem;
+            padding: 10px 18px;
         }
-
-        .dropdown-menu a {
-            font-size: 0.85rem;
-        }
-
-        .dataTables_length label {
-            font-weight: 500;
-            color: #1777e5;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .dataTables_length select {
-            min-width: 50px;
-            margin: 0 0.3rem;
-            padding: 0.3rem 0.5rem;
-            font-size: 0.85rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: #fff;
-            color: #1777e5;
-            appearance: none;
-        }
-
-        .dataTables_length select:focus {
-            outline: none;
-            border-color: #1777e5;
-            box-shadow: 0 0 0 0.1rem rgba(23, 119, 229, 0.25);
-        }
-
-        .dropdown-menu a:hover {
+        .dropdown-menu a.dropdown-item:hover {
             background-color: #f5faff;
             color: #0d6efd;
         }
-
         .dropdown-item i {
             width: 20px;
             text-align: center;
+            margin-right: 0.75rem;
         }
-
-        #studentsTable tbody tr:nth-child(odd) {
-            background-color: #f4f4f4;
+        .dropdown-divider {
+            margin: 0.5rem 0;
         }
-
-        #studentsTable tbody tr:nth-child(even) {
-            background-color: #ffffff;
+        .dropdown-item .text-primary {
+            color: #1777e5 !important;
         }
-
-        #studentDetailModal {
-            font-family: 'Roboto', sans-serif;
+        .dropdown-item .text-success {
+            color: #28a745 !important;
         }
-
-        .modal-title {
-            color: #183b70;
-            font-weight: bold;
+        .dropdown-item .text-info {
+            color: #17a2b8 !important;
         }
     </style>
 @endpush

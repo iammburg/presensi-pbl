@@ -25,12 +25,8 @@ public function create(Request $request)
 
         return DataTables::of($students)
             ->addIndexColumn()
-            // kolom‐kolom dasar
-            ->addColumn('nisn',       fn($s) => $s->nisn)
-            ->addColumn('nis',        fn($s) => $s->nis)
-            ->addColumn('name',       fn($s) => $s->name)
-            ->addColumn('gender',     fn($s) => $s->gender === 'L' ? 'Laki-laki' : 'Perempuan')
-            ->addColumn('enter_year', fn($s) => $s->enter_year)
+            // Tidak perlu menambahkan kolom dasar karena DataTables otomatis memetakan kolom yang ada
+            ->editColumn('gender', fn($s) => $s->gender === 'L' ? 'Laki-laki' : 'Perempuan')
             // kolom kelas: cek currentAssignment
             ->addColumn('class_name', function($s) {
                 if (! $s->currentAssignment || ! $s->currentAssignment->schoolClass) {
@@ -38,6 +34,16 @@ public function create(Request $request)
                 }
                 $c = $s->currentAssignment->schoolClass;
                 return "{$c->name} {$c->parallel_name}";
+            })
+            // Menangani pencarian custom untuk gender
+            ->filterColumn('gender', function($query, $keyword) {
+                if (stripos('laki', $keyword) !== false || stripos('pria', $keyword) !== false) {
+                    $query->where('gender', 'L');
+                } else if (stripos('perempuan', $keyword) !== false || stripos('wanita', $keyword) !== false) {
+                    $query->where('gender', 'P');
+                } else {
+                    $query->where('gender', 'like', "%$keyword%");
+                }
             })
             ->make(true);
     }
@@ -56,24 +62,32 @@ public function create(Request $request)
     }
 
     if ($request->ajax()) {
-        // Logika DataTables untuk siswa
-        $students = Student::with('currentAssignment.schoolClass'); //
+        // Menggunakan query builder untuk fleksibilitas sorting dan searching
+        $query = Student::query()->with('currentAssignment.schoolClass');
 
-        return DataTables::of($students)
+        return DataTables::of($query)
             ->addIndexColumn()
-            ->addColumn('nisn',       fn($s) => $s->nisn) //
-            ->addColumn('nis',        fn($s) => $s->nis) //
-            ->addColumn('name',       fn($s) => $s->name) //
-            ->addColumn('gender',     fn($s) => $s->gender === 'L' ? 'Laki-laki' : 'Perempuan') //
-            ->addColumn('enter_year', fn($s) => $s->enter_year) //
-            ->addColumn('class_name', function($s) { //
-                if ($s->currentAssignment && $s->currentAssignment->schoolClass) { //
-                    $c = $s->currentAssignment->schoolClass; //
-                    return "{$c->name} {$c->parallel_name}"; //
+            ->addColumn('class_name', function($s) {
+                if ($s->currentAssignment && $s->currentAssignment->schoolClass) {
+                    $c = $s->currentAssignment->schoolClass;
+                    return "{$c->name} {$c->parallel_name}";
                 }
-                return '-'; //
+                return '-';
             })
-            ->make(true); //
+            ->filterColumn('gender', function($query, $keyword) {
+                // Pencarian khusus untuk gender (L/P menjadi Laki-laki/Perempuan)
+                if (stripos('laki', $keyword) !== false || stripos('pria', $keyword) !== false) {
+                    $query->where('gender', 'L');
+                } else if (stripos('perempuan', $keyword) !== false || stripos('wanita', $keyword) !== false) {
+                    $query->where('gender', 'P');
+                } else {
+                    $query->where('gender', 'like', "%$keyword%");
+                }
+            })
+            ->editColumn('gender', function($s) {
+                return $s->gender === 'L' ? 'Laki-laki' : 'Perempuan';
+            })
+            ->make(true);
     }
 
     // Menggunakan view 'student_class_assignments.create'
