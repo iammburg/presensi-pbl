@@ -66,9 +66,20 @@
                             @endif
 
                             <div class="form-group mb-3">
+                                <label for="class_autocomplete">Pilih Kelas <span class="text-danger">*</span></label>
+                                <input type="text" id="class_autocomplete" class="form-control" placeholder="Ketik nama kelas..." autocomplete="off" required>
+                                <input type="hidden" name="class_id" id="class_id" value="{{ old('class_id') }}">
+                                @error('class_id')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+
+                            <div class="form-group mb-3">
                                 {{-- Tanda * tetap text-danger untuk menandakan wajib --}}
                                 <label for="student_id">Siswa <span class="text-danger">*</span></label>
-                                <input type="text" id="student_autocomplete" class="form-control" placeholder="Ketik nama siswa..." autocomplete="off" required>
+                                <input type="text" id="student_autocomplete" class="form-control" placeholder="Ketik nama siswa..." autocomplete="off" required disabled>
                                 <input type="hidden" name="student_id" id="student_id" value="{{ old('student_id') }}">
                                 @error('student_id')
                                     <span class="invalid-feedback" role="alert">
@@ -246,17 +257,38 @@
     });
 
     $(function() {
-        // Autocomplete siswa
+        // Autocomplete kelas
+        $("#class_autocomplete").autocomplete({
+            source: "{{ route('autocomplete.classes') }}",
+            minLength: 0,
+            select: function(event, ui) {
+                $('#class_id').val(ui.item.id);
+                $('#class_autocomplete').val(ui.item.value);
+                // Enable student field
+                $('#student_autocomplete').prop('disabled', false).val('');
+                $('#student_id').val('');
+            }
+        }).on('focus', function () {
+            $(this).autocomplete("search", "");
+        });
+        // Autocomplete siswa berdasarkan kelas
         $("#student_autocomplete").autocomplete({
-            source: "{{ route('autocomplete.siswa') }}",
-            minLength: 0, // ubah dari 2 ke 0
+            source: function(request, response) {
+                var classId = $('#class_id').val();
+                if (!classId) return response([]);
+                $.getJSON("{{ route('autocomplete.siswa-by-class') }}", {
+                    term: request.term,
+                    class_id: classId
+                }, response);
+            },
+            minLength: 0,
             select: function(event, ui) {
                 $('#student_id').val(ui.item.id);
                 $('#student_autocomplete').val(ui.item.value);
             }
         }).on('focus', function () {
-            // Tampilkan semua siswa saat field difokuskan
-            $(this).autocomplete("search", "");
+            var classId = $('#class_id').val();
+            if (classId) $(this).autocomplete("search", "");
         });
         // Autocomplete jenis pelanggaran
         $("#violation_point_autocomplete").autocomplete({

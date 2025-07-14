@@ -49,7 +49,7 @@ class Student extends Model
     public function currentAssignment()
     {
          return $this->hasOne(StudentClassAssignment::class, 'student_id', 'nisn') // Ganti 'nisn' dengan primary key siswa jika berbeda
-                    ->latestOfMany('updated_at'); 
+                    ->latestOfMany('updated_at');
     }
 
     /**
@@ -59,6 +59,22 @@ class Student extends Model
     {
         // Ambil dari currentAssignment jika ada, relasi ke SchoolClass
         return $this->currentAssignment ? $this->currentAssignment->schoolClass() : null;
+    }
+
+    /**
+     * Relasi ke prestasi siswa
+     */
+    public function achievements()
+    {
+        return $this->hasMany(Achievement::class, 'student_id', 'nisn');
+    }
+
+    /**
+     * Relasi ke pelanggaran siswa
+     */
+    public function violations()
+    {
+        return $this->hasMany(Violation::class, 'student_id', 'nisn');
     }
 
     /**

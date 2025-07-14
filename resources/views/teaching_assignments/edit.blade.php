@@ -135,15 +135,19 @@
 
                             <div class="form-group">
                                 <label for="class_id">Kelas</label>
-                                <select name="class_id" id="class_id" class="form-control" required>
-                                    <option value="">-- Pilih Kelas --</option>
+                                <select name="class_id" id="class-select" class="form-control select2 @error('class_id') is-invalid @enderror" required data-placeholder="-- Pilih Kelas --">
+                                    <option></option> {{-- Placeholder kosong agar Select2 bisa pakai data-placeholder --}}
                                     @foreach($classes as $class)
-                                        <option value="{{ $class->id }}" {{ $class->id == $teacherAssignment->class_id ? 'selected' : '' }}>
-                                            {{ $class->name }} @if($class->parallel_name) - {{ $class->parallel_name }}@endif
+                                        <option value="{{ $class->id }}" {{ old('class_id', $teacherAssignment->class_id) == $class->id ? 'selected' : '' }}>
+                                            {{ $class->name }}{{ $class->parallel_name ? ' - ' . $class->parallel_name : '' }}
                                         </option>
                                     @endforeach
                                 </select>
+                                @error('class_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
+
 
                             <div class="form-group">
                                 <label>Mata Pelajaran</label>
@@ -197,7 +201,6 @@
 @endsection
 
 @push('js')
-<!-- Jika butuh JS khusus -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function () {
@@ -206,7 +209,12 @@ $(document).ready(function () {
         allowClear: true,
         width: '100%'
     });
+
+    $('#class-select').select2({
+        placeholder: $('#class-select').data('placeholder'),
+        allowClear: true,
+        width: '100%'
+    });
 });
 </script>
-
 @endpush

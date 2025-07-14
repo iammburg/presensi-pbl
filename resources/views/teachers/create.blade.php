@@ -140,5 +140,19 @@
         $(function() {
             bsCustomFileInput.init();
         });
+        $('#photo').on('change', function() {
+            const file = this.files[0];
+            if (file && file.size > 2 * 1024 * 1024) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'File terlalu besar',
+                    text: 'Ukuran file maksimal 2MB!',
+                    timer: 2500,
+                    showConfirmButton: false
+                });
+                $(this).val('');
+                $(this).next('.custom-file-label').html('Pilih file (maks 2Mb)');
+            }
+        });
     </script>
 @endpush
