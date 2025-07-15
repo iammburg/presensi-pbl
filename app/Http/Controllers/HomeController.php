@@ -130,7 +130,22 @@ class HomeController extends Controller
                     ];
                 });
 
-            return view('home', compact('topAchievementStudents', 'topViolationStudents'));
+            // Hitung total kasus prestasi dan pelanggaran (bukan point)
+            $totalAchievementCases = \App\Models\Student::leftJoin('achievements', function ($join) {
+                $join->on('achievements.student_id', '=', 'students.nisn')
+                    ->where('achievements.validation_status', 'approved');
+            })->whereNotNull('achievements.id')->count();
+
+            $totalViolationCases = \App\Models\Student::leftJoin('violations', function ($join) {
+                $join->on('violations.student_id', '=', 'students.nisn')
+                    ->where('violations.validation_status', 'approved');
+            })->whereNotNull('violations.id')->count();
+
+            $totalCases = $totalAchievementCases + $totalViolationCases;
+            $achievementPercentage = $totalCases > 0 ? round(($totalAchievementCases / $totalCases) * 100) : 0;
+            $violationPercentage = $totalCases > 0 ? round(($totalViolationCases / $totalCases) * 100) : 0;
+
+            return view('home', compact('topAchievementStudents', 'topViolationStudents', 'achievementPercentage', 'violationPercentage'));
         } else if (Auth::user()->hasRole('Siswa')) {
             $user = Auth::user();
             $student = Student::where('user_id', $user->id)->first();
