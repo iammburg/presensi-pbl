@@ -84,35 +84,43 @@
                     minute: '2-digit'
                 });
 
-            function updateCountdown() {
-                const now = new Date();
-                let diff = graceDeadline - now;
-                let text;
-                if (diff > 0) {
-                    const m = Math.floor(diff / 60000);
-                    const s = Math.floor((diff % 60000) / 1000);
-                    text = `Sisa waktu on–time: ${m}m ${s}s`;
-                } else if (now < endDeadline) {
-                    diff = endDeadline - now;
-                    const m = Math.floor(diff / 60000);
-                    const s = Math.floor((diff % 60000) / 1000);
-                    text = `Masih bisa presensi selama ${m}m ${s}s`;
-                } else {
-                    text = `Waktu presensi telah berakhir`;
-                    clearInterval(countdownInterval);
-                    btn.disabled = true;
-                }
-                document.getElementById('countdown').textContent = text;
-            }
+            // function updateCountdown() {
+            //     const now = new Date();
+            //     let diff = graceDeadline - now;
+            //     let text;
+            //     if (diff > 0) {
+            //         const m = Math.floor(diff / 60000);
+            //         const s = Math.floor((diff % 60000) / 1000);
+            //         text = `Sisa waktu on–time: ${m}m ${s}s`;
+            //     } else if (now < endDeadline) {
+            //         diff = endDeadline - now;
+            //         const m = Math.floor(diff / 60000);
+            //         const s = Math.floor((diff % 60000) / 1000);
+            //         text = `Masih bisa presensi selama ${m}m ${s}s`;
+            //     } else {
+            //         text = `Waktu presensi telah berakhir`;
+            //         clearInterval(countdownInterval);
+            //         btn.disabled = true;
+            //     }
+            //     document.getElementById('countdown').textContent = text;
+            // }
 
-            const countdownInterval = setInterval(updateCountdown, 1000);
-            updateCountdown();
+            // const countdownInterval = setInterval(updateCountdown, 1000);
+            // updateCountdown();
         });
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const scheduleIds = @json($scheduleIds);
-            // console.log('Schedule IDs:', scheduleIds);
+            console.log('Schedule IDs:', scheduleIds);
+            console.log('First Schedule ID:', scheduleIds[0]);
+
+            // Verifikasi apakah scheduleIds tidak kosong
+            if (!scheduleIds || scheduleIds.length === 0) {
+                showToast('Error: Tidak ada jadwal yang ditemukan', 'danger');
+                return;
+            }
+
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
             const btnScan = document.getElementById('btn-scan');
@@ -142,7 +150,7 @@
 
                         try {
                             const resp1 = await fetch(
-                                'http://103.196.154.75:5000//classify', {
+                                'http://localhost:5000//classify', {
                                     method: 'POST',
                                     body: form
                                 });
@@ -175,17 +183,22 @@
                                                     10)
                                         })
                                     });
-                                // console.log('Response Laravel status:', resp2
-                                //     .status);
-
+                                console.log('Response Laravel status:', resp2
+                                    .status);
                                 const scan2 = await resp2.json();
-                                // console.log('Response Laravel body:', scan2);
+                                console.log('Response Laravel body:', scan2);
 
                                 // Menampilkan pesan berdasarkan respons dari Laravel
                                 if (resp2.ok) {
                                     showToast(scan2.message, 'success');
                                 } else if (resp2.status === 409) {
                                     showToast(scan2.message, 'success');
+                                } else if (resp2.status === 422) {
+                                    // Tambahkan handling untuk validation error
+                                    showToast('Validasi gagal: ' + scan2.message,
+                                        'danger');
+                                    console.error('Validation errors:', scan2
+                                        .errors);
                                 } else if (resp2.status === 500) {
                                     showToast(scan2.message, 'danger');
                                 } else {

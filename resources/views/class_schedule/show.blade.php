@@ -56,7 +56,7 @@
             @foreach ($days as $day)
                 <div class="card mb-4 shadow-sm" style="font-family: 'Poppins', sans-serif;">
                     <div class="card-header text-white d-flex justify-content-between align-items-center"
-                        style="background-color: #1D3F72; padding: 12px 20px;">
+                        style="background-color: #009df2; padding: 12px 20px;">
                         <h6 class="mb-0 fw-bold">{{ $day }}</h6>
                     </div>
                     <div class="card-body p-0">
@@ -104,7 +104,7 @@
                                                                 JAM ISTIRAHAT
                                                             </span>
                                                         @else
-                                                            <span class="badge bg-primary px-3 py-2"
+                                                            <span class="badge bg-tertiary px-3 py-2"
                                                                 style="font-weight: normal;">
                                                                 JAM PELAJARAN
                                                             </span>
@@ -165,8 +165,8 @@
                                                                     JAM ISTIRAHAT
                                                                 </span>
                                                             @else
-                                                                <span class="badge bg-primary px-3 py-2"
-                                                                    style="font-weight: normal;">
+                                                                <span class="badge bg-tertiary px-3 py-2"
+                                                                    style="font-weight: normal; color: white;">
                                                                     JAM PELAJARAN
                                                                 </span>
                                                             @endif

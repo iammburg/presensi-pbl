@@ -85,7 +85,8 @@
                                                         class="btn btn-sm btn-warning">
                                                         <i class="fas fa-edit"></i> Edit
                                                     </a>
-                                                    <form id="delete-form-{{ $schedule->id }}" action="{{ route('manage-schedules.destroy', $schedule->id) }}"
+                                                    <form id="delete-form-{{ $schedule->id }}"
+                                                        action="{{ route('manage-schedules.destroy', $schedule->id) }}"
                                                         method="POST" class="d-inline-block">
                                                         @csrf
                                                         @method('DELETE')
@@ -125,7 +126,7 @@
     <script src="{{ asset('plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
 
     <script>
-        $(function () {
+        $(function() {
             $('#scheduleTable').DataTable({
                 responsive: true,
                 autoWidth: false,

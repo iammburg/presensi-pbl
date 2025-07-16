@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Student;
 use Carbon\Carbon;
 use Yajra\DataTables\DataTables;
+use Illuminate\Support\Arr;
 
 class AttendanceController extends Controller
 {
@@ -97,6 +98,12 @@ class AttendanceController extends Controller
 
         $scheduleIds = $schedules->pluck('id');
 
+        Log::info('Create method data', [
+            'class_id' => $request->class_id,
+            'schedules_count' => $schedules->count(),
+            'schedule_ids' => $scheduleIds->toArray()
+        ]);
+
         if ($schedules->isEmpty()) {
             abort(404, 'Jadwal tidak ditemukan untuk kelas ini.');
         }
@@ -126,17 +133,21 @@ class AttendanceController extends Controller
      */
     public function store(Request $request)
     {
-        // Log::info('AttendanceController@store dipanggil', $request->all());
-
-        $scan = $request->validate([
-            'class_schedule_id' => 'required|exists:class_schedules,id',
-            'nisn'              => 'required|exists:students,nisn',
-            'meeting_date'      => 'required|date',
+        // Tambahkan debugging
+        Log::info('AttendanceController@store dipanggil', [
+            'request_data' => $request->all(),
+            'headers' => $request->headers->all()
         ]);
 
-        // Log::info('scan setelah validasi', $scan);
-
         try {
+            $scan = $request->validate([
+                'class_schedule_id' => 'required|exists:class_schedules,id',
+                'nisn'              => 'required|exists:students,nisn',
+                'meeting_date'      => 'required|date',
+            ]);
+
+            Log::info('Validasi berhasil', $scan);
+
             $exists = Attendance::where('class_schedule_id', $scan['class_schedule_id'])
                 ->where('student_id', $scan['nisn'])
                 ->where('meeting_date', $scan['meeting_date'])
@@ -172,6 +183,16 @@ class AttendanceController extends Controller
                 'success' => true,
                 'message' => "Presensi {$attendance->student->name} berhasil dicatat.",
             ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'message' => 'Data tidak valid: ' . implode(', ', Arr::flatten($e->errors())),
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             Log::error('Error saat menyimpan presensi', [
                 'error_message' => $e->getMessage(),
@@ -180,7 +201,7 @@ class AttendanceController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan input.',
+                'message' => 'Terjadi kesalahan input: ' . $e->getMessage(),
             ], 500);
         }
     }

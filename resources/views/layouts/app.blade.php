@@ -7,6 +7,7 @@
     <title>
         @yield('title')
     </title>
+    <link rel="icon" type="image/png" href="{{ asset('dist/img/round-logo.png') }}">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
@@ -16,9 +17,6 @@
 
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Memuat Bootstrap JavaScript -->
-
-
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed font-primary">
