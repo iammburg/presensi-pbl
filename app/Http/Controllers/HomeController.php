@@ -191,9 +191,12 @@ class HomeController extends Controller
                 ->selectRaw('MONTH(meeting_date) as month, COUNT(*) as total')
                 ->groupBy('month')->orderBy('month')->pluck('total', 'month');
             // Dummy data jika belum ada data kehadiran
-            $attendance = $attendance->isEmpty() ? collect([1 => 10, 2 => 12, 3 => 8, 4 => 15, 5 => 9, 6 => 11, 7 => 13, 8 => 10, 9 => 14, 10 => 12, 11 => 13, 12 => 9]) : $attendance;
+            // $attendance = $attendance->isEmpty() ? collect([1 => 10, 2 => 12, 3 => 8, 4 => 15, 5 => 9, 6 => 11, 7 => 13, 8 => 10, 9 => 14, 10 => 12, 11 => 13, 12 => 9]) : $attendance;
 
-            return view('home', compact('pieData', 'prestasiList', 'pelanggaranList', 'attendance'));
+            // Default values for achievementPercentage and violationPercentage
+            $achievementPercentage = 0;
+            $violationPercentage = 0;
+            return view('home', compact('pieData', 'prestasiList', 'pelanggaranList', 'attendance', 'achievementPercentage', 'violationPercentage'));
         } else if (Auth::user()->hasRole('Guru')) {
             #// Dashboard Guru
             $selectedDate = request()->date ?? Carbon::today()->toDateString();

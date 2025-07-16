@@ -645,8 +645,8 @@
                         $totalPoints = $totalAchievementPoints + $totalViolationPoints;
 
                         // Hitung persentase
-                        $achievementPercentage = $achievementPercentage;
-                        $violationPercentage = $violationPercentage;
+                        $achievementPercentage = $totalPoints > 0 ? round(($totalAchievementPoints / $totalPoints) * 100) : 0;
+                        $violationPercentage = $totalPoints > 0 ? round(($totalViolationPoints / $totalPoints) * 100) : 0;
                     @endphp
 
                     <div style="height: 300px; width: 300px; margin: 0 auto;">
