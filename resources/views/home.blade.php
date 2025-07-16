@@ -645,10 +645,8 @@
                         $totalPoints = $totalAchievementPoints + $totalViolationPoints;
 
                         // Hitung persentase
-                        $achievementPercentage =
-                            $totalPoints > 0 ? round(($totalAchievementPoints / $totalPoints) * 100) : 70;
-                        $violationPercentage =
-                            $totalPoints > 0 ? round(($totalViolationPoints / $totalPoints) * 100) : 30;
+                        $achievementPercentage = $totalPoints > 0 ? round(($totalAchievementPoints / $totalPoints) * 100) : 0;
+                        $violationPercentage = $totalPoints > 0 ? round(($totalViolationPoints / $totalPoints) * 100) : 0;
                     @endphp
 
                     <div style="height: 300px; width: 300px; margin: 0 auto;">
@@ -838,8 +836,8 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Mendapatkan data dari PHP untuk pie chart
-                const achievementPercentage = {{ $achievementPercentage ?? 70 }};
-                const violationPercentage = {{ $violationPercentage ?? 30 }};
+                const achievementPercentage = {{ $achievementPercentage }};
+                const violationPercentage = {{ $violationPercentage }};
 
                 // Membuat pie chart untuk perbandingan prestasi dan pelanggaran
                 const pieCtx = document.getElementById('pointPieChart').getContext('2d');
