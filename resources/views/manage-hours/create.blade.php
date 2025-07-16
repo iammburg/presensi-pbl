@@ -14,33 +14,7 @@
                     </ol>
                 </div>
             </div>
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6 text-uppercase">
-                    <h4 class="m-0">Tambah Jam</h4>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                    </ol>
-                </div>
-            </div>
         </div>
-    </div>
-
-    <div class="content">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card card-primary card-outline">
-                        <div class="card-header">
-                            <h5 class="card-title m-0">Form Tambah Jam </h5>
-                            <div class="card-tools">
-                                <a href="{{ route('manage-hours.index') }}" class="btn btn-tool">
-                                    <i class="fas fa-arrow-alt-circle-left"></i>
-                                </a>
-                            </div>
-                        </div>
     </div>
 
     <div class="content">
@@ -71,10 +45,12 @@
                                         class="form-control @error('session_type') is-invalid @enderror">
                                         <option value="">-- Pilih Tipe Jam --</option>
                                         <option value="Jam pelajaran"
-                                            {{ old('session_type') == 'Jam pelajaran' ? 'selected' : '' }}>Jam Pelajaran
+                                            {{ old('session_type') == 'Jam pelajaran' ? 'selected' : '' }}>
+                                            Jam Pelajaran
                                         </option>
                                         <option value="Jam istirahat"
-                                            {{ old('session_type') == 'Jam istirahat' ? 'selected' : '' }}>Jam Istirahat
+                                            {{ old('session_type') == 'Jam istirahat' ? 'selected' : '' }}>
+                                            Jam Istirahat
                                         </option>
                                     </select>
                                     @error('session_type')
