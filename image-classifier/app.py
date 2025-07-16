@@ -12,7 +12,6 @@ CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = app.logger
 
-# Constants
 STUDENT_PHOTOS_DIR = os.environ.get("STUDENT_PHOTOS_DIR")
 
 # STUDENT_PHOTOS_DIR = os.path.abspath(
@@ -37,7 +36,6 @@ augmentations = transforms.Compose(
     [
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.RandomRotation(degrees=5),
-        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
     ]
 )
 
