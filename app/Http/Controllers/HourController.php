@@ -29,9 +29,23 @@ class HourController extends Controller
                 $isFriday = request()->boolean('is_friday');
                 $query->where('is_friday', $isFriday);
             }
+            $query = Hour::select('hours.*');
+
+            // Tambahkan filter berdasarkan is_friday
+            if (request()->has('is_friday')) {
+                $isFriday = request()->boolean('is_friday');
+                $query->where('is_friday', $isFriday);
+            }
 
             return DataTables::of($query)
                 ->addIndexColumn()
+                ->editColumn('start_time', function ($row) {
+                    return Carbon::parse($row->start_time)->format('H:i');
+                })
+                ->editColumn('end_time', function ($row) {
+                    return Carbon::parse($row->end_time)->format('H:i');
+                })
+                ->addColumn('friday', fn($row) => $row->is_friday ? 'Ya' : '-')
                 ->editColumn('start_time', function ($row) {
                     return Carbon::parse($row->start_time)->format('H:i');
                 })
@@ -47,6 +61,7 @@ class HourController extends Controller
                     }
                     return $actions;
                 })
+                ->rawColumns(['action', 'friday'])
                 ->rawColumns(['action', 'friday'])
                 ->make(true);
         }
@@ -100,6 +115,10 @@ class HourController extends Controller
             'is_friday'    => $request->boolean('is_friday'),
             'start_time'   => $request->start_time,
             'end_time'     => $request->end_time,
+            'slot_number'  => $request->slot_number,
+            'is_friday'    => $request->boolean('is_friday'),
+            'start_time'   => $request->start_time,
+            'end_time'     => $request->end_time,
         ]);
 
         return redirect()->route('manage-hours.index')->with('success', 'Jam berhasil ditambahkan.');
@@ -108,11 +127,14 @@ class HourController extends Controller
     public function edit($id)
     {
         $hour = Hour::findOrFail($id);
+        $hour = Hour::findOrFail($id);
         return view('manage-hours.edit', compact('hour'));
     }
 
     public function update(Request $request, $id)
     {
+        $hour = Hour::findOrFail($id);
+
         $hour = Hour::findOrFail($id);
 
         $request->validate([
@@ -155,6 +177,10 @@ class HourController extends Controller
             'is_friday'    => $request->boolean('is_friday'),
             'start_time'   => $request->start_time,
             'end_time'     => $request->end_time,
+            'slot_number'  => $request->slot_number,
+            'is_friday'    => $request->boolean('is_friday'),
+            'start_time'   => $request->start_time,
+            'end_time'     => $request->end_time,
         ]);
 
         return redirect()->route('manage-hours.index')->with('success', 'Jam berhasil diperbarui.');
@@ -162,6 +188,7 @@ class HourController extends Controller
 
     public function destroy($id)
     {
+        $hour = Hour::findOrFail($id);
         $hour = Hour::findOrFail($id);
         $hour->delete();
         if (request()->ajax()) {
