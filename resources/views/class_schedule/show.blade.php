@@ -22,7 +22,7 @@
     <div class="content">
         <div class="container-fluid">
             <!-- Informasi Kelas -->
-            <div class="card card-primary card-outline mb-4" style="font-family: 'Poppins', sans-serif;">
+            <div class="card card-tertiary card-outline mb-4" style="font-family: 'Poppins', sans-serif;">
                 <div class="card-header">
                     <h5 class="card-title m-0">Informasi Jadwal</h5>
                     <div class="card-tools">
@@ -105,7 +105,7 @@
                                                             </span>
                                                         @else
                                                             <span class="badge bg-tertiary px-3 py-2"
-                                                                style="font-weight: normal;">
+                                                                style="font-weight: normal; color: white;">
                                                                 JAM PELAJARAN
                                                             </span>
                                                         @endif

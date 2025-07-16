@@ -15,6 +15,9 @@ use Illuminate\Support\Arr;
 
 class AttendanceController extends Controller
 {
+    // Static variable untuk deadline presensi (dalam menit)
+    const ATTENDANCE_DEADLINE_MINUTES = 20;
+
     public function __construct()
     {
         $this->middleware('permission:create_attendance')->only(['create', 'store']);
@@ -129,6 +132,43 @@ class AttendanceController extends Controller
     }
 
     /**
+     * Determine attendance status based on time
+     */
+    private function determineAttendanceStatus($classScheduleId, $currentTime = null)
+    {
+        if (!$currentTime) {
+            $currentTime = now();
+        }
+
+        // Get the class schedule to determine start time
+        $classSchedule = ClassSchedule::with('hour')->find($classScheduleId);
+
+        if (!$classSchedule) {
+            return 'Hadir'; // Default jika tidak ada jadwal
+        }
+
+        $startTime = Carbon::parse($classSchedule->hour->start_time);
+        $deadlineTime = $startTime->copy()->addMinutes(self::ATTENDANCE_DEADLINE_MINUTES);
+
+        // Convert current time to today with the attendance time
+        $attendanceTime = Carbon::parse($currentTime->format('H:i:s'));
+
+        Log::info('Attendance time check', [
+            'start_time' => $startTime->format('H:i:s'),
+            'deadline_time' => $deadlineTime->format('H:i:s'),
+            'attendance_time' => $attendanceTime->format('H:i:s'),
+            'is_late' => $attendanceTime->gt($deadlineTime)
+        ]);
+
+        // Jika presensi setelah deadline, maka status "Terlambat"
+        if ($attendanceTime->gt($deadlineTime)) {
+            return 'Terlambat';
+        }
+
+        return 'Hadir';
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -164,24 +204,34 @@ class AttendanceController extends Controller
                 ], 409);
             }
 
+            // Tentukan status berdasarkan waktu presensi
+            $attendanceStatus = $this->determineAttendanceStatus($scan['class_schedule_id']);
+            $currentTime = now();
+
             $attendance = Attendance::create([
                 'class_schedule_id' => $scan['class_schedule_id'],
                 'student_id'        => $scan['nisn'],
                 'meeting_date'      => $scan['meeting_date'],
-                'time_in'           => now()->format('H:i:s'),
-                'status'            => 'Hadir',
+                'time_in'           => $currentTime->format('H:i:s'),
+                'status'            => $attendanceStatus,
                 'recorded_by'       => Auth::id(),
             ]);
 
+            Log::info('Presensi berhasil dibuat', [
+                'attendance_id' => $attendance->id,
+                'student'       => $attendance->student->name,
+                'status'        => $attendanceStatus,
+                'time_in'       => $currentTime->format('H:i:s'),
+            ]);
 
-            // Log::info('Presensi berhasil dibuat', [
-            //     'attendance_id' => $attendance->id,
-            //     'student'       => $attendance->student->name,
-            // ]);
+            $statusMessage = $attendanceStatus === 'Terlambat'
+                ? "Presensi {$attendance->student->name} tercatat sebagai TERLAMBAT."
+                : "Presensi {$attendance->student->name} berhasil dicatat.";
 
             return response()->json([
                 'success' => true,
-                'message' => "Presensi {$attendance->student->name} berhasil dicatat.",
+                'message' => $statusMessage,
+                'status' => $attendanceStatus,
             ], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation failed', [
@@ -190,7 +240,8 @@ class AttendanceController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Data tidak valid: ' . implode(', ', Arr::flatten($e->errors())),
+                // 'message' => 'Data tidak valid: ' . implode(', ', Arr::flatten($e->errors())),
+                'message' => 'Data tidak valid',
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
@@ -201,7 +252,8 @@ class AttendanceController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan input: ' . $e->getMessage(),
+                // 'message' => 'Terjadi kesalahan input: ' . $e->getMessage(),
+                'message' => 'Terjadi kesalahan input',
             ], 500);
         }
     }
@@ -253,10 +305,10 @@ class AttendanceController extends Controller
                     return $student->name;
                 })
                 ->addColumn('status', function ($student) use ($attendances) {
-                    $attendance = $attendances->get($student->nisn ?? $student->id); // pastikan key sesuai
+                    $attendance = $attendances->get($student->nisn); // Gunakan NISN sebagai key
                     $status = $attendance ? $attendance->status : 'Absen';
 
-                    $select = '<select name="statuses[' . ($student->nisn ?? $student->id) . ']" class="form-control attendance-status">';
+                    $select = '<select name="statuses[' . $student->nisn . ']" class="form-control attendance-status">';
                     $options = ['Absen', 'Hadir', 'Sakit', 'Izin', 'Terlambat'];
                     foreach ($options as $option) {
                         $selected = $status === $option ? 'selected' : '';
@@ -266,46 +318,137 @@ class AttendanceController extends Controller
 
                     return $select;
                 })
+                ->addColumn('time_in', function ($student) use ($attendances) {
+                    $attendance = $attendances->get($student->nisn);
+                    if ($attendance && $attendance->time_in) {
+                        return \Carbon\Carbon::parse($attendance->time_in)->format('H:i');
+                    }
+                    return '-';
+                })
                 ->rawColumns(['status'])
                 ->make(true);
         }
 
+        // Calculate start and end times for the class schedules
+        $firstStart = $schedules->min(fn($s) => $s->hour->start_time);
+        $lastEnd = $schedules->max(fn($s) => $s->hour->end_time);
+
         // Log::info('Returning view (not AJAX)', ['classSchedule' => $classSchedule->id]);
-        return view('attendances.detail', compact('classSchedule'));
+        return view('attendances.detail', compact('classSchedule', 'firstStart', 'lastEnd'));
     }
 
     public function updateStatus(Request $request)
     {
         try {
             $request->validate([
+                'class_schedule_id' => 'required|exists:class_schedules,id',
                 'statuses' => 'required|array',
                 'statuses.*' => 'required|in:Absen,Hadir,Sakit,Izin,Terlambat',
             ]);
 
+            Log::info('updateStatus called', [
+                'class_schedule_id' => $request->class_schedule_id,
+                'statuses' => $request->statuses
+            ]);
+
+            $changedToLate = [];
+
             foreach ($request->statuses as $studentId => $status) {
                 $attendance = Attendance::where('student_id', $studentId)
+                    ->where('class_schedule_id', $request->class_schedule_id)
                     ->where('meeting_date', today()->toDateString())
                     ->first();
 
+                $originalStatus = $status;
+
                 if ($attendance) {
-                    $attendance->update(['status' => $status]);
-                } else {
-                    Attendance::create([
-                        'student_id'        => $studentId,
-                        'class_schedule_id' => $request->class_schedule_id,
-                        'meeting_date'      => today()->toDateString(),
-                        'status'            => $status,
-                        'recorded_by'       => Auth::id(),
+                    // Jika status diubah menjadi "Hadir", cek apakah sudah melewati deadline
+                    if ($status === 'Hadir') {
+                        $actualStatus = $this->determineAttendanceStatus($request->class_schedule_id);
+                        if ($actualStatus === 'Terlambat') {
+                            $student = Student::where('nisn', $studentId)->first();
+                            $changedToLate[] = $student->name;
+                        }
+                        $status = $actualStatus; // Override dengan status yang sebenarnya
+                    }
+
+                    $attendance->update([
+                        'status' => $status,
+                        'time_in' => in_array($status, ['Hadir', 'Terlambat']) ? ($attendance->time_in ?? now()->format('H:i:s')) : null
                     ]);
+                    Log::info('Updated attendance', ['student_id' => $studentId, 'status' => $status]);
+                } else {
+                    // Hanya buat attendance baru jika bukan status "Absen"
+                    if ($status !== 'Absen') {
+                        // Jika status yang dipilih "Hadir", cek deadline
+                        if ($status === 'Hadir') {
+                            $actualStatus = $this->determineAttendanceStatus($request->class_schedule_id);
+                            if ($actualStatus === 'Terlambat') {
+                                $student = Student::where('nisn', $studentId)->first();
+                                $changedToLate[] = $student->name;
+                            }
+                            $status = $actualStatus; // Override dengan status yang sebenarnya
+                        }
+
+                        Attendance::create([
+                            'student_id'        => $studentId,
+                            'class_schedule_id' => $request->class_schedule_id,
+                            'meeting_date'      => today()->toDateString(),
+                            'status'            => $status,
+                            'time_in'           => in_array($status, ['Hadir', 'Terlambat']) ? now()->format('H:i:s') : null,
+                            'recorded_by'       => Auth::id(),
+                        ]);
+                        Log::info('Created new attendance', ['student_id' => $studentId, 'status' => $status]);
+                    }
                 }
             }
-            return back()->with('success', 'Status presensi berhasil diperbarui.');
+
+            // Buat pesan yang informatif
+            $message = 'Status presensi berhasil diperbarui.';
+            if (!empty($changedToLate)) {
+                $names = implode(', ', $changedToLate);
+                $message .= ' Catatan: ' . $names . ' diubah menjadi "Terlambat" karena sudah melewati batas waktu presensi.';
+            }
+
+            // Return JSON response for AJAX, redirect for regular form submission
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message
+                ], 200);
+            }
+
+            return back()->with('success', $message);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation error in updateStatus', [
+                'errors' => $e->errors(),
+                'request' => $request->all()
+            ]);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak valid',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+
+            return back()->withErrors($e->errors());
         } catch (\Throwable $th) {
-            // Log::error('Error updating attendance status', [
-            //     'error_message' => $th->getMessage(),
-            //     'trace' => $th->getTraceAsString(),
-            // ]);
-            return back()->withErrors(['error' => 'Terjadi kesalahan saat memperbarui status presensi.']);
+            Log::error('Error updating attendance status', [
+                'error_message' => $th->getMessage(),
+                'trace' => $th->getTraceAsString(),
+                'request' => $request->all()
+            ]);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat memperbarui status presensi.',
+                ], 500);
+            }
+
+            return back()->withErrors(['error' => 'Terjadi kesalahan saat memperbarui status presensi: ' . $th->getMessage()]);
         }
     }
 

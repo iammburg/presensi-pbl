@@ -1,4 +1,4 @@
-import os, time, threading, io
+import os, time, threading, io, logging
 import numpy as np
 import torch
 from PIL import Image
@@ -10,15 +10,24 @@ from torchvision import transforms
 app = Flask(__name__)
 CORS(app)
 
-STUDENT_PHOTOS_DIR = os.environ.get("STUDENT_PHOTOS_DIR", "/app/student-photos")
+# Logging setup
+logging.basicConfig(level=logging.INFO)
+logger = app.logger
 
+# Constants
+STUDENT_PHOTOS_DIR = os.environ.get("STUDENT_PHOTOS_DIR")
+
+# STUDENT_PHOTOS_DIR = os.path.abspath(
+#     os.path.join(os.path.dirname(__file__), "../storage/app/public/student-photos")
+# )
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-mtcnn = None
-resnet = None
-db_embeddings = {}
 CACHE_LOCK = threading.Lock()
-REFRESH_INTERVAL = 300
+REFRESH_INTERVAL = 300  # 5 minutes
+db_embeddings = {}
+mtcnn, resnet = None, None
+model_loaded = False
 
+# Augmentations
 augmentations = transforms.Compose(
     [
         transforms.RandomHorizontalFlip(p=0.5),
@@ -28,8 +37,23 @@ augmentations = transforms.Compose(
 )
 
 
+def init_models():
+    global mtcnn, resnet, model_loaded
+    if model_loaded:
+        return
+    logger.info("🧠 Initializing models...")
+    mtcnn = MTCNN(image_size=160, margin=0, keep_all=False, device=device)
+    resnet = InceptionResnetV1(pretrained="vggface2").eval().to(device)
+    model_loaded = True
+    logger.info("✅ Models loaded on %s", device)
+
+
 def load_db_embeddings():
-    global db_embeddings
+    if not os.path.exists(STUDENT_PHOTOS_DIR):
+        logger.warning("❌ STUDENT_PHOTOS_DIR %s tidak ditemukan!", STUDENT_PHOTOS_DIR)
+        return
+
+    logger.info("📁 Loading database from: %s", STUDENT_PHOTOS_DIR)
     temp = {}
     for fname in os.listdir(STUDENT_PHOTOS_DIR):
         if not fname.lower().endswith((".jpg", "jpeg", "png")):
@@ -60,34 +84,38 @@ def load_db_embeddings():
                 temp[nisn] = mean_emb / np.linalg.norm(mean_emb)
 
         except Exception as e:
-            app.logger.warning(f"Gagal embed {fname}: {e}")
+            logger.warning("⚠️ Gagal proses %s: %s", fname, e)
 
     with CACHE_LOCK:
-        db_embeddings = temp
-        app.logger.info(f"Refreshed db_embeddings: {len(db_embeddings)} siswa")
+        db_embeddings.clear()
+        db_embeddings.update(temp)
+        logger.info("🔁 Refreshed embeddings for %d siswa", len(db_embeddings))
 
 
 def refresher():
     while True:
-        load_db_embeddings()
+        try:
+            load_db_embeddings()
+        except Exception as e:
+            logger.error("🛑 Gagal refresh embeddings: %s", e)
         time.sleep(REFRESH_INTERVAL)
 
 
-@app.before_first_request
-def initialize_model_and_cache():
-    global mtcnn, resnet
-    if mtcnn is None or resnet is None:
-        app.logger.info("🔧 Initializing model and embeddings...")
-        mtcnn = MTCNN(image_size=160, margin=0, keep_all=False, device=device)
-        resnet = InceptionResnetV1(pretrained="vggface2").eval().to(device)
+def start_background_refresher():
+    t = threading.Thread(target=refresher, daemon=True)
+    t.start()
+    logger.info("🔄 Background refresher started")
 
-        load_db_embeddings()
-        thread = threading.Thread(target=refresher, daemon=True)
-        thread.start()
-        app.logger.info("📦 Embedding refresher thread started.")
+
+@app.before_first_request
+def setup_on_first_request():
+    init_models()
+    load_db_embeddings()
+    start_background_refresher()
 
 
 def get_input_embedding(file_bytes):
+    init_models()
     img = Image.open(io.BytesIO(file_bytes)).convert("RGB")
     face = mtcnn(img)
     if face is None:
@@ -95,15 +123,13 @@ def get_input_embedding(file_bytes):
     face = face.unsqueeze(0).to(device)
     with torch.no_grad():
         emb = resnet(face).cpu().numpy()[0]
-    emb = emb / np.linalg.norm(emb)
-    return emb
+    return emb / np.linalg.norm(emb)
 
 
 def match_face(emb, threshold=0.60):
     if emb is None:
         return None, None
-    best_nisn = None
-    best_sim = threshold
+    best_nisn, best_sim = None, threshold
     with CACHE_LOCK:
         for nisn, db_emb in db_embeddings.items():
             sim = float(np.dot(db_emb, emb))
@@ -126,42 +152,29 @@ def embed_single():
         return jsonify({"error": "nisn or file missing"}), 400
 
     try:
-        img_bytes = file.read()
-        emb = get_input_embedding(img_bytes)
+        emb = get_input_embedding(file.read())
         if emb is None:
             return jsonify({"error": "no_face"}), 422
-
         with CACHE_LOCK:
-            db_embeddings[nisn] = emb / np.linalg.norm(emb)
-        app.logger.info("Updated embedding for %s", nisn)
+            db_embeddings[nisn] = emb
+        logger.info("✅ Embedded %s", nisn)
         return jsonify({"success": True, "nisn": nisn}), 200
-
     except Exception as e:
-        app.logger.error(f"Failed embedding {nisn}: {e}")
+        logger.error("❌ Embed failed for %s: %s", nisn, e)
         return jsonify({"error": "server_error"}), 500
 
 
 @app.route("/classify", methods=["POST"])
 def classify():
-    if "file" not in request.files:
-        app.logger.error("No file received in request.")
-        return jsonify({"error": "No file"}), 400
+    file = request.files.get("file")
+    if not file:
+        return jsonify({"error": "no_file"}), 400
 
-    blob = request.files["file"].read()
-    app.logger.info("File received for classification.")
-
-    emb = get_input_embedding(blob)
+    emb = get_input_embedding(file.read())
     if emb is None:
-        app.logger.warning("No face detected in the image.")
         return jsonify({"label": None, "confidence": 0.0, "method": "no_face"}), 200
 
-    app.logger.info(f"Embedding generated: {emb[:5]}... (truncated)")
-
-    nisn, conf = match_face(emb, threshold=0.60)
-    app.logger.info(
-        f"Match result: nisn={nisn}, confidence={conf}, total_db={len(db_embeddings)}"
-    )
-
+    nisn, conf = match_face(emb)
     return (
         jsonify(
             {
@@ -172,3 +185,7 @@ def classify():
         ),
         200,
     )
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=os.environ.get("FLASK_DEBUG") == "1")

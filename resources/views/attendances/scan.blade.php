@@ -42,7 +42,7 @@
             <div class="mb-3">
                 <p>
                     Waktu presensi akan ditutup pada:
-                    <strong id="deadline" class="text-danger"></strong>
+                    <strong class="text-danger">20 menit</strong> setelah jam mulai presensi.
                     <br>
                     {{-- <span id="countdown" style="font-weight:bold;"></span> --}}
                     <span>Posisikan wajah Anda tepat di tengah kamera</span>
@@ -68,21 +68,21 @@
 @push('js')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const startTime = "{{ $start_time }}";
-            const endTime = "{{ $end_time }}";
-            const graceMins = {{ $grace_minutes }};
+            // const startTime = "{{ $start_time }}";
+            // const endTime = "{{ $end_time }}";
+            // const graceMins = {{ $grace_minutes }};
 
-            const todayDate = new Date().toISOString().slice(0, 10);
-            const graceDeadline = new Date(`${todayDate}T${startTime}`);
-            graceDeadline.setMinutes(graceDeadline.getMinutes() + graceMins);
+            // const todayDate = new Date().toISOString().slice(0, 10);
+            // const graceDeadline = new Date(`${todayDate}T${startTime}`);
+            // graceDeadline.setMinutes(graceDeadline.getMinutes() + graceMins);
 
-            const endDeadline = new Date(`${todayDate}T${endTime}`);
+            // const endDeadline = new Date(`${todayDate}T${endTime}`);
 
-            document.getElementById('deadline').textContent =
-                graceDeadline.toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+            // document.getElementById('deadline').textContent =
+            //     graceDeadline.toLocaleTimeString([], {
+            //         hour: '2-digit',
+            //         minute: '2-digit'
+            //     });
 
             // function updateCountdown() {
             //     const now = new Date();
