@@ -6,6 +6,8 @@ use App\Models\Hour;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
+use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 
 class HourController extends Controller
 {
@@ -20,10 +22,23 @@ class HourController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $hours = Hour::select('hours.*');
+            $query = Hour::select('hours.*');
 
-            return DataTables::of($hours)
+            // Tambahkan filter berdasarkan is_friday
+            if (request()->has('is_friday')) {
+                $isFriday = request()->boolean('is_friday');
+                $query->where('is_friday', $isFriday);
+            }
+
+            return DataTables::of($query)
                 ->addIndexColumn()
+                ->editColumn('start_time', function ($row) {
+                    return Carbon::parse($row->start_time)->format('H:i');
+                })
+                ->editColumn('end_time', function ($row) {
+                    return Carbon::parse($row->end_time)->format('H:i');
+                })
+                ->addColumn('friday', fn($row) => $row->is_friday ? 'Ya' : '-')
                 ->addColumn('action', function ($hour) {
                     $actions = '';
                     if (Auth::check()) {
@@ -32,7 +47,7 @@ class HourController extends Controller
                     }
                     return $actions;
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'friday'])
                 ->make(true);
         }
 
@@ -48,60 +63,106 @@ class HourController extends Controller
     {
         $request->validate([
             'session_type' => 'required|in:Jam pelajaran,Jam istirahat',
-            'slot_number' => 'required|integer|min:1|unique:hours,slot_number',
-            'start_time' => 'required',
-            'end_time' => 'required|after:start_time',
-        ], [
-            'slot_number.unique' => 'Nomor jam tersebut sudah digunakan. Silakan pilih nomor lain.',
+            'slot_number'  => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('hours')->where(
+                    fn($q) =>
+                    $q->where('is_friday', $request->boolean('is_friday'))
+                )
+            ],
+            'start_time'   => 'required',
+            'end_time'     => 'required|after:start_time',
+            'is_friday'    => 'sometimes|boolean',
         ]);
+
+        $start = Carbon::parse($request->start_time);
+        $end   = Carbon::parse($request->end_time);
+
+        $conflict = Hour::where('is_friday', $request->boolean('is_friday'))
+            ->where(function ($query) use ($start, $end) {
+                $query->whereBetween('start_time', [$start, $end])
+                    ->orWhereBetween('end_time', [$start, $end])
+                    ->orWhere(function ($q) use ($start, $end) {
+                        $q->where('start_time', '<=', $start)
+                            ->where('end_time', '>=', $end);
+                    });
+            })->exists();
+
+        if ($conflict) {
+            return back()->with('error', 'Waktu jam bertabrakan dengan jadwal lain.');
+        }
 
         Hour::create([
             'session_type' => $request->session_type,
-            'slot_number' => $request->slot_number,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
+            'slot_number'  => $request->slot_number,
+            'is_friday'    => $request->boolean('is_friday'),
+            'start_time'   => $request->start_time,
+            'end_time'     => $request->end_time,
         ]);
 
         return redirect()->route('manage-hours.index')->with('success', 'Jam berhasil ditambahkan.');
     }
 
-    public function edit($hour)
+    public function edit($id)
     {
-        $hour = Hour::findOrFail($hour);
-        if (!$hour) {
-            return redirect()->route('manage-hours.index')->with('error', 'Jam tidak ditemukan.');
-        }
+        $hour = Hour::findOrFail($id);
         return view('manage-hours.edit', compact('hour'));
     }
 
-    public function update(Request $request, $hour)
+    public function update(Request $request, $id)
     {
-        $hour = Hour::findOrFail($hour);
-        if (!$hour) {
-            return redirect()->route('manage-hours.index')->with('error', 'Jam tidak ditemukan.');
-        }
+        $hour = Hour::findOrFail($id);
+
         $request->validate([
             'session_type' => 'required|in:Jam pelajaran,Jam istirahat',
-            'slot_number' => 'required|integer|min:1|unique:hours,slot_number,' . $hour->id,
-            'start_time' => 'required',
-            'end_time' => 'required|after:start_time',
-        ], [
-            'slot_number.unique' => 'Nomor jam tersebut sudah digunakan. Silakan masukkan nomor lain.',
+            'slot_number'  => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('hours')->ignore($hour->id)->where(
+                    fn($q) =>
+                    $q->where('is_friday', $request->boolean('is_friday'))
+                )
+            ],
+            'start_time'   => 'required',
+            'end_time'     => 'required|after:start_time',
+            'is_friday'    => 'sometimes|boolean',
         ]);
+
+        $start = Carbon::parse($request->start_time);
+        $end   = Carbon::parse($request->end_time);
+
+        $conflict = Hour::where('id', '!=', $hour->id)
+            ->where('is_friday', $request->boolean('is_friday'))
+            ->where(function ($query) use ($start, $end) {
+                $query->whereBetween('start_time', [$start, $end])
+                    ->orWhereBetween('end_time', [$start, $end])
+                    ->orWhere(function ($q) use ($start, $end) {
+                        $q->where('start_time', '<=', $start)
+                            ->where('end_time', '>=', $end);
+                    });
+            })->exists();
+
+        if ($conflict) {
+            return back()->with('error', 'Waktu jam bertabrakan dengan jadwal lain.');
+        }
 
         $hour->update([
             'session_type' => $request->session_type,
-            'slot_number' => $request->slot_number,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
+            'slot_number'  => $request->slot_number,
+            'is_friday'    => $request->boolean('is_friday'),
+            'start_time'   => $request->start_time,
+            'end_time'     => $request->end_time,
         ]);
 
         return redirect()->route('manage-hours.index')->with('success', 'Jam berhasil diperbarui.');
     }
 
-    public function destroy($hour)
+    public function destroy($id)
     {
-        $hour = Hour::findOrFail($hour);
+        $hour = Hour::findOrFail($id);
         $hour->delete();
         if (request()->ajax()) {
             return response()->json(['message' => 'Jam berhasil dihapus.']);

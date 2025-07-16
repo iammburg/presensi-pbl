@@ -1,42 +1,121 @@
 @extends('layouts.app')
+@push('css')
+@endpush
 
 @section('content')
-<div class="container">
-    <h2>Tambah Jam</h2>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6 text-uppercase">
+                    <h4 class="m-0">Tambah Jam</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-primary card-outline">
+                        <div class="card-header">
+                            <h5 class="card-title m-0">Form Tambah Jam </h5>
+                            <div class="card-tools">
+                                <a href="{{ route('manage-hours.index') }}" class="btn btn-tool">
+                                    <i class="fas fa-arrow-alt-circle-left"></i>
+                                </a>
+                            </div>
+                        </div>
 
-    <form action="{{ route('manage-hours.store') }}" method="POST">
-        @csrf
-        <div class="mb-3">
-            <label for="session_type">Tipe Jam</label>
-            <select name="session_type" class="form-control" required>
-                <option value="">Pilih</option>
-                <option value="Jam pelajaran">Jam Pelajaran</option>
-                <option value="Jam istirahat">Jam Istirahat</option>
-            </select>
+                        <form action="{{ route('manage-hours.store') }}" method="POST">
+                            @csrf
+
+                            <div class="card-body">
+                                {{-- Checkbox Jumat --}}
+
+
+                                {{-- Tipe Jam --}}
+                                <div class="form-group">
+                                    <label>Tipe Jam</label>
+                                    <select name="session_type"
+                                        class="form-control @error('session_type') is-invalid @enderror">
+                                        <option value="">-- Pilih Tipe Jam --</option>
+                                        <option value="Jam pelajaran"
+                                            {{ old('session_type') == 'Jam pelajaran' ? 'selected' : '' }}>Jam Pelajaran
+                                        </option>
+                                        <option value="Jam istirahat"
+                                            {{ old('session_type') == 'Jam istirahat' ? 'selected' : '' }}>Jam Istirahat
+                                        </option>
+                                    </select>
+                                    @error('session_type')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                {{-- Jam ke- --}}
+                                <div class="form-group">
+                                    <label>Jam ke-</label>
+                                    <select name="slot_number"
+                                        class="form-control @error('slot_number') is-invalid @enderror" required>
+                                        <option value="">-- Pilih Jam ke- --</option>
+                                        @for ($i = 1; $i <= 15; $i++)
+                                            <option value="{{ $i }}"
+                                                {{ old('slot_number') == $i ? 'selected' : '' }}>
+                                                Jam ke-{{ $i }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                    @error('slot_number')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                {{-- Jam Mulai & Selesai --}}
+                                <div class="form-group">
+                                    <label>Jam Mulai</label>
+                                    <input type="time" name="start_time"
+                                        class="form-control @error('start_time') is-invalid @enderror"
+                                        value="{{ old('start_time') }}">
+                                    @error('start_time')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Jam Selesai</label>
+                                    <input type="time" name="end_time"
+                                        class="form-control @error('end_time') is-invalid @enderror"
+                                        value="{{ old('end_time') }}">
+                                    @error('end_time')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group form-check">
+                                    <input type="checkbox" name="is_friday" value="1" class="form-check-input"
+                                        id="chkFridayCreate" {{ old('is_friday') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="chkFridayCreate">
+                                        Berlaku untuk Hari Jumat
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-block btn-flat text-white" style="background:#1777E5">
+                                    <i class="fa fa-save"></i> Simpan
+                                </button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="slot_number">Jam ke-</label>
-            <input type="number" name="slot_number" class="form-control" min="1" required>
-        </div>
-        <div class="mb-3">
-            <label for="start_time">Jam Mulai</label>
-            <input type="time" name="start_time" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label for="end_time">Jam Selesai</label>
-            <input type="time" name="end_time" class="form-control" required>
-        </div>
-        <button class="btn btn-success">Simpan</button>
-    </form>
-</div>
+    </div>
 @endsection
+@push('js')
+@endpush
